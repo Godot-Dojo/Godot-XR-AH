@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://bufelcry36rw1"]
+
+[ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sssg3"]
+albedo_color = Color(0.6842, 0.671572, 0.696409, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lsd0h"]
+material = SubResource("StandardMaterial3D_sssg3")
+size = Vector3(0.1, 0.8, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7hjbq"]
+albedo_color = Color(0.956863, 0.0235294, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h2ysa"]
+material = SubResource("StandardMaterial3D_7hjbq")
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="AutoHandtracker" type="Node3D"]
+script = ExtResource("1_kokq6")
+
+[node name="VisibleHandTrackSkeleton" type="Node3D" parent="."]
+visible = false
+
+[node name="ExampleStick" type="Node3D" parent="VisibleHandTrackSkeleton"]
+
+[node name="StemY" type="MeshInstance3D" parent="VisibleHandTrackSkeleton/ExampleStick"]
+mesh = SubResource("BoxMesh_lsd0h")
+
+[node name="ExampleJoint" type="Node3D" parent="VisibleHandTrackSkeleton"]
+
+[node name="Box" type="MeshInstance3D" parent="VisibleHandTrackSkeleton/ExampleJoint"]
+mesh = SubResource("BoxMesh_h2ysa")
