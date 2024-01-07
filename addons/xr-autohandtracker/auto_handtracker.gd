@@ -6,8 +6,6 @@ extends Node3D
 @export var applyscaling : bool = true
 @export var coincidewristorknuckle : bool = true
 @export var visiblehandtrackskeleton : bool = true
-@export var emithandsignalsintocontrollers : bool = true
-@export var generatehandgraspsignal : bool = true
 @export var enableautohandtracker : bool = true
 
 # Hand tracking data access object
@@ -16,21 +14,16 @@ var xr_interface : OpenXRInterface
 # Local origin for the hand tracking positions
 var xr_origin : XROrigin3D
 
-# Objects needed only to handle the actions and signals
+# Controller and its tracker with the aim pose that we can use when hand-tracking active
 var xr_controller_node : XRController3D = null
 var tracker_nhand : XRPositionalTracker.TrackerHand = XRPositionalTracker.TrackerHand.TRACKER_HAND_UNKNOWN
 var xr_tracker : XRPositionalTracker = null
-var xr_pose : XRPose = null
+var xr_aimpose : XRPose = null
 
-# This tracker and pose can be swapped in for the original tracker and pose when 
-# handtracking is operating so that signals can be fed into it at a layer where they 
-# can be interpreted by the standard xr-tools interface.
-# Unfortunately when the old tracker is disconnected, no positions are read, 
-# so we need to copy them in ourselves into the XRController3D.
-# The openxr/openxr_interface.cpp almost works to merge/overload the hand tracking positions 
-# when the controllers are put down via the handle_hand_tracking() function, but 
-# the lack of any capability to overload button presses from the hand gestures 
-# limits its usefulness.
+# The autotracker is swapped onto the xr_controller_node when hand-tracking is active 
+# so that we can insert in our own button and float signals from the hand gestures, 
+# as well as setting the pose from the xr_aimpose (which is filtered by the system during hand tracking)
+# Calling set_pose emits a pose_changed signal that copies its values into the xr_controller_node 
 var xr_autotracker : XRPositionalTracker = null
 var xr_autopose : XRPose = null
 
@@ -95,7 +88,7 @@ func extractrestfingerbones():
 				assert (f == "Thumb" and b == "Intermediate")
 
 func _xr_controller_node_tracking_changed(tracking):
-	xr_pose = xr_controller_node.get_pose()
+	var xr_pose = xr_controller_node.get_pose()
 	print("_xr_controller_node_tracking_changed ", xr_pose.name if xr_pose else "<none>")
 
 
@@ -158,8 +151,6 @@ func findxrtrackerobjects():
 	print("action_sets: ", xr_interface.get_action_sets())
 	xr_tracker.button_pressed.connect(_xr_tracker_button_pressed)
 	xr_tracker.button_released.connect(_xr_tracker_button_released)
-	xr_tracker.input_float_changed.connect(_xr_tracker_input_float_changed)
-	xr_controller_node.input_float_changed.connect(_xr_tracker_input_float_changedC)
 	#xr_tracker.input_vector2_changed.connect(_input_vector2_changed.bind(hand))
 
 	xr_autotracker = XRPositionalTracker.new()
@@ -175,30 +166,17 @@ func findxrtrackerobjects():
 
 	return true
 
-# All of these signals are from tracker buttons, except for 
-# "select_button", which is either the hand-tracking "aim_activate" or "pinch_ext" actions
-# We can remap the hand tracking signals back into this same tracker  so that
-# they get recognized by the controller code.
-# The controller code sets its own hand poses onto the XRController3D 
-# to which these gestures are related.  
-# Our hand poses are set for the purpose of animating the hand skeleton.
+# select_button is the hand-tracking gesutre currently recognized that can be used for a button signal
 func _xr_tracker_button_pressed(name):
-	if emithandsignalsintocontrollers:
+	if enableautohandtracker:
 		if name == "select_button":
 			xr_autotracker.set_input("trigger_click", true)
 		
 func _xr_tracker_button_released(name):
-	if emithandsignalsintocontrollers:
+	if enableautohandtracker:
 		if name == "select_button":
 			xr_autotracker.set_input("trigger_click", false)
 			
-func _xr_tracker_input_float_changed(name, value):
-	if hand == 0:
-		print(" input float changed ", name, " ", value)
-
-func _xr_tracker_input_float_changedC(name, value):
-	if hand == 0:
-		print(" input float changedCC  ", name, " ", value)
 
 func _ready():
 	var xrnodesfound = findxrnodes()
@@ -307,12 +285,6 @@ func handgraspdetection(oxrjps, xrt):
 		handcurrentlygrasped = false
 		$GraspMarker.visible = false
 
-		
-func handgraspdetection_clear():
-	if handcurrentlygrasped:
-		xr_tracker.emit_signal("button_released", "autohand_grasp")
-		handcurrentlygrasped = false
-
 
 func _process(delta):
 	if hand == 0 and xr_controller_node != null:
@@ -328,14 +300,13 @@ func _process(delta):
 		handnode.get_node("AnimationTree").active = not handtrackingactive
 		print("setting hand "+str(hand)+" active: ", handtrackingactive)
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
-		if not handtrackingactive and generatehandgraspsignal and handcurrentlygrasped:
-			handgraspdetection_clear()
-		xr_controller_node.set_tracker(xr_autotracker.name if handtrackingactive else xr_tracker.name)
+		if enableautohandtracker:
+			xr_controller_node.set_tracker(xr_autotracker.name if handtrackingactive else xr_tracker.name)
 
 	if handtrackingactive:
 		var oxrjps = getoxrjointpositions()
 		var xrt = xr_origin.global_transform
-		if generatehandgraspsignal:
+		if enableautohandtracker:
 			handgraspdetection(oxrjps, xrt)
 		if applymiddlefingerfix:
 			fixmiddlefingerpositions(oxrjps)
@@ -345,16 +316,11 @@ func _process(delta):
 		copyouttransformstoskel(fingerbonetransformsOut)
 		if visible and $VisibleHandTrackSkeleton.visible:
 			updatevisiblehandskeleton(oxrjps)
-		if xr_autopose != null:
-			var jw = OpenXRInterface.HAND_JOINT_PALM
-			var pppaim = xr_tracker.get_pose("aim")
-			var palmtransform = Transform3D(Basis(xr_interface.get_hand_joint_rotation(hand, jw)), 
-											xr_interface.get_hand_joint_position(hand, jw))
-			if pppaim != null:
-				palmtransform = pppaim.transform
-			xr_autotracker.set_pose(xr_controller_node.pose, palmtransform, Vector3(), Vector3(), XRPose.TrackingConfidence.XR_TRACKING_CONFIDENCE_HIGH)
-			if hand == 0:
-				print(" yt ", xr_pose.transform.origin.y, " ", xr_pose.has_tracking_data)
+		if xr_aimpose == null:
+			xr_aimpose = xr_tracker.get_pose("aim")
+			print("...xr_aimpose ", xr_aimpose)
+		if xr_aimpose != null and enableautohandtracker:
+			xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
 const hjsticks = [ [ OpenXRInterface.HAND_JOINT_WRIST, OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_THUMB_PROXIMAL, OpenXRInterface.HAND_JOINT_THUMB_DISTAL, OpenXRInterface.HAND_JOINT_THUMB_TIP ],
