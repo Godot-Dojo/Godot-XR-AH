@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://bufelcry36rw1"]
+[gd_scene load_steps=10 format=3 uid="uid://bufelcry36rw1"]
 
 [ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
 
@@ -16,6 +16,20 @@ albedo_color = Color(0.956863, 0.0235294, 0, 1)
 material = SubResource("StandardMaterial3D_7hjbq")
 size = Vector3(0.8, 0.8, 0.8)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f71oj"]
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_epivk"]
+material = SubResource("StandardMaterial3D_f71oj")
+size = Vector3(0.01, 0.02, 0.01)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvumm"]
+albedo_color = Color(1, 0.0431373, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ssbes"]
+material = SubResource("StandardMaterial3D_fvumm")
+size = Vector3(0.005, 0.19, 0.005)
+
 [node name="AutoHandtracker" type="Node3D"]
 script = ExtResource("1_kokq6")
 
@@ -31,3 +45,10 @@ mesh = SubResource("BoxMesh_lsd0h")
 
 [node name="Box" type="MeshInstance3D" parent="VisibleHandTrackSkeleton/ExampleJoint"]
 mesh = SubResource("BoxMesh_h2ysa")
+
+[node name="GraspMarker" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("BoxMesh_epivk")
+
+[node name="ControllerMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ssbes")

@@ -8,6 +8,7 @@ extends Node3D
 @export var visiblehandtrackskeleton : bool = true
 @export var emithandsignalsintocontrollers : bool = true
 @export var generatehandgraspsignal : bool = true
+@export var enableautohandtracker : bool = true
 
 # Hand tracking data access object
 var xr_interface : OpenXRInterface
@@ -17,8 +18,21 @@ var xr_origin : XROrigin3D
 
 # Objects needed only to handle the actions and signals
 var xr_controller_node : XRController3D = null
-var tracker_hand : XRPositionalTracker.TrackerHand = XRPositionalTracker.TrackerHand.TRACKER_HAND_UNKNOWN
-var xr_tracker_hand : XRPositionalTracker = null
+var tracker_nhand : XRPositionalTracker.TrackerHand = XRPositionalTracker.TrackerHand.TRACKER_HAND_UNKNOWN
+var xr_tracker : XRPositionalTracker = null
+var xr_pose : XRPose = null
+
+# This tracker and pose can be swapped in for the original tracker and pose when 
+# handtracking is operating so that signals can be fed into it at a layer where they 
+# can be interpreted by the standard xr-tools interface.
+# Unfortunately when the old tracker is disconnected, no positions are read, 
+# so we need to copy them in ourselves into the XRController3D.
+# The openxr/openxr_interface.cpp almost works to merge/overload the hand tracking positions 
+# when the controllers are put down via the handle_hand_tracking() function, but 
+# the lack of any capability to overload button presses from the hand gestures 
+# limits its usefulness.
+var xr_autotracker : XRPositionalTracker = null
+var xr_autopose : XRPose = null
 
 # Note the that the enumerations disagree
 # XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT = 1 
@@ -29,6 +43,7 @@ var handtrackingactive = false
 
 var handnode = null
 var skel = null
+
 
 # values calculated from the hand skeleton itself
 var handtoskeltransform
@@ -79,6 +94,11 @@ func extractrestfingerbones():
 			else:
 				assert (f == "Thumb" and b == "Intermediate")
 
+func _xr_controller_node_tracking_changed(tracking):
+	xr_pose = xr_controller_node.get_pose()
+	print("_xr_controller_node_tracking_changed ", xr_pose.name if xr_pose else "<none>")
+
+
 func findxrnodes():
 	# first go up the tree to find the controller and origin
 	var nd = self
@@ -88,6 +108,7 @@ func findxrnodes():
 		print("Warning, no controller node detected")
 		return false
 	xr_controller_node = nd
+	xr_controller_node.tracking_changed.connect(_xr_controller_node_tracking_changed)
 	while nd != null and not (nd is XROrigin3D):
 		nd = nd.get_parent()
 	if nd == null:
@@ -108,7 +129,7 @@ func findxrnodes():
 		return false
 
 	# Finally decide if it is left or right hand and test consistency in the API
-	tracker_hand = xr_controller_node.get_tracker_hand()
+	tracker_nhand = xr_controller_node.get_tracker_hand()
 	tracker_name = xr_controller_node.tracker
 	var islefthand = (tracker_name == "left_hand")
 	assert (tracker_name == ("left_hand" if islefthand else "right_hand"))
@@ -117,24 +138,41 @@ func findxrnodes():
 	print("All nodes for %s detected" % tracker_name)
 	return true
 
+
 func findxrtrackerobjects():
 	xr_interface = XRServer.find_interface("OpenXR")
-	#var trackers1 = XRServer.get_trackers(1)
-	#xr_tracker_head = trackers1["head"]
-	var trackers2 = XRServer.get_trackers(2)
-	xr_tracker_hand = trackers2.get(tracker_name)
-	if xr_tracker_hand == null:
+	if xr_interface == null:
 		return false
-	assert (xr_tracker_hand.hand == tracker_hand) 
-	var islefthand = (tracker_name == "left_hand")	
-	assert (tracker_hand == (XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT if islefthand else XRPositionalTracker.TrackerHand.TRACKER_HAND_RIGHT))
-	
-	if xr_interface:
-		print("action_sets: ", xr_interface.get_action_sets())
-	xr_tracker_hand.button_pressed.connect(_xr_tracker_button_pressed)
-	xr_tracker_hand.button_released.connect(_xr_tracker_button_released)
-	#xr_tracker_hands.input_float_changed.connect(_input_float_changed.bind(hand))
-	#xr_tracker_hands.input_vector2_changed.connect(_input_vector2_changed.bind(hand))
+	var tracker_name = xr_controller_node.tracker
+	xr_tracker = XRServer.get_tracker(tracker_name)
+	if xr_tracker == null:
+		return false
+	assert (xr_tracker.hand == tracker_nhand)
+	print(xr_tracker.description, " ", xr_tracker.hand, " ", xr_tracker.name, " ", xr_tracker.profile, " ", xr_tracker.type)
+
+	#var xr_headtracker = XRServer.get_tracker("head")
+	var islefthand = (tracker_name == "left_hand")
+	assert (tracker_nhand == (XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT if islefthand else XRPositionalTracker.TrackerHand.TRACKER_HAND_RIGHT))
+	print(tracker_name, "  ", tracker_nhand)
+
+	print("action_sets: ", xr_interface.get_action_sets())
+	xr_tracker.button_pressed.connect(_xr_tracker_button_pressed)
+	xr_tracker.button_released.connect(_xr_tracker_button_released)
+	xr_tracker.input_float_changed.connect(_xr_tracker_input_float_changed)
+	xr_controller_node.input_float_changed.connect(_xr_tracker_input_float_changedC)
+	#xr_tracker.input_vector2_changed.connect(_input_vector2_changed.bind(hand))
+
+	xr_autotracker = XRPositionalTracker.new()
+	xr_autotracker.hand = tracker_nhand
+	xr_autotracker.name = "left_autohand" if islefthand else "right_autohand"
+	xr_autotracker.profile = "/interaction_profiles/autohand" # "/interaction_profiles/none"
+	xr_autotracker.type = 2
+
+	xr_autotracker.set_pose(xr_controller_node.pose, Transform3D(), Vector3(), Vector3(), XRPose.TrackingConfidence.XR_TRACKING_CONFIDENCE_NONE)
+	xr_autopose = xr_autotracker.get_pose(xr_controller_node.pose)
+
+	XRServer.add_tracker(xr_autotracker)
+
 	return true
 
 # All of these signals are from tracker buttons, except for 
@@ -147,16 +185,20 @@ func findxrtrackerobjects():
 func _xr_tracker_button_pressed(name):
 	if emithandsignalsintocontrollers:
 		if name == "select_button":
-			xr_tracker_hand.emit_signal("button_pressed", "trigger_click")
-		if name == "autohand_grasp":
-			xr_tracker_hand.emit_signal("button_pressed", "grip_click")
+			xr_autotracker.set_input("trigger_click", true)
 		
 func _xr_tracker_button_released(name):
 	if emithandsignalsintocontrollers:
 		if name == "select_button":
-			xr_tracker_hand.emit_signal("button_released", "trigger_click")
-		if name == "autohand_grasp":
-			xr_tracker_hand.emit_signal("button_released", "grip_click")
+			xr_autotracker.set_input("trigger_click", false)
+			
+func _xr_tracker_input_float_changed(name, value):
+	if hand == 0:
+		print(" input float changed ", name, " ", value)
+
+func _xr_tracker_input_float_changedC(name, value):
+	if hand == 0:
+		print(" input float changedCC  ", name, " ", value)
 
 func _ready():
 	var xrnodesfound = findxrnodes()
@@ -203,12 +245,11 @@ func calchandnodetransform(oxrjps, xrt):
 
 	var m2g1g3 = leftrestreltransform.origin - rightrestreltransform.origin
 	var hnbasis = rotationtoalignB(hstw.basis*m2g1.origin, middleknuckle - wristorigin, 
-							hstw.basis*m2g1g3, leftknuckle - rightknuckle)
+								   hstw.basis*m2g1g3, leftknuckle - rightknuckle)
 
 	var hnorigin = wristorigin - hnbasis*hstw.origin
 	if not coincidewristorknuckle:
 		hnorigin = middleknuckle - hnbasis*(hstw*middlerestreltransform).origin
-
 
 	return Transform3D(hnbasis, hnorigin)
 		
@@ -245,23 +286,40 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 var handcurrentlygrasped = false
 const middlethumbdistancecontact = 0.015
 const middlethumbdistancerelease = 0.025
-func handgraspdetection(oxrjps):
+func handgraspdetection(oxrjps, xrt):
 	var middlethumbdistance = (oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_THUMB_TIP]).length()
 	if (not handcurrentlygrasped) and middlethumbdistance < middlethumbdistancecontact:
-		xr_tracker_hand.emit_signal("button_pressed", "autohand_grasp")
+		#xr_tracker.emit_signal("button_pressed", "autohand_grasp")
 		print("grasp made")
+		xr_autotracker.set_input("grip_click", true)
+		xr_autotracker.set_input("grip", 1.0)
+		$GraspMarker.global_transform.origin = xrt*oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] 
+		$GraspMarker.visible = true
+		if hand == 0:
+			print("   sssss ", xr_autotracker.get_input("grip"))
 		handcurrentlygrasped = true
+		
 	elif handcurrentlygrasped and middlethumbdistance > middlethumbdistancerelease:
-		xr_tracker_hand.emit_signal("button_released", "autohand_grasp")
+		#xr_tracker.emit_signal("button_released", "autohand_grasp")
 		print("grasp released")
+		xr_autotracker.set_input("grip_click", false)
+		xr_autotracker.set_input("grip", 0.0)
 		handcurrentlygrasped = false
+		$GraspMarker.visible = false
+
+		
 func handgraspdetection_clear():
 	if handcurrentlygrasped:
-		xr_tracker_hand.emit_signal("button_released", "autohand_grasp")
+		xr_tracker.emit_signal("button_released", "autohand_grasp")
 		handcurrentlygrasped = false
 
 
 func _process(delta):
+	if hand == 0 and xr_controller_node != null:
+		var lxr_tracker = XRServer.get_tracker(xr_controller_node.tracker)
+		if lxr_tracker and xr_controller_node.get_float("grip") != 0:
+			print("gripv ", xr_controller_node.get_float("grip"), "  a:", xr_controller_node.get_is_active())
+#
 	var handjointflagswrist = xr_interface.get_hand_joint_flags(hand, OpenXRInterface.HAND_JOINT_WRIST);
 	var lhandtrackingactive = (handjointflagswrist & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0
 	if handtrackingactive != lhandtrackingactive:
@@ -272,26 +330,33 @@ func _process(delta):
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
 		if not handtrackingactive and generatehandgraspsignal and handcurrentlygrasped:
 			handgraspdetection_clear()
+		xr_controller_node.set_tracker(xr_autotracker.name if handtrackingactive else xr_tracker.name)
 
 	if handtrackingactive:
 		var oxrjps = getoxrjointpositions()
+		var xrt = xr_origin.global_transform
 		if generatehandgraspsignal:
-			handgraspdetection(oxrjps)
+			handgraspdetection(oxrjps, xrt)
 		if applymiddlefingerfix:
 			fixmiddlefingerpositions(oxrjps)
-		var xrt = xr_origin.global_transform
 		var handnodetransform = calchandnodetransform(oxrjps, xrt)
 		var fingerbonetransformsOut = calcboneposes(oxrjps, handnodetransform, xrt)
 		handnode.transform = handnodetransform
 		copyouttransformstoskel(fingerbonetransformsOut)
 		if visible and $VisibleHandTrackSkeleton.visible:
 			updatevisiblehandskeleton(oxrjps)
-
-
-	
+		if xr_autopose != null:
+			var jw = OpenXRInterface.HAND_JOINT_PALM
+			var pppaim = xr_tracker.get_pose("aim")
+			var palmtransform = Transform3D(Basis(xr_interface.get_hand_joint_rotation(hand, jw)), 
+											xr_interface.get_hand_joint_position(hand, jw))
+			if pppaim != null:
+				palmtransform = pppaim.transform
+			xr_autotracker.set_pose(xr_controller_node.pose, palmtransform, Vector3(), Vector3(), XRPose.TrackingConfidence.XR_TRACKING_CONFIDENCE_HIGH)
+			if hand == 0:
+				print(" yt ", xr_pose.transform.origin.y, " ", xr_pose.has_tracking_data)
+		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
-
-
 const hjsticks = [ [ OpenXRInterface.HAND_JOINT_WRIST, OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_THUMB_PROXIMAL, OpenXRInterface.HAND_JOINT_THUMB_DISTAL, OpenXRInterface.HAND_JOINT_THUMB_TIP ],
 				 [ OpenXRInterface.HAND_JOINT_WRIST, OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_INDEX_PROXIMAL, OpenXRInterface.HAND_JOINT_INDEX_INTERMEDIATE, OpenXRInterface.HAND_JOINT_INDEX_DISTAL, OpenXRInterface.HAND_JOINT_INDEX_TIP ],
 				 [ OpenXRInterface.HAND_JOINT_WRIST, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL, OpenXRInterface.HAND_JOINT_MIDDLE_INTERMEDIATE, OpenXRInterface.HAND_JOINT_MIDDLE_DISTAL, OpenXRInterface.HAND_JOINT_MIDDLE_TIP ],
