@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bufelcry36rw1"]
+[gd_scene load_steps=12 format=3 uid="uid://bufelcry36rw1"]
 
 [ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
 
@@ -30,6 +30,13 @@ albedo_color = Color(1, 0.0431373, 0, 1)
 material = SubResource("StandardMaterial3D_fvumm")
 size = Vector3(0.005, 0.19, 0.005)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2y0qr"]
+albedo_color = Color(0, 0.470588, 0.698039, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dhtpa"]
+material = SubResource("StandardMaterial3D_2y0qr")
+size = Vector3(0.5, 1, 0.5)
+
 [node name="AutoHandtracker" type="Node3D"]
 script = ExtResource("1_kokq6")
 
@@ -52,3 +59,9 @@ mesh = SubResource("BoxMesh_epivk")
 
 [node name="ControllerMarker" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_ssbes")
+
+[node name="ThumbstickSimu" type="Node3D" parent="."]
+visible = false
+
+[node name="DirY" type="MeshInstance3D" parent="ThumbstickSimu"]
+mesh = SubResource("BoxMesh_dhtpa")
