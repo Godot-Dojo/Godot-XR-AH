@@ -38,6 +38,7 @@ var handtrackingactive = false
 
 var handnode = null
 var skel = null
+var handanimationtree = null
 
 
 # values calculated from the hand skeleton itself
@@ -103,6 +104,8 @@ func findxrnodes():
 		print("Warning, no controller node detected")
 		return false
 	xr_controller_node = nd
+	tracker_nhand = xr_controller_node.get_tracker_hand()
+	tracker_name = xr_controller_node.tracker
 	xr_controller_node.tracking_changed.connect(_xr_controller_node_tracking_changed)
 	while nd != null and not (nd is XROrigin3D):
 		nd = nd.get_parent()
@@ -118,9 +121,12 @@ func findxrnodes():
 
 	# Then look for the hand skeleton that we are going to map to
 	for ch in xr_controller_node.get_children():
-		if ch.has_node("AnimationTree"):
-			handnode = ch
-
+		var lskel = ch.find_child("Skeleton3D")
+		if lskel:
+			if lskel.get_bone_count() == 26:
+				handnode = ch
+			else:
+				print("unrecognized skeleton in controller")
 	if handnode == null:
 		print("Warning, no handnode (mesh and animationtree) detected")
 		return false
@@ -128,10 +134,9 @@ func findxrnodes():
 	if skel == null:
 		print("Warning, no Skeleton3D found")
 		return false
+	handanimationtree = handnode.get_node_or_null("AnimationTree")
 
 	# Finally decide if it is left or right hand and test consistency in the API
-	tracker_nhand = xr_controller_node.get_tracker_hand()
-	tracker_name = xr_controller_node.tracker
 	var islefthand = (tracker_name == "left_hand")
 	assert (tracker_name == ("left_hand" if islefthand else "right_hand"))
 	hand = OpenXRInterface.Hand.HAND_LEFT if islefthand else OpenXRInterface.Hand.HAND_RIGHT
@@ -330,7 +335,8 @@ func _process(delta):
 	if handtrackingactive != lhandtrackingactive:
 		handtrackingactive = lhandtrackingactive
 		handnode.top_level = handtrackingactive
-		handnode.get_node("AnimationTree").active = not handtrackingactive
+		if handanimationtree:
+			handanimationtree.active = not handtrackingactive
 		print("setting hand "+str(hand)+" active: ", handtrackingactive)
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
 		if enableautohandtracker:
