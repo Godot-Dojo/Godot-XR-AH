@@ -20,7 +20,8 @@ sky = SubResource("Sky_tsis2")
 tonemap_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_anl0v"]
-albedo_color = Color(1, 0.54902, 0.490196, 1)
+transparency = 1
+albedo_color = Color(1, 0.54902, 0.490196, 0.709804)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s8gw2"]
 albedo_color = Color(0, 0.717647, 0.717647, 1)

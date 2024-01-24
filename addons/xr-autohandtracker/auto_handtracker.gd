@@ -274,27 +274,40 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 			skel.set_bone_pose_scale(ix, t.basis.get_scale())
 
 
-var handcurrentlygrasped = false
-const middlethumbdistancecontact = 0.015
-const middlethumbdistancerelease = 0.025
+const touchbuttondistance = 0.07
+const depressbuttondistance = 0.04
+const clickbuttononratio = 0.6
+const clickbuttonoffratio = 0.4
+var buttoncurrentlyclicked = false
+var buttoncurrentlytouched = false
+var Dcount = 0
 func handgraspdetection(oxrjps, xrt):
-	var middlethumbdistance = (oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_THUMB_TIP]).length()
-	if (not handcurrentlygrasped) and middlethumbdistance < middlethumbdistancecontact:
-		#xr_tracker.emit_signal("button_pressed", "autohand_grasp")
-		print("grasp made")
-		xr_autotracker.set_input("grip_click", true)
-		xr_autotracker.set_input("grip", 1.0)
+	var middleknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL]).length()
+	var ringknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_RING_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_RING_PROXIMAL]).length()
+	var littleknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_LITTLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_LITTLE_PROXIMAL]).length()
+	var avgknuckletip = (middleknuckletip + ringknuckletip + littleknuckletip)/3
+	Dcount += 1
+	var buttonratio = min(inverse_lerp(touchbuttondistance, depressbuttondistance, avgknuckletip), 1.0)
+	if buttonratio < 0.0:
+		if buttoncurrentlytouched:
+			xr_autotracker.set_input("grip", 0.0)
+			# xr_autotracker.set_input("grip_touched", false)
+			buttoncurrentlytouched = false
+	else:
+		xr_autotracker.set_input("grip", buttonratio)
+		if not buttoncurrentlytouched:
+		#	xr_autotracker.set_input("grip_touched", false)
+			buttoncurrentlytouched = true
+	var buttonclicked = (buttonratio > (clickbuttonoffratio if buttoncurrentlyclicked else clickbuttononratio))
+	if buttonclicked != buttoncurrentlyclicked:
+		xr_autotracker.set_input("grip_click", buttonclicked)
+		buttoncurrentlyclicked = buttonclicked
 		$GraspMarker.global_transform.origin = xrt*oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] 
-		$GraspMarker.visible = true
-		handcurrentlygrasped = true
-		
-	elif handcurrentlygrasped and middlethumbdistance > middlethumbdistancerelease:
-		#xr_tracker.emit_signal("button_released", "autohand_grasp")
-		print("grasp released")
-		xr_autotracker.set_input("grip_click", false)
-		xr_autotracker.set_input("grip", 0.0)
-		handcurrentlygrasped = false
-		$GraspMarker.visible = false
+		$GraspMarker.visible = buttoncurrentlyclicked
+	if Dcount == 10 and (tracker_name == "left_hand"):
+		Dcount = 0
+		print("l ", avgknuckletip, " ", buttonratio, " ", buttonclicked)
+
 
 var thumbstickstartpt = null
 const thumbdistancecontact = 0.025
@@ -310,6 +323,7 @@ func thumbsticksimulation(oxrjps, xrt):
 		if thumbdistance < thumbdistancecontact and middleknuckle.y < tipcen.y - 0.029:
 			thumbstickstartpt = tipcen
 			$ThumbstickSimu.visible = true
+			$ThumbstickSimu.global_transform.origin = tipcen
 	else:
 		if thumbdistance > thumbdistancerelease:
 			thumbstickstartpt = null
@@ -318,7 +332,7 @@ func thumbsticksimulation(oxrjps, xrt):
 
 	$ThumbstickSimu.visible = (thumbstickstartpt != null)
 	if thumbstickstartpt != null:
-		$ThumbstickSimu.global_transform = sticktransform(xrt*thumbstickstartpt, xrt*tipcen)
+		$ThumbstickSimu/DragRod.global_transform = sticktransform(xrt*thumbstickstartpt, xrt*tipcen)
 		var facingangle = Vector2(xr_camera_node.transform.basis.z.x, xr_camera_node.transform.basis.z.z).angle() if xr_camera_node != null else 0.0
 		var vec2 = Vector2(tipcen.x - thumbstickstartpt.x, tipcen.z - thumbstickstartpt.z)/0.8
 		var vv = vec2.rotated(deg_to_rad(90) - facingangle)
