@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bufelcry36rw1"]
+[gd_scene load_steps=18 format=3 uid="uid://bufelcry36rw1"]
 
 [ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
 
@@ -37,10 +37,33 @@ height = 1.0
 albedo_color = Color(0, 0.470588, 0.698039, 1)
 
 [sub_resource type="TorusMesh" id="TorusMesh_r0bsl"]
-inner_radius = 0.9
+inner_radius = 0.19
+outer_radius = 0.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r0qnr"]
+transparency = 1
 albedo_color = Color(1, 1, 0.00784314, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_wsh6v"]
+inner_radius = 0.59
+outer_radius = 0.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pce3n"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.01
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2wqtw"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 0.00784314, 0.235294)
+disable_receive_shadows = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_53tyc"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 0.00784314, 0.235294)
+disable_receive_shadows = true
 
 [node name="AutoHandtracker" type="Node3D"]
 script = ExtResource("1_kokq6")
@@ -77,11 +100,21 @@ mesh = SubResource("CylinderMesh_ga8xh")
 surface_material_override/0 = SubResource("StandardMaterial3D_2y0qr")
 
 [node name="InnerRing" type="MeshInstance3D" parent="ThumbstickSimu"]
-transform = Transform3D(0.2, 0, 0, 0, 1, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("TorusMesh_r0bsl")
 surface_material_override/0 = SubResource("StandardMaterial3D_r0qnr")
 
 [node name="OuterRing" type="MeshInstance3D" parent="ThumbstickSimu"]
-transform = Transform3D(0.6, 0, 0, 0, 1, 0, 0, 0, 0.6, 0, 0, 0)
-mesh = SubResource("TorusMesh_r0bsl")
+mesh = SubResource("TorusMesh_wsh6v")
 surface_material_override/0 = SubResource("StandardMaterial3D_r0qnr")
+
+[node name="UpDisc" type="MeshInstance3D" parent="ThumbstickSimu"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_pce3n")
+surface_material_override/0 = SubResource("StandardMaterial3D_2wqtw")
+
+[node name="DownDisc" type="MeshInstance3D" parent="ThumbstickSimu"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_pce3n")
+surface_material_override/0 = SubResource("StandardMaterial3D_53tyc")
