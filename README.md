@@ -1,10 +1,15 @@
-# Godot-XR-AH
-Godot XR Auto Hand - addon
+# Godot XR Auto Hand - addon
+
+Adds hand tracking to any godot-xr-tools based XR game by animating the 
+fingers to fit with the hand assets and generating button controller 
+events based on hand gestures.
 
 ## Installation
 
-Clone the repo and copy the `addons/godot-xr-autohandtrack` folder into your project's `addons` folder 
-or use the AssetLib to install it.
+Clone the repo and copy the `addons/godot-xr-autohandtrack` folder into your project's `addons` folder.   
+(May be added to the AssetLib later).
+
+Demo is included in the top level, as well as a precompiled APK suitable for the Meta Quest.
 
 ## To Use
 
@@ -26,9 +31,9 @@ provide the absolute space positions and rotations for 26 joints of each hand.
 
 Given the rest poses of the bones in the hands of the Godot-xr-toolkit 
 we can calculate the new poses and scalings of each bone in order to force 
-them to conform and fit to these joint locations.  Experimental Options are 
-exported (`applymiddlefingerfix`, `coincidewristorknuckle`, etc) to help understand 
-factors that go into this calculation.
+them to conform and fit to these joint locations.  Experimental options 
+(*applymiddlefingerfix*, *coincidewristorknuckle*, etc) are available to help understand 
+the factors that go into this calculation.
 
 ## Hand signal generation
 
@@ -40,7 +45,7 @@ We have encoded several finger gestures to match controller button presses by
 creating a new `XRPositionalTracker` object and temporarily swapping it in on the 
 XRController3D node when hand tracking is active.  
 
-These gestures simulate the full button experience, including the touch, squeeze value 
+These gestures simulate the full controller-button experience, including the touch, squeeze value 
 and click.  This was necessary because the godot-xr-tools pickup feature ignores the 
 `grip_click` signal and just relies on floating point `grip` value to determin if the 
 player is squeezing the grip button.  
@@ -52,7 +57,7 @@ The hand signal controls are:
 	
 * Pinch (tips of index and thumb close together) is mapped to the trigger.  The 
 default controller's XRPositionalTracker maps this to a `select_button` signal, 
-which can be treated as a trigger click by some libraries, but then you 
+which is treated like a trigger click in some applications, but then you 
 don't get any other signals.
 
 * Grasp (a fist gesture where the position of the index finger is ignored) is 
