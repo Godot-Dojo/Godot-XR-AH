@@ -22,12 +22,13 @@ func setupautotracker(tracker_nhand, islefthand, xr_controller_node):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	$ThumbstickBoundaries/InnerRing.mesh.outer_radius = innerringrad
+	$ThumbstickBoundaries/InnerRing.mesh.inner_radius = 0.95*innerringrad
+	$ThumbstickBoundaries/OuterRing.mesh.outer_radius = outerringrad
+	$ThumbstickBoundaries/OuterRing.mesh.inner_radius = 0.95*outerringrad
+	$ThumbstickBoundaries/UpDisc.transform.origin.y = updowndistbutton
+	$ThumbstickBoundaries/DownDisc.transform.origin.y = -updowndistbutton
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 
 var thumbstickstartpt = null
@@ -41,13 +42,6 @@ var thumbsticktouched = false
 var axbybuttonstatus = 0 # -2:by_button, -1:by_touch, 1:ax_touch, 1:ax_button
 var by_is_up = true
 
-func setupthumsticksimu():
-	$ThumbstickBoundaries/InnerRing.mesh.outer_radius = innerringrad
-	$ThumbstickBoundaries/InnerRing.mesh.inner_radius = 0.95*innerringrad
-	$ThumbstickBoundaries/OuterRing.mesh.outer_radius = outerringrad
-	$ThumbstickBoundaries/OuterRing.mesh.inner_radius = 0.95*outerringrad
-	$ThumbstickBoundaries/UpDisc.transform.origin.y = updowndistbutton
-	$ThumbstickBoundaries/DownDisc.transform.origin.y = -updowndistbutton
 	
 func setaxbybuttonstatus(newaxbybuttonstatus):
 	if axbybuttonstatus == newaxbybuttonstatus:
@@ -80,6 +74,7 @@ func thumbsticksimulation(oxrjps, xrt, xr_camera_node):
 			thumbstickstartpt = tipcen
 			visible = true
 			global_transform.origin = xrt*tipcen
+			$ThumbstickBoundaries.global_transform.origin = xrt*thumbstickstartpt
 	else:
 		if thumbdistance > thumbdistancerelease:
 			thumbstickstartpt = null
@@ -91,8 +86,7 @@ func thumbsticksimulation(oxrjps, xrt, xr_camera_node):
 
 	visible = (thumbstickstartpt != null)
 	if thumbstickstartpt != null:
-		$DragRod.global_transform = sticktransform(xrt*thumbstickstartpt, xrt*tipcen)
-		$ThumbstickBoundaries.global_transform.origin = xrt*thumbstickstartpt
+		$DragRod.global_transform = sticktransformB(xrt*thumbstickstartpt, xrt*tipcen)
 		var facingangle = Vector2(xr_camera_node.transform.basis.z.x, xr_camera_node.transform.basis.z.z).angle() if xr_camera_node != null else 0.0
 		var hvec = Vector2(tipcen.x - thumbstickstartpt.x, tipcen.z - thumbstickstartpt.z)
 		var hv = hvec.rotated(deg_to_rad(90) - facingangle)
@@ -161,16 +155,19 @@ func handgraspdetection(oxrjps, xrt):
 	#	Dcount = 0
 	#	print("l ", avgknuckletip, " ", buttonratio, " ", buttonclicked)
 
-func rotationtoalign(a, b):
-	var axis = a.cross(b).normalized();
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		return Basis(axis, angle_rads)
-	return Basis()
 
-func sticktransform(j1, j2):
-	var b = rotationtoalign(Vector3(0,1,0), j2 - j1)
-	var d = (j2 - j1).length()
-	return Transform3D(b, (j1 + j2)*0.5).scaled_local(Vector3(0.01, d, 0.01))
+const stickradius = 0.01
+static func sticktransformB(j1, j2):
+	var v = j2 - j1
+	var vlen = v.length()
+	var b
+	if vlen != 0:
+		var vy = v/vlen
+		var vyunaligned = Vector3(0,1,0) if abs(vy.y) < abs(vy.x) + abs(vy.z) else Vector3(1,0,0)
+		var vz = vy.cross(vyunaligned)
+		var vx = vy.cross(vz)
+		b = Basis(vx*stickradius, v, vz*stickradius)
+	else:
+		b = Basis().scaled(Vector3(0.01, 0.0, 0.01))
+	return Transform3D(b, (j1 + j2)*0.5)
+	

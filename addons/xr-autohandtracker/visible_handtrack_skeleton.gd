@@ -31,27 +31,30 @@ func _ready():
 			#get_node("J%d" % hjstick[i+1]).get_node("Sphere").visible = (i > 0)
 
 
+const knuckleradius = 0.01
 func updatevisiblehandskeleton(oxrjps, oxrjrot, xrt):
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
-		get_node("J%d" % j).global_transform = Transform3D(xrt.basis*Basis(oxrjrot[j]).scaled(Vector3(0.01, 0.01, 0.01)), xrt*oxrjps[j])
+		get_node("J%d" % j).global_transform = Transform3D(xrt.basis*Basis(oxrjrot[j]).scaled(Vector3(knuckleradius, knuckleradius, knuckleradius)), xrt*oxrjps[j])
 
 	for hjstick in hjsticks:
 		for i in range(0, len(hjstick)-1):
 			var j1 = hjstick[i]
 			var j2 = hjstick[i+1]
 			var rstick = get_node("S%d_%d" % [j1, j2])
-			rstick.global_transform = sticktransform(xrt*oxrjps[j1], xrt*oxrjps[j2])
+			rstick.global_transform = sticktransformB(xrt*oxrjps[j1], xrt*oxrjps[j2])
 
-func rotationtoalign(a, b):
-	var axis = a.cross(b).normalized();
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		return Basis(axis, angle_rads)
-	return Basis()
 
-func sticktransform(j1, j2):
-	var b = rotationtoalign(Vector3(0,1,0), j2 - j1)
-	var d = (j2 - j1).length()
-	return Transform3D(b, (j1 + j2)*0.5).scaled_local(Vector3(0.01, d, 0.01))
+const stickradius = 0.01
+static func sticktransformB(j1, j2):
+	var v = j2 - j1
+	var vlen = v.length()
+	var b
+	if vlen != 0:
+		var vy = v/vlen
+		var vyunaligned = Vector3(0,1,0) if abs(vy.y) < abs(vy.x) + abs(vy.z) else Vector3(1,0,0)
+		var vz = vy.cross(vyunaligned)
+		var vx = vy.cross(vz)
+		b = Basis(vx*stickradius, v, vz*stickradius)
+	else:
+		b = Basis().scaled(Vector3(0.01, 0.0, 0.01))
+	return Transform3D(b, (j1 + j2)*0.5)

@@ -113,7 +113,17 @@ func findxrnodes():
 		if cch is XRCamera3D:
 			xr_camera_node = cch
 
-	# Then look for the hand skeleton that we are going to map to
+	# Finally decide if it is left or right hand and test consistency in the API
+	var islefthand = (tracker_name == "left_hand")
+	assert (tracker_name == ("left_hand" if islefthand else "right_hand"))
+	hand = OpenXRInterface.Hand.HAND_LEFT if islefthand else OpenXRInterface.Hand.HAND_RIGHT
+
+	print("All nodes for %s detected" % tracker_name)
+	return true
+
+func findhandnodes():
+	if xr_controller_node == null:
+		return
 	for ch in xr_controller_node.get_children():
 		var lskel = ch.find_child("Skeleton3D")
 		if lskel:
@@ -129,15 +139,8 @@ func findxrnodes():
 		print("Warning, no Skeleton3D found")
 		return false
 	handanimationtree = handnode.get_node_or_null("AnimationTree")
-
-	# Finally decide if it is left or right hand and test consistency in the API
-	var islefthand = (tracker_name == "left_hand")
-	assert (tracker_name == ("left_hand" if islefthand else "right_hand"))
-	hand = OpenXRInterface.Hand.HAND_LEFT if islefthand else OpenXRInterface.Hand.HAND_RIGHT
-
-	print("All nodes for %s detected" % tracker_name)
-	return true
-
+	extractrestfingerbones()
+	
 
 func findxrtrackerobjects():
 	xr_interface = XRServer.find_interface("OpenXR")
@@ -176,14 +179,18 @@ func _xr_tracker_button_released(name):
 			
 
 func _ready():
-	var xrnodesfound = findxrnodes()
-	if xrnodesfound:
-		extractrestfingerbones()
+	findxrnodes()
+	findxrtrackerobjects()
 
-	var xctrackerobjectsfound = findxrtrackerobjects()
-	set_process(xrnodesfound and xctrackerobjectsfound)
-	$AutoTracker.setupthumsticksimu()
-	top_level = true
+	# As a transform we are effectively reparenting ourselves directly under the XROrigin3D
+	if xr_origin != null:
+		var rt = RemoteTransform3D.new()
+		rt.remote_path = get_path()
+		xr_origin.add_child.call_deferred(rt)
+
+	findhandnodes()
+	set_process(xr_interface != null)
+	
 
 func getoxrjointpositions():
 	var oxrjps = [ ]
@@ -196,7 +203,6 @@ func getoxrjointrotations():
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
 		oxrjrot.push_back(xr_interface.get_hand_joint_rotation(hand, j))
 	return oxrjrot
-
 
 func fixmiddlefingerpositions(oxrjps):
 	for j in [ OpenXRInterface.HAND_JOINT_MIDDLE_TIP, OpenXRInterface.HAND_JOINT_RING_TIP ]:
@@ -266,26 +272,11 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 			skel.set_bone_pose_position(ix, t.origin)
 			skel.set_bone_pose_scale(ix, t.basis.get_scale())
 
-# Convert this into a class to be used for click and grip
-# finish the joystick click area (requiring motion from that position)
-# where it tows to the max circle value
-# Same thing for up-tows for A and B button (jumps)
-# How do we do the stick click!!
-
-# Drop in with the Godot-XR-Tools hand tracking system
-#
-
-
-
 
 func _process(delta):
-	if hand == 0 and xr_controller_node != null:
-		var lxr_tracker = XRServer.get_tracker(xr_controller_node.tracker)
-		#if lxr_tracker and xr_controller_node.get_float("grip") != 0:
-		#	print("gripv ", xr_controller_node.get_float("grip"), "  a:", xr_controller_node.get_is_active())
-#
 	var handjointflagswrist = xr_interface.get_hand_joint_flags(hand, OpenXRInterface.HAND_JOINT_WRIST);
 	var lhandtrackingactive = (handjointflagswrist & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0
+
 	if handtrackingactive != lhandtrackingactive:
 		handtrackingactive = lhandtrackingactive
 		handnode.top_level = handtrackingactive
@@ -320,21 +311,4 @@ func _process(delta):
 			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
-
-func rotationtoalign(a, b):
-	var axis = a.cross(b).normalized();
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		return Basis(axis, angle_rads)
-	return Basis()
-
-func sticktransform(j1, j2):
-	var b = rotationtoalign(Vector3(0,1,0), j2 - j1)
-	var d = (j2 - j1).length()
-	return Transform3D(b, (j1 + j2)*0.5).scaled_local(Vector3(0.01, d, 0.01))
-
-			
-	
 
