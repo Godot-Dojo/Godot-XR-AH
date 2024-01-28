@@ -1,6 +1,7 @@
-[gd_scene load_steps=18 format=3 uid="uid://bufelcry36rw1"]
+[gd_scene load_steps=19 format=3 uid="uid://bufelcry36rw1"]
 
 [ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
+[ext_resource type="Script" path="res://addons/xr-autohandtracker/VisibleHandTrackSkeleton.gd" id="2_arukn"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_lsd0h"]
 size = Vector3(0.1, 0.8, 0.1)
@@ -70,6 +71,7 @@ script = ExtResource("1_kokq6")
 
 [node name="VisibleHandTrackSkeleton" type="Node3D" parent="."]
 visible = false
+script = ExtResource("2_arukn")
 
 [node name="ExampleStick" type="Node3D" parent="VisibleHandTrackSkeleton"]
 
