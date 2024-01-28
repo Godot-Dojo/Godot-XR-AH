@@ -4,6 +4,8 @@ Adds hand tracking to any godot-xr-tools based XR game by animating the
 fingers to fit with the hand assets and generating button controller 
 events based on hand gestures.
 
+Video: https://www.youtube.com/watch?v=RTVatH8KDVA&feature=youtu.be
+
 ## Installation
 
 Clone the repo and copy the `addons/godot-xr-autohandtrack` folder into your project's `addons` folder.   
