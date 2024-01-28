@@ -6,7 +6,7 @@ extends Node3D
 @export var applyscaling : bool = true
 @export var coincidewristorknuckle : bool = true
 @export var visiblehandtrackskeleton : bool = true
-@export var enableautohandtracker : bool = true
+@export var enableautotracker : bool = true
 
 # Hand tracking data access object
 var xr_interface : OpenXRInterface
@@ -141,7 +141,6 @@ func findhandnodes():
 	handanimationtree = handnode.get_node_or_null("AnimationTree")
 	extractrestfingerbones()
 	
-
 func findxrtrackerobjects():
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface == null:
@@ -160,7 +159,6 @@ func findxrtrackerobjects():
 
 	print("action_sets: ", xr_interface.get_action_sets())
 	$AutoTracker.setupautotracker(tracker_nhand, islefthand, xr_controller_node)
-
 
 
 func _ready():
@@ -228,6 +226,9 @@ func calchandnodetransform(oxrjps, xrt):
 
 	return Transform3D(hnbasis, hnorigin)
 		
+const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, 
+	OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, 
+	OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
 func calcboneposes(oxrjps, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(5):
@@ -270,9 +271,8 @@ func _process(delta):
 		print("setting hand "+str(hand)+" active: ", handtrackingactive)
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
 		if handtrackingactive:
-			if enableautohandtracker:
+			if enableautotracker:
 				$AutoTracker.activateautotracker(xr_controller_node)
-			xr_controller_node.set_tracker($AutoTracker.xr_autotracker.name if handtrackingactive else xr_tracker.name)
 		else:
 			if $AutoTracker.autotrackeractive:
 				$AutoTracker.deactivateautotracker(xr_controller_node, xr_tracker)
@@ -295,8 +295,8 @@ func _process(delta):
 		if xr_aimpose == null:
 			xr_aimpose = xr_tracker.get_pose("aim")
 			print("...xr_aimpose ", xr_aimpose)
-		if xr_aimpose != null and enableautohandtracker:
+		if xr_aimpose != null and $AutoTracker.autotrackeractive:
 			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
-const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
+
 
