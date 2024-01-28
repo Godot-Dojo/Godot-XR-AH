@@ -22,12 +22,6 @@ var xr_aimpose : XRPose = null
 var xr_headtracker : XRPositionalTracker = null
 var xr_camera_node : XRCamera3D = null
 
-# The autotracker is swapped onto the xr_controller_node when hand-tracking is active 
-# so that we can insert in our own button and float signals from the hand gestures, 
-# as well as setting the pose from the xr_aimpose (which is filtered by the system during hand tracking)
-# Calling set_pose emits a pose_changed signal that copies its values into the xr_controller_node 
-var xr_autotracker : XRPositionalTracker = null
-var xr_autopose : XRPose = null
 
 # Note the that the enumerations disagree
 # XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT = 1 
@@ -166,29 +160,19 @@ func findxrtrackerobjects():
 	xr_tracker.button_released.connect(_xr_tracker_button_released)
 	#xr_tracker.input_vector2_changed.connect(_input_vector2_changed.bind(hand))
 
-	xr_autotracker = XRPositionalTracker.new()
-	xr_autotracker.hand = tracker_nhand
-	xr_autotracker.name = "left_autohand" if islefthand else "right_autohand"
-	xr_autotracker.profile = "/interaction_profiles/autohand" # "/interaction_profiles/none"
-	xr_autotracker.type = 2
-
-	xr_autotracker.set_pose(xr_controller_node.pose, Transform3D(), Vector3(), Vector3(), XRPose.TrackingConfidence.XR_TRACKING_CONFIDENCE_NONE)
-	xr_autopose = xr_autotracker.get_pose(xr_controller_node.pose)
-
-	XRServer.add_tracker(xr_autotracker)
-
+	$AutoTracker.setupautotracker(tracker_nhand, islefthand, xr_controller_node)
 	return true
 
 # select_button is the hand-tracking gesture currently recognized that can be used for a button signal
 func _xr_tracker_button_pressed(name):
 	if enableautohandtracker:
 		if name == "select_button":
-			xr_autotracker.set_input("trigger_click", true)
+			$AutoTracker.xr_autotracker.set_input("trigger_click", true)
 		
 func _xr_tracker_button_released(name):
 	if enableautohandtracker:
 		if name == "select_button":
-			xr_autotracker.set_input("trigger_click", false)
+			$AutoTracker.xr_autotracker.set_input("trigger_click", false)
 			
 
 func _ready():
@@ -198,7 +182,7 @@ func _ready():
 
 	var xctrackerobjectsfound = findxrtrackerobjects()
 	set_process(xrnodesfound and xctrackerobjectsfound)
-	setupthumsticksimu()
+	$AutoTracker.setupthumsticksimu()
 	top_level = true
 
 func getoxrjointpositions():
@@ -207,6 +191,13 @@ func getoxrjointpositions():
 		oxrjps.push_back(xr_interface.get_hand_joint_position(hand, j))
 	return oxrjps
 	
+func getoxrjointrotations():
+	var oxrjrot = [ ]
+	for j in range(OpenXRInterface.HAND_JOINT_MAX):
+		oxrjrot.push_back(xr_interface.get_hand_joint_rotation(hand, j))
+	return oxrjrot
+
+
 func fixmiddlefingerpositions(oxrjps):
 	for j in [ OpenXRInterface.HAND_JOINT_MIDDLE_TIP, OpenXRInterface.HAND_JOINT_RING_TIP ]:
 		var b = Basis(xr_interface.get_hand_joint_rotation(hand, j))
@@ -284,135 +275,7 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 # Drop in with the Godot-XR-Tools hand tracking system
 #
 
-const touchbuttondistance = 0.07
-const depressbuttondistance = 0.04
-const clickbuttononratio = 0.6
-const clickbuttonoffratio = 0.4
-var buttoncurrentlyclicked = false
-var buttoncurrentlytouched = false
-var Dcount = 0
-func handgraspdetection(oxrjps, xrt):
-	var middleknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL]).length()
-	var ringknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_RING_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_RING_PROXIMAL]).length()
-	var littleknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_LITTLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_LITTLE_PROXIMAL]).length()
-	var avgknuckletip = (middleknuckletip + ringknuckletip + littleknuckletip)/3
-	Dcount += 1
-	var buttonratio = min(inverse_lerp(touchbuttondistance, depressbuttondistance, avgknuckletip), 1.0)
-	if buttonratio < 0.0:
-		if buttoncurrentlytouched:
-			xr_autotracker.set_input("grip", 0.0)
-			# xr_autotracker.set_input("grip_touched", false)
-			buttoncurrentlytouched = false
-	else:
-		xr_autotracker.set_input("grip", buttonratio)
-		if not buttoncurrentlytouched:
-		#	xr_autotracker.set_input("grip_touched", false)
-			buttoncurrentlytouched = true
-	var buttonclicked = (buttonratio > (clickbuttonoffratio if buttoncurrentlyclicked else clickbuttononratio))
-	if buttonclicked != buttoncurrentlyclicked:
-		xr_autotracker.set_input("grip_click", buttonclicked)
-		buttoncurrentlyclicked = buttonclicked
-		$GraspMarker.global_transform.origin = xrt*oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] 
-		$GraspMarker.visible = buttoncurrentlyclicked
-	#if Dcount == 10 and (tracker_name == "left_hand"):
-	#	Dcount = 0
-	#	print("l ", avgknuckletip, " ", buttonratio, " ", buttonclicked)
 
-
-var thumbstickstartpt = null
-const thumbdistancecontact = 0.025
-const thumbdistancerelease = 0.045
-const innerringrad = 0.05
-const outerringrad = 0.22
-const updowndisttouch = 0.08
-const updowndistbutton = 0.12
-var thumbsticktouched = false
-var axbybuttonstatus = 0 # -2:by_button, -1:by_touch, 1:ax_touch, 1:ax_button
-var by_is_up = true
-
-func setupthumsticksimu():
-	$ThumbstickSimu/InnerRing.mesh.outer_radius = innerringrad
-	$ThumbstickSimu/InnerRing.mesh.inner_radius = 0.95*innerringrad
-	$ThumbstickSimu/OuterRing.mesh.outer_radius = outerringrad
-	$ThumbstickSimu/OuterRing.mesh.inner_radius = 0.95*outerringrad
-	$ThumbstickSimu/UpDisc.transform.origin.y = updowndistbutton
-	$ThumbstickSimu/DownDisc.transform.origin.y = -updowndistbutton
-	
-func setaxbybuttonstatus(newaxbybuttonstatus):
-	if axbybuttonstatus == newaxbybuttonstatus:
-		return
-	if abs(axbybuttonstatus) == 2:
-		xr_autotracker.set_input("ax_button" if axbybuttonstatus > 0 else "by_button", false)
-		axbybuttonstatus = 1 if axbybuttonstatus > 0 else -1
-	if axbybuttonstatus == newaxbybuttonstatus:
-		return
-	xr_autotracker.set_input("ax_touch" if axbybuttonstatus > 0 else "by_touch", false)
-	axbybuttonstatus = 0
-	if axbybuttonstatus == newaxbybuttonstatus:
-		return
-	xr_autotracker.set_input("ax_touch" if newaxbybuttonstatus > 0 else "by_touch", true)
-	axbybuttonstatus = 1 if newaxbybuttonstatus > 0 else -1
-	if axbybuttonstatus == newaxbybuttonstatus:
-		return
-	xr_autotracker.set_input("ax_button" if newaxbybuttonstatus > 0 else "by_button", true)
-	axbybuttonstatus = newaxbybuttonstatus
-
-func thumbsticksimulation(oxrjps, xrt):
-	var middletip = oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP]
-	var thumbtip = oxrjps[OpenXRInterface.HAND_JOINT_THUMB_TIP]
-	var ringtip = oxrjps[OpenXRInterface.HAND_JOINT_RING_TIP]
-	var tipcen = (middletip + thumbtip + ringtip)/3.0
-	var middleknuckle = oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL]
-	var thumbdistance = max((middletip - tipcen).length(), (thumbtip - tipcen).length(), (ringtip - tipcen).length())
-	if thumbstickstartpt == null:
-		if thumbdistance < thumbdistancecontact and middleknuckle.y < tipcen.y - 0.029:
-			thumbstickstartpt = tipcen
-			$ThumbstickSimu.visible = true
-			$ThumbstickSimu.global_transform.origin = xrt*tipcen
-	else:
-		if thumbdistance > thumbdistancerelease:
-			thumbstickstartpt = null
-			if thumbsticktouched:
-				xr_autotracker.set_input("primary", Vector2(0.0, 0.0))
-				xr_autotracker.set_input("primary_touch", true)
-				thumbsticktouched = false
-			setaxbybuttonstatus(0)
-
-	$ThumbstickSimu.visible = (thumbstickstartpt != null)
-	if thumbstickstartpt != null:
-		$ThumbstickSimu/DragRod.global_transform = sticktransform(xrt*thumbstickstartpt, xrt*tipcen)
-		var facingangle = Vector2(xr_camera_node.transform.basis.z.x, xr_camera_node.transform.basis.z.z).angle() if xr_camera_node != null else 0.0
-		var hvec = Vector2(tipcen.x - thumbstickstartpt.x, tipcen.z - thumbstickstartpt.z)
-		var hv = hvec.rotated(deg_to_rad(90) - facingangle)
-		var hvlen = hv.length()
-		if not thumbsticktouched:
-			var frat = hvlen/max(hvlen, innerringrad)
-			frat = frat*frat*frat 
-			$ThumbstickSimu/InnerRing.get_surface_override_material(0).albedo_color.a = frat
-			$ThumbstickSimu/OuterRing.get_surface_override_material(0).albedo_color.a = frat
-			if hvlen > innerringrad:
-				xr_autotracker.set_input("primary_touch", true)
-				thumbsticktouched = true
-			
-		if thumbsticktouched:
-			var hvN = hv/max(hvlen, outerringrad)
-			xr_autotracker.set_input("primary", Vector2(hvN.x, -hvN.y))
-
-		var ydist = (tipcen.y - thumbstickstartpt.y)
-		var rawnewaxbybuttonstatus = 0
-		if ydist > updowndisttouch:
-			$ThumbstickSimu/UpDisc.visible = true
-			$ThumbstickSimu/UpDisc.get_surface_override_material(0).albedo_color.a = min((ydist - updowndisttouch)/(updowndistbutton - updowndisttouch), 1.0)
-			rawnewaxbybuttonstatus = 2 if ydist > updowndistbutton else 1
-		else:
-			$ThumbstickSimu/UpDisc.visible = false
-		if ydist < -updowndisttouch:
-			$ThumbstickSimu/DownDisc.visible = true
-			$ThumbstickSimu/DownDisc.get_surface_override_material(0).albedo_color.a = min((-ydist - updowndisttouch)/(updowndistbutton - updowndisttouch), 1.0)
-			rawnewaxbybuttonstatus = -2 if -ydist > updowndistbutton else -1
-		else:
-			$ThumbstickSimu/DownDisc.visible = false
-		setaxbybuttonstatus(rawnewaxbybuttonstatus*(1 if by_is_up else -1))
 
 
 func _process(delta):
@@ -431,7 +294,7 @@ func _process(delta):
 		print("setting hand "+str(hand)+" active: ", handtrackingactive)
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
 		if enableautohandtracker:
-			xr_controller_node.set_tracker(xr_autotracker.name if handtrackingactive else xr_tracker.name)
+			xr_controller_node.set_tracker($AutoTracker.xr_autotracker.name if handtrackingactive else xr_tracker.name)
 		if !handtrackingactive:
 			handnode.transform = Transform3D()
 
@@ -439,8 +302,8 @@ func _process(delta):
 		var oxrjps = getoxrjointpositions()
 		var xrt = xr_origin.global_transform
 		if enableautohandtracker:
-			handgraspdetection(oxrjps, xrt)
-			thumbsticksimulation(oxrjps, xrt)
+			$AutoTracker.handgraspdetection(oxrjps, xrt)
+			$AutoTracker.thumbsticksimulation(oxrjps, xrt, xr_camera_node)
 		if applymiddlefingerfix:
 			fixmiddlefingerpositions(oxrjps)
 		var handnodetransform = calchandnodetransform(oxrjps, xrt)
@@ -448,12 +311,13 @@ func _process(delta):
 		handnode.transform = handnodetransform
 		copyouttransformstoskel(fingerbonetransformsOut)
 		if visible and $VisibleHandTrackSkeleton.visible:
-			$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrjps, xrt, xr_interface, hand)
+			var oxrjrot = getoxrjointrotations()
+			$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrjps, oxrjrot, xrt)
 		if xr_aimpose == null:
 			xr_aimpose = xr_tracker.get_pose("aim")
 			print("...xr_aimpose ", xr_aimpose)
 		if xr_aimpose != null and enableautohandtracker:
-			xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
+			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
 

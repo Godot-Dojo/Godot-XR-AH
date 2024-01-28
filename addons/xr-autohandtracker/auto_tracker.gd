@@ -1,0 +1,176 @@
+extends Node3D
+
+# The autotracker is swapped onto the xr_controller_node when hand-tracking is active 
+# so that we can insert in our own button and float signals from the hand gestures, 
+# as well as setting the pose from the xr_aimpose (which is filtered by the system during hand tracking)
+# Calling set_pose emits a pose_changed signal that copies its values into the xr_controller_node 
+var xr_autotracker : XRPositionalTracker = null
+var xr_autopose : XRPose = null
+
+func setupautotracker(tracker_nhand, islefthand, xr_controller_node):
+	xr_autotracker = XRPositionalTracker.new()
+	xr_autotracker.hand = tracker_nhand
+	xr_autotracker.name = "left_autohand" if islefthand else "right_autohand"
+	xr_autotracker.profile = "/interaction_profiles/autohand" # "/interaction_profiles/none"
+	xr_autotracker.type = 2
+
+	xr_autotracker.set_pose(xr_controller_node.pose, Transform3D(), Vector3(), Vector3(), XRPose.TrackingConfidence.XR_TRACKING_CONFIDENCE_NONE)
+	xr_autopose = xr_autotracker.get_pose(xr_controller_node.pose)
+
+	XRServer.add_tracker(xr_autotracker)
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+
+var thumbstickstartpt = null
+const thumbdistancecontact = 0.025
+const thumbdistancerelease = 0.045
+const innerringrad = 0.05
+const outerringrad = 0.22
+const updowndisttouch = 0.08
+const updowndistbutton = 0.12
+var thumbsticktouched = false
+var axbybuttonstatus = 0 # -2:by_button, -1:by_touch, 1:ax_touch, 1:ax_button
+var by_is_up = true
+
+func setupthumsticksimu():
+	$ThumbstickBoundaries/InnerRing.mesh.outer_radius = innerringrad
+	$ThumbstickBoundaries/InnerRing.mesh.inner_radius = 0.95*innerringrad
+	$ThumbstickBoundaries/OuterRing.mesh.outer_radius = outerringrad
+	$ThumbstickBoundaries/OuterRing.mesh.inner_radius = 0.95*outerringrad
+	$ThumbstickBoundaries/UpDisc.transform.origin.y = updowndistbutton
+	$ThumbstickBoundaries/DownDisc.transform.origin.y = -updowndistbutton
+	
+func setaxbybuttonstatus(newaxbybuttonstatus):
+	if axbybuttonstatus == newaxbybuttonstatus:
+		return
+	if abs(axbybuttonstatus) == 2:
+		xr_autotracker.set_input("ax_button" if axbybuttonstatus > 0 else "by_button", false)
+		axbybuttonstatus = 1 if axbybuttonstatus > 0 else -1
+	if axbybuttonstatus == newaxbybuttonstatus:
+		return
+	xr_autotracker.set_input("ax_touch" if axbybuttonstatus > 0 else "by_touch", false)
+	axbybuttonstatus = 0
+	if axbybuttonstatus == newaxbybuttonstatus:
+		return
+	xr_autotracker.set_input("ax_touch" if newaxbybuttonstatus > 0 else "by_touch", true)
+	axbybuttonstatus = 1 if newaxbybuttonstatus > 0 else -1
+	if axbybuttonstatus == newaxbybuttonstatus:
+		return
+	xr_autotracker.set_input("ax_button" if newaxbybuttonstatus > 0 else "by_button", true)
+	axbybuttonstatus = newaxbybuttonstatus
+
+func thumbsticksimulation(oxrjps, xrt, xr_camera_node):
+	var middletip = oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP]
+	var thumbtip = oxrjps[OpenXRInterface.HAND_JOINT_THUMB_TIP]
+	var ringtip = oxrjps[OpenXRInterface.HAND_JOINT_RING_TIP]
+	var tipcen = (middletip + thumbtip + ringtip)/3.0
+	var middleknuckle = oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL]
+	var thumbdistance = max((middletip - tipcen).length(), (thumbtip - tipcen).length(), (ringtip - tipcen).length())
+	if thumbstickstartpt == null:
+		if thumbdistance < thumbdistancecontact and middleknuckle.y < tipcen.y - 0.029:
+			thumbstickstartpt = tipcen
+			visible = true
+			global_transform.origin = xrt*tipcen
+	else:
+		if thumbdistance > thumbdistancerelease:
+			thumbstickstartpt = null
+			if thumbsticktouched:
+				xr_autotracker.set_input("primary", Vector2(0.0, 0.0))
+				xr_autotracker.set_input("primary_touch", true)
+				thumbsticktouched = false
+			setaxbybuttonstatus(0)
+
+	visible = (thumbstickstartpt != null)
+	if thumbstickstartpt != null:
+		$DragRod.global_transform = sticktransform(xrt*thumbstickstartpt, xrt*tipcen)
+		$ThumbstickBoundaries.global_transform.origin = xrt*thumbstickstartpt
+		var facingangle = Vector2(xr_camera_node.transform.basis.z.x, xr_camera_node.transform.basis.z.z).angle() if xr_camera_node != null else 0.0
+		var hvec = Vector2(tipcen.x - thumbstickstartpt.x, tipcen.z - thumbstickstartpt.z)
+		var hv = hvec.rotated(deg_to_rad(90) - facingangle)
+		var hvlen = hv.length()
+		if not thumbsticktouched:
+			var frat = hvlen/max(hvlen, innerringrad)
+			frat = frat*frat*frat 
+			$ThumbstickBoundaries/InnerRing.get_surface_override_material(0).albedo_color.a = frat
+			$ThumbstickBoundaries/OuterRing.get_surface_override_material(0).albedo_color.a = frat
+			if hvlen > innerringrad:
+				xr_autotracker.set_input("primary_touch", true)
+				thumbsticktouched = true
+			
+		if thumbsticktouched:
+			var hvN = hv/max(hvlen, outerringrad)
+			xr_autotracker.set_input("primary", Vector2(hvN.x, -hvN.y))
+
+		var ydist = (tipcen.y - thumbstickstartpt.y)
+		var rawnewaxbybuttonstatus = 0
+		if ydist > updowndisttouch:
+			$ThumbstickBoundaries/UpDisc.visible = true
+			$ThumbstickBoundaries/UpDisc.get_surface_override_material(0).albedo_color.a = min((ydist - updowndisttouch)/(updowndistbutton - updowndisttouch), 1.0)
+			rawnewaxbybuttonstatus = 2 if ydist > updowndistbutton else 1
+		else:
+			$ThumbstickBoundaries/UpDisc.visible = false
+		if ydist < -updowndisttouch:
+			$ThumbstickBoundaries/DownDisc.visible = true
+			$ThumbstickBoundaries/DownDisc.get_surface_override_material(0).albedo_color.a = min((-ydist - updowndisttouch)/(updowndistbutton - updowndisttouch), 1.0)
+			rawnewaxbybuttonstatus = -2 if -ydist > updowndistbutton else -1
+		else:
+			$ThumbstickBoundaries/DownDisc.visible = false
+		setaxbybuttonstatus(rawnewaxbybuttonstatus*(1 if by_is_up else -1))
+
+
+const touchbuttondistance = 0.07
+const depressbuttondistance = 0.04
+const clickbuttononratio = 0.6
+const clickbuttonoffratio = 0.4
+var buttoncurrentlyclicked = false
+var buttoncurrentlytouched = false
+var Dcount = 0
+func handgraspdetection(oxrjps, xrt):
+	var middleknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL]).length()
+	var ringknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_RING_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_RING_PROXIMAL]).length()
+	var littleknuckletip = (oxrjps[OpenXRInterface.HAND_JOINT_LITTLE_TIP] - oxrjps[OpenXRInterface.HAND_JOINT_LITTLE_PROXIMAL]).length()
+	var avgknuckletip = (middleknuckletip + ringknuckletip + littleknuckletip)/3
+	Dcount += 1
+	var buttonratio = min(inverse_lerp(touchbuttondistance, depressbuttondistance, avgknuckletip), 1.0)
+	if buttonratio < 0.0:
+		if buttoncurrentlytouched:
+			xr_autotracker.set_input("grip", 0.0)
+			# xr_autotracker.set_input("grip_touched", false)
+			buttoncurrentlytouched = false
+	else:
+		xr_autotracker.set_input("grip", buttonratio)
+		if not buttoncurrentlytouched:
+		#	xr_autotracker.set_input("grip_touched", false)
+			buttoncurrentlytouched = true
+	var buttonclicked = (buttonratio > (clickbuttonoffratio if buttoncurrentlyclicked else clickbuttononratio))
+	if buttonclicked != buttoncurrentlyclicked:
+		xr_autotracker.set_input("grip_click", buttonclicked)
+		buttoncurrentlyclicked = buttonclicked
+		$GraspMarker.global_transform.origin = xrt*oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_TIP] 
+		$GraspMarker.visible = buttoncurrentlyclicked
+	#if Dcount == 10 and (tracker_name == "left_hand"):
+	#	Dcount = 0
+	#	print("l ", avgknuckletip, " ", buttonratio, " ", buttonclicked)
+
+func rotationtoalign(a, b):
+	var axis = a.cross(b).normalized();
+	if (axis.length_squared() != 0):
+		var dot = a.dot(b)/(a.length()*b.length())
+		dot = clamp(dot, -1.0, 1.0)
+		var angle_rads = acos(dot)
+		return Basis(axis, angle_rads)
+	return Basis()
+
+func sticktransform(j1, j2):
+	var b = rotationtoalign(Vector3(0,1,0), j2 - j1)
+	var d = (j2 - j1).length()
+	return Transform3D(b, (j1 + j2)*0.5).scaled_local(Vector3(0.01, d, 0.01))

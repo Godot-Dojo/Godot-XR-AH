@@ -31,10 +31,9 @@ func _ready():
 			#get_node("J%d" % hjstick[i+1]).get_node("Sphere").visible = (i > 0)
 
 
-func updatevisiblehandskeleton(oxrjps, xrt, xr_interface, hand):
+func updatevisiblehandskeleton(oxrjps, oxrjrot, xrt):
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
-		var jrot = xr_interface.get_hand_joint_rotation(hand, j)
-		get_node("J%d" % j).global_transform = Transform3D(xrt.basis*Basis(jrot).scaled(Vector3(0.01, 0.01, 0.01)), xrt*oxrjps[j])
+		get_node("J%d" % j).global_transform = Transform3D(xrt.basis*Basis(oxrjrot[j]).scaled(Vector3(0.01, 0.01, 0.01)), xrt*oxrjps[j])
 
 	for hjstick in hjsticks:
 		for i in range(0, len(hjstick)-1):
