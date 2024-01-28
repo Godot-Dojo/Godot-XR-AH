@@ -145,11 +145,11 @@ func findhandnodes():
 func findxrtrackerobjects():
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface == null:
-		return false
+		return
 	var tracker_name = xr_controller_node.tracker
 	xr_tracker = XRServer.get_tracker(tracker_name)
 	if xr_tracker == null:
-		return false
+		return
 	assert (xr_tracker.hand == tracker_nhand)
 	print(xr_tracker.description, " ", xr_tracker.hand, " ", xr_tracker.name, " ", xr_tracker.profile, " ", xr_tracker.type)
 
@@ -159,24 +159,9 @@ func findxrtrackerobjects():
 	print(tracker_name, "  ", tracker_nhand)
 
 	print("action_sets: ", xr_interface.get_action_sets())
-	xr_tracker.button_pressed.connect(_xr_tracker_button_pressed)
-	xr_tracker.button_released.connect(_xr_tracker_button_released)
-	#xr_tracker.input_vector2_changed.connect(_input_vector2_changed.bind(hand))
-
 	$AutoTracker.setupautotracker(tracker_nhand, islefthand, xr_controller_node)
-	return true
 
-# select_button is the hand-tracking gesture currently recognized that can be used for a button signal
-func _xr_tracker_button_pressed(name):
-	if enableautohandtracker:
-		if name == "select_button":
-			$AutoTracker.xr_autotracker.set_input("trigger_click", true)
-		
-func _xr_tracker_button_released(name):
-	if enableautohandtracker:
-		if name == "select_button":
-			$AutoTracker.xr_autotracker.set_input("trigger_click", false)
-			
+
 
 func _ready():
 	findxrnodes()
@@ -284,17 +269,20 @@ func _process(delta):
 			handanimationtree.active = not handtrackingactive
 		print("setting hand "+str(hand)+" active: ", handtrackingactive)
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
-		if enableautohandtracker:
+		if handtrackingactive:
+			if enableautohandtracker:
+				$AutoTracker.activateautotracker(xr_controller_node)
 			xr_controller_node.set_tracker($AutoTracker.xr_autotracker.name if handtrackingactive else xr_tracker.name)
-		if !handtrackingactive:
+		else:
+			if $AutoTracker.autotrackeractive:
+				$AutoTracker.deactivateautotracker(xr_controller_node, xr_tracker)
 			handnode.transform = Transform3D()
 
 	if handtrackingactive:
 		var oxrjps = getoxrjointpositions()
 		var xrt = xr_origin.global_transform
-		if enableautohandtracker:
-			$AutoTracker.handgraspdetection(oxrjps, xrt)
-			$AutoTracker.thumbsticksimulation(oxrjps, xrt, xr_camera_node)
+		if $AutoTracker.autotrackeractive:
+			$AutoTracker.autotrackgestures(oxrjps, xrt, xr_camera_node)
 		if applymiddlefingerfix:
 			fixmiddlefingerpositions(oxrjps)
 		var handnodetransform = calchandnodetransform(oxrjps, xrt)

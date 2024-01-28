@@ -26,19 +26,22 @@ var buttonsignalnames = [
 	"by_touch", "by_button",
 ]
 
-func rotationtoalign(a, b):
-	var axis = a.cross(b).normalized();
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		return Basis(axis, angle_rads)
-	return Basis()
 
-func sticktransform(j1, j2):
-	var b = rotationtoalign(Vector3(0,1,0), j2 - j1)
-	var d = (j2 - j1).length()
-	return Transform3D(b, (j1 + j2)*0.5).scaled_local(Vector3(0.01, d, 0.01))
+
+const stickradius = 0.01
+static func sticktransformB(j1, j2):
+	var v = j2 - j1
+	var vlen = v.length()
+	var b
+	if vlen != 0:
+		var vy = v/vlen
+		var vyunaligned = Vector3(0,1,0) if abs(vy.y) < abs(vy.x) + abs(vy.z) else Vector3(1,0,0)
+		var vz = vy.cross(vyunaligned)
+		var vx = vy.cross(vz)
+		b = Basis(vx*stickradius, v, vz*stickradius)
+	else:
+		b = Basis().scaled(Vector3(0.01, 0.0, 0.01))
+	return Transform3D(b, (j1 + j2)*0.5)
 
 # Set up the displayed axes for each hand and each joint of the hand 
 func _ready():
@@ -69,7 +72,7 @@ func _ready():
 				var rstickf = stickscene.instantiate()
 				rstickf.name = LRstick % [hjstick[i], hjstick[i+1]]
 				joints2D.add_child(rstickf)
-				rstickf.transform = sticktransform(joints2D.get_node(LRd % j1).transform.origin, joints2D.get_node(LRd % j2).transform.origin)
+				rstickf.transform = sticktransformB(joints2D.get_node(LRd % j1).transform.origin, joints2D.get_node(LRd % j2).transform.origin)
 
 
 		# Make the toggle buttons that show the activated button signals

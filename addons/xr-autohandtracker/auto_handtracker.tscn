@@ -39,7 +39,7 @@ outer_radius = 0.6
 [sub_resource type="CylinderMesh" id="CylinderMesh_pce3n"]
 top_radius = 0.05
 bottom_radius = 0.05
-height = 0.01
+height = 0.002
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2wqtw"]
 transparency = 1
@@ -88,7 +88,6 @@ mesh = SubResource("BoxMesh_h2ysa")
 surface_material_override/0 = SubResource("StandardMaterial3D_kb47o")
 
 [node name="AutoTracker" type="Node3D" parent="."]
-visible = false
 script = ExtResource("3_6kyde")
 
 [node name="DragRod" type="MeshInstance3D" parent="AutoTracker"]
