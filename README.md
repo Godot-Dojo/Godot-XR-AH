@@ -74,3 +74,9 @@ convention of using the A button for jumping up.
 
 * Stick click.  We don't have a gesture for this.  Possibly curling the little finger.
 
+## Demo
+
+A demo suitable for the Meta Quest is available at: https://github.com/Godot-Dojo/Godot-XR-AH/releases/tag/v0.9
+
+![image](https://github.com/Godot-Dojo/Godot-XR-AH/assets/677254/ddaff4ac-56b6-4530-a00a-f2e446b46d67)
+
