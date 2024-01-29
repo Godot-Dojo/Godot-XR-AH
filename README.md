@@ -28,7 +28,7 @@ when you export the project**.
 ## Hand finger animation
 
 The three functions `get_hand_joint_position()`, `get_hand_joint_rotation()` 
-and `get_hand_joint_flags()` in the `OpenXRInterface` class 
+and `get_hand_joint_flags()` in the [OpenXRInterface](https://docs.godotengine.org/en/latest/classes/class_openxrinterface.html) class 
 provide the absolute space positions and rotations for 26 joints of each hand.  
 
 Given the rest poses of the bones in the hands of the Godot-xr-toolkit 
@@ -44,8 +44,8 @@ generate the equivalent of button presses and joystick motions from the
 finger gestures.
 
 We have encoded several finger gestures to match controller button presses by 
-creating a new `XRPositionalTracker` object and temporarily swapping it in on the 
-XRController3D node when hand tracking is active.  
+creating a new [XRPositionalTracker](https://docs.godotengine.org/en/latest/classes/class_xrpositionaltracker.html) object and temporarily swapping it in on the 
+[XRController3D](https://docs.godotengine.org/en/latest/classes/class_xrcontroller3d.html) node when hand tracking is active.  
 
 These gestures simulate the full controller-button experience, including the touch, squeeze value 
 and click.  This was necessary because the godot-xr-tools pickup feature ignores the 
@@ -75,6 +75,11 @@ These are reversed by default as they appear on the controllers due to the
 convention of using the A button for jumping up.
 
 * Stick click.  We don't have a gesture for this.  Possibly curling the little finger.
+
+The aim [XRPose](https://docs.godotengine.org/en/latest/classes/class_xrpose.html) is copied 
+across from the controller output to the hand output instead of using something 
+derived from the hand-positions.  This is why there is a mismatch which you can see 
+by the filtering applied to the aim pose to stabilize it.
 
 ## Demo
 
