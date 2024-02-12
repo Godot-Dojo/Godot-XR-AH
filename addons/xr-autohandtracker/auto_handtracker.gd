@@ -7,7 +7,7 @@ extends Node3D
 @export var coincidewristorknuckle : bool = true
 @export var visiblehandtrackskeleton : bool = true
 @export var enableautotracker : bool = true
-@export var controllersourcefingertracking : bool = false
+@export var controllersourcefingertracking : bool = true
 
 # Hand tracking data access object
 var xr_interface : OpenXRInterface
