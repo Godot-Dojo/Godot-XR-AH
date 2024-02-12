@@ -7,6 +7,7 @@ extends Node3D
 @export var coincidewristorknuckle : bool = true
 @export var visiblehandtrackskeleton : bool = true
 @export var enableautotracker : bool = true
+@export var controllersourcefingertracking : bool = false
 
 # Hand tracking data access object
 var xr_interface : OpenXRInterface
@@ -28,7 +29,13 @@ var xr_camera_node : XRCamera3D = null
 # OpenXRInterface.Hand.HAND_LEFT = 0
 var hand : OpenXRInterface.Hand
 var tracker_name : String 
+var handtrackingsource = HAND_TRACKED_SOURCE_UNKNOWN
 var handtrackingactive = false
+
+# Copied out from OpenXRInterface.HandTrackedSource so it works on v4.2
+const HAND_TRACKED_SOURCE_UNKNOWN = 0
+const HAND_TRACKED_SOURCE_UNOBSTRUCTED = 1
+const HAND_TRACKED_SOURCE_CONTROLLER = 2
 
 var handnode = null
 var skel = null
@@ -145,6 +152,7 @@ func findxrtrackerobjects():
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface == null:
 		return
+	
 	var tracker_name = xr_controller_node.tracker
 	xr_tracker = XRServer.get_tracker(tracker_name)
 	if xr_tracker == null:
@@ -202,6 +210,7 @@ func calchandnodetransform(oxrjps, xrt):
 	#  so that avatarwristpos->avatarmiddleknucklepos is aligned along handwrist->handmiddleknuckle
 	#  and rotated so that the line between index and ring knuckles are in the same plane
 	
+	
 	# We want skel.global_transform*wristboneresttransform to have origin xrorigintransform*gg[OpenXRInterface.HAND_JOINT_WRIST].origin
 	var wristorigin = xrt*oxrjps[OpenXRInterface.HAND_JOINT_WRIST]
 
@@ -227,8 +236,8 @@ func calchandnodetransform(oxrjps, xrt):
 	return Transform3D(hnbasis, hnorigin)
 		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, 
-	OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, 
-	OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
+					OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, 
+					OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
 func calcboneposes(oxrjps, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(5):
@@ -260,17 +269,24 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 
 
 func _process(delta):
-	var handjointflagswrist = xr_interface.get_hand_joint_flags(hand, OpenXRInterface.HAND_JOINT_WRIST);
-	var lhandtrackingactive = (handjointflagswrist & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0
+	var lhandtrackingsource = HAND_TRACKED_SOURCE_UNKNOWN
+	var handwristjointvalid = ((xr_interface.get_hand_joint_flags(hand, OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
 
-	if handtrackingactive != lhandtrackingactive:
-		handtrackingactive = lhandtrackingactive
+	if xr_interface.has_method("get_hand_tracking_source"):
+		lhandtrackingsource = xr_interface.get_hand_tracking_source(hand)  # comes in v4.3
+	else:
+		if handwristjointvalid:
+			lhandtrackingsource = HAND_TRACKED_SOURCE_UNOBSTRUCTED
+
+	if handtrackingsource != lhandtrackingsource:
+		handtrackingsource = lhandtrackingsource
+		handtrackingactive = (handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED) or (controllersourcefingertracking and (handtrackingsource == HAND_TRACKED_SOURCE_CONTROLLER))
 		handnode.top_level = handtrackingactive
 		if handanimationtree:
 			handanimationtree.active = not handtrackingactive
-		print("setting hand "+str(hand)+" active: ", handtrackingactive)
+		print("setting hand tracking source "+str(hand)+": ", handtrackingsource)
 		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
-		if handtrackingactive:
+		if handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED:
 			if enableautotracker:
 				$AutoTracker.activateautotracker(xr_controller_node)
 		else:
@@ -278,7 +294,7 @@ func _process(delta):
 				$AutoTracker.deactivateautotracker(xr_controller_node, xr_tracker)
 			handnode.transform = Transform3D()
 
-	if handtrackingactive:
+	if handtrackingactive and handwristjointvalid:
 		var oxrjps = getoxrjointpositions()
 		var xrt = xr_origin.global_transform
 		if $AutoTracker.autotrackeractive:

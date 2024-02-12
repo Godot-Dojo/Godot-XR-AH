@@ -23,3 +23,4 @@ func _process(delta):
 	var camerafore = Vector3($XROrigin3D/XRCamera3D.transform.basis.z.x, 0.0, $XROrigin3D/XRCamera3D.transform.basis.z.z).normalized()
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
+
