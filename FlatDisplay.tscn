@@ -154,14 +154,26 @@ offset_right = 70.0
 offset_bottom = 20.0
 color = Color(1, 0.588235, 0.988235, 1)
 
-[node name="DisplayOption" type="OptionButton" parent="."]
+[node name="HandDisplay0" type="OptionButton" parent="."]
 layout_mode = 0
 offset_left = 353.0
 offset_top = 247.0
-offset_right = 470.0
+offset_right = 408.0
 offset_bottom = 278.0
 selected = 0
 item_count = 2
-popup/item_0/text = "Autohands"
-popup/item_1/text = "XRHandModifier"
+popup/item_0/text = "AH"
+popup/item_1/text = "XR"
+popup/item_1/id = 1
+
+[node name="HandDisplay1" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 471.0
+offset_top = 248.0
+offset_right = 526.0
+offset_bottom = 279.0
+selected = 0
+item_count = 2
+popup/item_0/text = "AH"
+popup/item_1/text = "XR"
 popup/item_1/id = 1

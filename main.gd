@@ -24,19 +24,20 @@ func _process(delta):
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
 
-
 func triggerfingerbutton(hand):
-	var displayoption = $XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh/SubViewport/FlatDisplay/DisplayOption
+	var handname = "Left" if hand == 0 else "Right"
+	var displayoption = get_node("XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh/SubViewport/FlatDisplay/HandDisplay%d" % hand)
 	displayoption.selected = displayoption.selected + 1 if displayoption.selected < displayoption.item_count - 1 else 0
 	var triggermode = displayoption.get_item_text(displayoption.selected)
-	var handname = "Left" if hand else "Right"
-	if triggermode == "XRHandModifier":
+	if triggermode == "XR":
 		get_node("XROrigin3D/"+handname+"TrackedHand").visible = true
 		get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = true
 		get_node("XROrigin3D/XRController3D"+handname).visible = false
 		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(false)
-	elif triggermode == "Autohands":
+	elif triggermode == "AH":
 		get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = false
 		get_node("XROrigin3D/"+handname+"TrackedHand").visible = false
 		get_node("XROrigin3D/XRController3D"+handname).visible = true
 		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(true)
+	get_node("XROrigin3D/XRController3D"+handname).trigger_haptic_pulse("haptic", 0, 1.0, 0.25, 0)
+	
