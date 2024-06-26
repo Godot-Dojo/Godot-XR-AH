@@ -24,6 +24,7 @@ func _process(delta):
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
 
+var Dvr = true
 func triggerfingerbutton(hand):
 	var handname = "Left" if hand == 0 else "Right"
 	var displayoption = get_node("XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh/SubViewport/FlatDisplay/HandDisplay%d" % hand)
@@ -40,4 +41,45 @@ func triggerfingerbutton(hand):
 		get_node("XROrigin3D/XRController3D"+handname).visible = true
 		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(true)
 	get_node("XROrigin3D/XRController3D"+handname).trigger_haptic_pulse("haptic", 0, 1.0, 0.25, 0)
+
+#	if Dvr:
+#		switch_to_ar()
+#		Dvr = false
+#	else:
+#		switch_to_vr()
+#		Dvr = true
+
 	
+@onready var viewport : Viewport = get_viewport()
+@onready var environment : Environment = $WorldEnvironment.environment
+func switch_to_ar() -> bool:
+	var xr_interface: XRInterface = XRServer.primary_interface
+	if xr_interface:
+		var modes = xr_interface.get_supported_environment_blend_modes()
+		if XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND in modes:
+			xr_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND
+			viewport.transparent_bg = true
+		elif XRInterface.XR_ENV_BLEND_MODE_ADDITIVE in modes:
+			xr_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ADDITIVE
+			viewport.transparent_bg = false
+	else:
+		return false
+
+	environment.background_mode = Environment.BG_COLOR
+	environment.background_color = Color(0.0, 0.0, 0.0, 0.0)
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	return true
+
+func switch_to_vr() -> bool:
+	var xr_interface: XRInterface = XRServer.primary_interface
+	if xr_interface:
+		var modes = xr_interface.get_supported_environment_blend_modes()
+		if XRInterface.XR_ENV_BLEND_MODE_OPAQUE in modes:
+			xr_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_OPAQUE
+		else:
+			return false
+
+	viewport.transparent_bg = false
+	environment.background_mode = Environment.BG_SKY
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_BG
+	return true

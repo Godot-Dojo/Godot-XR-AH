@@ -139,7 +139,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 [node name="LeftTrackedHand" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.201679, 1.78448, -0.284881)
 visible = false
-tracker = &"left_hand"
+tracker = &"/user/hand_tracker/left"
 show_when_tracked = true
 
 [node name="LeftHandHumanoid2" parent="XROrigin3D/LeftTrackedHand" instance=ExtResource("7_qbuxi")]
