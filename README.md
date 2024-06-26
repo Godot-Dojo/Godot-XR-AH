@@ -1,5 +1,5 @@
 # Godot-XR-AH
-Godot XR Auto Hand - addon
+Godot XR Auto Hand addon. (A flexible and accurate implementation.)
 
 ## Installation
 
@@ -8,7 +8,7 @@ or use the AssetLib to install it.
 
 ## To Use
 
-This addon should automatically enable hand tracking on all of the hand assets used in the 
+This addon automatically enables hand tracking on the hand models used in the 
 [godot-xr-tools](https://github.com/GodotVR/godot-xr-tools) addon library.  
 Simply instantiate an AutoHand scene under the XRController3Ds or the 
 hand objects themselves and this library will take over the animation of 
@@ -30,9 +30,24 @@ them to conform and fit to these joint locations.  Experimental Options are
 exported (`applymiddlefingerfix`, `coincidewristorknuckle`, etc) to help understand 
 factors that go into this calculation.
 
+## Comparison to XRHandModifier3D
+
+This library predates and replicates the hand tracking features implemented 
+in Godot 4.3 that depend on an `XRNode3D` set to use `user/hand_tracker/...` 
+containing a special Z-aligned `Skeleton3D`  
+containing an `XRHandModifier3D` node.
+See the documentation [here](https://docs.godotengine.org/en/latest/tutorials/xr/openxr_hand_tracking.html)
+
+There are differences, and demo project allows you to switch between these 
+two implementations by touching the yellow sphere with your index fingers.  
+In particular, since the bone lengths are ignored (the distance between the 
+joints) and only the bone orientations are read and set, the fingertips are 
+misplaced if your hands don't match the base model's dimensions exactly.
+
+
 ## Hand signal generation
 
-Hand tracking can't do much on its own (except look cool) unless you can 
+Hand tracking can't do anything on its own without the capability to  
 generate the equivalent of button presses and joystick motions from the 
 finger gestures.
 
@@ -68,4 +83,3 @@ These are reversed by default as they appear on the controllers due to the
 convention of using the A button for jumping up.
 
 * Stick click.  We don't have a gesture for this.  Possibly curling the little finger.
-
