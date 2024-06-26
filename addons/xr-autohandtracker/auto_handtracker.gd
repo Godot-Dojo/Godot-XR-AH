@@ -314,5 +314,3 @@ func _process(delta):
 		if xr_aimpose != null and $AutoTracker.autotrackeractive:
 			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
-
-

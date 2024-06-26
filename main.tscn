@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=25 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://bufelcry36rw1" path="res://addons/xr-autohandtracker/auto_handtracker.tscn" id="3_7v2m6"]
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" path="res://HandJoints.gd" id="4_eaqi8"]
+[ext_resource type="PackedScene" uid="uid://chd0t404yk7ws" path="res://oxr_compatible_hands/LeftHandHumanoid.gltf" id="7_qbuxi"]
+[ext_resource type="PackedScene" uid="uid://clmflmidvs4bx" path="res://oxr_compatible_hands/RightHandHumanoid.gltf" id="8_alnal"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -81,7 +83,7 @@ environment = SubResource("Environment_0xu52")
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.89138, 0)
 
 [node name="XRController3DLeft" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.169555, 1.69177, -0.268697)
@@ -134,9 +136,29 @@ visible = false
 mesh = SubResource("BoxMesh_yct16")
 surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
+[node name="LeftTrackedHand" type="XRNode3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.201679, 1.78448, -0.284881)
+tracker = &"/user/hand_tracker/left"
+show_when_tracked = true
+
+[node name="LeftHandHumanoid2" parent="XROrigin3D/LeftTrackedHand" instance=ExtResource("7_qbuxi")]
+
+[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2/LeftHandHumanoid/Skeleton3D" index="1"]
+
+[node name="RightTrackedHand" type="XRNode3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.234468, 1.76984, -0.387242)
+tracker = &"/user/hand_tracker/right"
+
+[node name="RightHandHumanoid2" parent="XROrigin3D/RightTrackedHand" instance=ExtResource("8_alnal")]
+
+[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/RightTrackedHand/RightHandHumanoid2/RightHandHumanoid/Skeleton3D" index="1"]
+hand_tracker = &"/user/hand_tracker/right"
+
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
 
 [editable path="XROrigin3D/XRController3DLeft/Hand_low_L"]
 [editable path="XROrigin3D/XRController3DRight/Hand_low_R"]
+[editable path="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2"]
+[editable path="XROrigin3D/RightTrackedHand/RightHandHumanoid2"]

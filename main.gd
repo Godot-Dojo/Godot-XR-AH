@@ -24,3 +24,19 @@ func _process(delta):
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
 
+
+func triggerfingerbutton(hand):
+	var displayoption = $XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh/SubViewport/FlatDisplay/DisplayOption
+	displayoption.selected = displayoption.selected + 1 if displayoption.selected < displayoption.item_count - 1 else 0
+	var triggermode = displayoption.get_item_text(displayoption.selected)
+	var handname = "Left" if hand else "Right"
+	if triggermode == "XRHandModifier":
+		get_node("XROrigin3D/"+handname+"TrackedHand").visible = true
+		get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = true
+		get_node("XROrigin3D/XRController3D"+handname).visible = false
+		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(false)
+	elif triggermode == "Autohands":
+		get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = false
+		get_node("XROrigin3D/"+handname+"TrackedHand").visible = false
+		get_node("XROrigin3D/XRController3D"+handname).visible = true
+		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(true)
