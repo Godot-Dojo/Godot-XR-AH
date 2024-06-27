@@ -1,4 +1,4 @@
-# Godot XR Auto Hand - addon
+# Godot Auto Hand addon
 
 Adds hand tracking to any godot-xr-tools based XR game by animating the 
 fingers to fit with the hand assets and generating button controller 
@@ -15,14 +15,15 @@ Demo is included in the top level, as well as a precompiled APK suitable for the
 
 ## To Use
 
-This addon should automatically enable hand tracking on all of the hand assets used in the 
+This addon automatically enables hand tracking on the hand models found in the 
 [godot-xr-tools](https://github.com/GodotVR/godot-xr-tools) addon library.  
 Simply instantiate an AutoHand scene under the XRController3Ds or the 
 hand objects themselves and this library will take over the animation of 
 the fingers when hand tracking is used.
 
-Uses only the OpenXR hand tracking API function calls made available in Godot4.2.
-Tested on the Quest2.  **Don't forget to enable hand tracking 
+This addon does not depend on `godot-xr-tools` since it uses only the OpenXR hand tracking 
+API function calls made available in Godot4.2.
+Tested on the Quest2 and Pico4.  **Don't forget to enable hand tracking 
 when you export the project**.
 
 ## Hand finger animation
@@ -37,9 +38,23 @@ them to conform and fit to these joint locations.  Experimental options
 (*applymiddlefingerfix*, *coincidewristorknuckle*, etc) are available to help understand 
 the factors that go into this calculation.
 
-## Hand signal generation
+## Comparison to XRHandModifier3D
 
-Hand tracking can't do much on its own (except look cool) unless you can 
+This library predates and replicates the hand tracking features implemented 
+in Godot 4.3 that depend on an `XRNode3D` set to `user/hand_tracker/...` 
+containing a special Z-aligned `Skeleton3D`  
+containing an `XRHandModifier3D` node.
+See the documentation [here](https://docs.godotengine.org/en/latest/tutorials/xr/openxr_hand_tracking.html)
+
+There are differences, and demo project allows you to switch between these 
+two implementations for comparison by touching the yellow sphere with your index fingers.  
+XRHandModifier3D ignores bone lengths (the distance between the 
+joints) and only the bone orientations are read and set, so your fingertips are 
+mis-aligned if your hands don't match the base model's dimensions exactly.
+
+## Hand action signals
+
+Hand tracking can't do anything on its own without the capability to  
 generate the equivalent of button presses and joystick motions from the 
 finger gestures.
 

@@ -12,12 +12,12 @@ config_version=5
 
 config/name="Godot-xr-ah"
 run/main_scene="res://main.tscn"
-config/features=PackedStringArray("4.2", "Mobile")
+config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.svg"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godotopenxr/plugin.cfg")
+enabled=PackedStringArray()
 
 [rendering]
 
@@ -27,6 +27,7 @@ textures/vram_compression/import_etc2_astc=true
 [xr]
 
 openxr/enabled=true
+openxr/environment_blend_mode=2
 openxr/foveation_level=1
 openxr/foveation_dynamic=true
 shaders/enabled=true

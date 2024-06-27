@@ -6,15 +6,32 @@ anchors_preset = 0
 offset_right = 1148.0
 offset_bottom = 643.0
 
-[node name="ColorRect" type="ColorRect" parent="."]
-visible = false
+[node name="PlayAreaRect" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
-offset_left = 484.0
-offset_top = 20.0
-offset_right = 584.0
-offset_bottom = 120.0
-color = Color(0.305882, 1, 1, 1)
+offset_left = 313.0
+offset_top = 17.0
+offset_right = 546.0
+offset_bottom = 142.0
+color = Color(0, 0.583158, 0.584188, 1)
+
+[node name="PlayArea" type="Polygon2D" parent="PlayAreaRect"]
+self_modulate = Color(0.522932, 0.649037, 0.839479, 1)
+position = Vector2(50, 50)
+scale = Vector2(50, 50)
+polygon = PackedVector2Array(-0.6, 0, 0, 0.6, 0.6, 0, 0, -0.6)
+
+[node name="ColorRect" type="ColorRect" parent="PlayAreaRect/PlayArea"]
+offset_left = -0.05
+offset_top = -0.05
+offset_right = 0.05
+offset_bottom = 0.05
+color = Color(0.992157, 0.847059, 0.12549, 1)
+
+[node name="HeadCam" type="Polygon2D" parent="PlayAreaRect/PlayArea"]
+position = Vector2(-0.2, 0)
+color = Color(0.839519, 0.0643854, 0.282991, 1)
+polygon = PackedVector2Array(0, 0, 0.04, 0.1, -0.04, 0.1)
 
 [node name="VBoxTrackers0" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -59,6 +76,21 @@ offset_right = 289.0
 offset_bottom = 235.0
 value = 20.0
 
+[node name="TrackingSource0" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 228.0
+offset_top = 243.0
+offset_right = 339.0
+offset_bottom = 274.0
+disabled = true
+selected = 0
+item_count = 3
+popup/item_0/text = "Unknown"
+popup/item_1/text = "Hand"
+popup/item_1/id = 1
+popup/item_2/text = "Controller"
+popup/item_2/id = 2
+
 [node name="VSlider1trigger" type="VSlider" parent="."]
 layout_mode = 2
 offset_left = 567.0
@@ -74,6 +106,21 @@ offset_top = 20.0
 offset_right = 637.0
 offset_bottom = 235.0
 value = 20.0
+
+[node name="TrackingSource1" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 556.0
+offset_top = 245.0
+offset_right = 667.0
+offset_bottom = 276.0
+disabled = true
+selected = 0
+item_count = 3
+popup/item_0/text = "Unknown"
+popup/item_1/text = "Hand"
+popup/item_1/id = 1
+popup/item_2/text = "Controller"
+popup/item_2/id = 2
 
 [node name="Thumbstick0" type="ColorRect" parent="."]
 layout_mode = 0
@@ -106,3 +153,27 @@ offset_top = 10.0
 offset_right = 70.0
 offset_bottom = 20.0
 color = Color(1, 0.588235, 0.988235, 1)
+
+[node name="HandDisplay0" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 353.0
+offset_top = 247.0
+offset_right = 408.0
+offset_bottom = 278.0
+selected = 0
+item_count = 2
+popup/item_0/text = "AH"
+popup/item_1/text = "XR"
+popup/item_1/id = 1
+
+[node name="HandDisplay1" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 471.0
+offset_top = 248.0
+offset_right = 526.0
+offset_bottom = 279.0
+selected = 0
+item_count = 2
+popup/item_0/text = "AH"
+popup/item_1/text = "XR"
+popup/item_1/id = 1

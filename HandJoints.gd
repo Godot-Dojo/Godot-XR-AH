@@ -26,8 +26,6 @@ var buttonsignalnames = [
 	"by_touch", "by_button",
 ]
 
-
-
 const stickradius = 0.01
 static func sticktransformB(j1, j2):
 	var v = j2 - j1
@@ -45,6 +43,8 @@ static func sticktransformB(j1, j2):
 
 # Set up the displayed axes for each hand and each joint of the hand 
 func _ready():
+	play_area_changed(-1)
+
 	var axes3dscene = load("res://axes3d.tscn")
 	var stickscene = load("res://stick.tscn")
 	
@@ -94,7 +94,6 @@ func _ready():
 		controller.input_vector2_changed.connect(_input_vector2_changed.bind(hand))
 
 
-
 func _button_signal(name, hand, pressed):
 	var buttonsig = flat_display.get_node_or_null("VBoxTrackers%d/%s" % [ hand, name ])
 	if buttonsig:
@@ -117,10 +116,32 @@ func _input_vector2_changed(name, vector, hand):
 		print("inputvector2changed ", hand, " ", name, " ", vector)
 	#print("inputvector2changed ", name)  # it's always primary
 
+func play_area_changed(mode):
+	print(" play_area_changed ", mode)
+	var playareapoly = flat_display.get_node("PlayAreaRect/PlayArea")
+	var poly = [ ]
+	var xr = 0 
+	var yr = 0
+	var xrplayarea = xr_interface.get_play_area() if xr_interface else null
+	if not xrplayarea:
+		xrplayarea = [ Vector3(-0.6,0,0), Vector3(0,0,0.6), Vector3(0.6,0,0), Vector3(0,0,-0.6)]
+	for p in xrplayarea:
+		xr = max(xr, abs(p.x)); 
+		yr = max(yr, abs(p.z))
+		poly.append(Vector2(p.x, -p.z))
+	var rectsize = playareapoly.get_parent().size
+	var sca = min(rectsize.x/(0.1 + 2*xr), rectsize.y/(0.1 + 2*yr))
+	playareapoly.scale = Vector2(sca, sca)
+	playareapoly.position = rectsize/2
+	playareapoly.polygon = PackedVector2Array(poly)
+
+
 # Get the trackers once the interface has been initialized
 func set_xr_interface(lxr_interface : OpenXRInterface):
 	# wire up the signals from the hand trackers
 	xr_interface = lxr_interface
+	xr_interface.play_area_changed.connect(play_area_changed)
+	play_area_changed(xr_interface.xr_play_area_mode)
 		
 	# reset the position of the 2D information panel 3 times in the first 15 seconds
 	for t in range(3):
@@ -129,6 +150,7 @@ func set_xr_interface(lxr_interface : OpenXRInterface):
 		$FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))
 
 
+var prevdistancefingerbuttondepressed = false
 func _process(delta):
 	if xr_interface != null:
 		for hand in range(2):
@@ -141,7 +163,25 @@ func _process(delta):
 				joint2d.get_node("UntrackedMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_TRACKED)
 				joint2d.transform.basis = Basis(xr_interface.get_hand_joint_rotation(hand, j))*0.013
 
+		var fingerbuttonpos = get_parent().global_transform.inverse()*$FrontOfPlayer/FingerButton.global_transform.origin
+		var distancefingerbuttonL = fingerbuttonpos.distance_to(xr_interface.get_hand_joint_position(0, OpenXRInterface.HAND_JOINT_INDEX_TIP))
+		var distancefingerbuttonR = fingerbuttonpos.distance_to(xr_interface.get_hand_joint_position(1, OpenXRInterface.HAND_JOINT_INDEX_TIP))
+		var distancefingerbutton = min(distancefingerbuttonL, distancefingerbuttonR)
+		if (distancefingerbutton < 0.02) and not prevdistancefingerbuttondepressed:
+			prevdistancefingerbuttondepressed = true
+			get_parent().get_parent().triggerfingerbutton(0 if distancefingerbuttonL < distancefingerbuttonR else 1)
+			$FrontOfPlayer/FingerButton/Touched.visible = true
+		elif distancefingerbutton > 0.03 and prevdistancefingerbuttondepressed:
+			prevdistancefingerbuttondepressed = false
+			$FrontOfPlayer/FingerButton/Touched.visible = false
+		
+		var headtransform = get_node("../XRCamera3D").transform	
+		flat_display.get_node("PlayAreaRect/PlayArea/HeadCam").position = Vector2(-headtransform.origin.x, -headtransform.origin.z)
+		flat_display.get_node("PlayAreaRect/PlayArea/HeadCam").rotation = Vector2(headtransform.basis.z.z, -headtransform.basis.z.x).angle()
+		flat_display.get_node("TrackingSource0").selected = get_node("../XRController3DLeft/AutoHandtracker").handtrackingsource
+		flat_display.get_node("TrackingSource1").selected = get_node("../XRController3DRight/AutoHandtracker").handtrackingsource
 
+		
 var flatlefthandjointsfromwrist = [
 	Vector3(0.000861533, -0.0012695, -0.0477441), Vector3(0, 0, 0), Vector3(0.0315846, -0.0131271, -0.0329833), Vector3(0.0545926, -0.0174885, -0.0554602), 
 	Vector3(0.0757424, -0.0190563, -0.0816979), Vector3(0.0965827, -0.0188126, -0.0947297), Vector3(0.0204946, -0.00802441, -0.0356591), 
