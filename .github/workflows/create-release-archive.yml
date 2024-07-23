@@ -1,0 +1,44 @@
+name: Create Release Archive
+
+on:
+  push:
+    # Only run this workflow if github.ref_name has the form "x.y.z".
+    tags: ["v*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+        # Repository name, with owner name removed using sed (Stream Editor).
+        # Example: "octocat/octorepo" is converted to "octorepo".
+      - name: Repository Name
+        run: echo REPOSITORY=`echo ${{ github.repository }} | sed s'#.*/\(.*\)#\1#'` >> "$GITHUB_ENV"
+
+        # Example: octorepo-1.2.3-full_repository
+      - name: Archive Name
+        run: echo ARCHIVE="$REPOSITORY"-"${{ github.ref_name }}"-full_repository >> "$GITHUB_ENV"
+
+        # Example: octorepo-1.2.3-full_repository.zip
+      - name: Make Archive
+        run: |
+          # Create subdirectory, which will be archive's top level directory.
+          mkdir "$ARCHIVE"
+
+          # Copy desired files into subdirectory, excluding the subdirectory itself.
+          # rsync is used because it has an --exclude option.
+          rsync --archive --exclude={"$ARCHIVE",.git,.github} . "$ARCHIVE"
+
+          # Make archive from subdirectory.
+          zip --recurse-paths "$ARCHIVE".zip "$ARCHIVE"
+
+      - name: Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: '*.zip'
+

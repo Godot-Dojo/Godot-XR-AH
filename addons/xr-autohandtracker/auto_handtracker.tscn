@@ -88,6 +88,7 @@ mesh = SubResource("BoxMesh_h2ysa")
 surface_material_override/0 = SubResource("StandardMaterial3D_kb47o")
 
 [node name="AutoTracker" type="Node3D" parent="."]
+visible = false
 script = ExtResource("3_6kyde")
 
 [node name="DragRod" type="MeshInstance3D" parent="AutoTracker"]

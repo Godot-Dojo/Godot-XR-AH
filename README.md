@@ -101,4 +101,3 @@ by the filtering applied to the aim pose to stabilize it.
 A demo suitable for the Meta Quest is available at: https://github.com/Godot-Dojo/Godot-XR-AH/releases/tag/v0.9
 
 ![image](https://github.com/Godot-Dojo/Godot-XR-AH/assets/677254/ddaff4ac-56b6-4530-a00a-f2e446b46d67)
-
