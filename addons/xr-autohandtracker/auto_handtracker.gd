@@ -37,8 +37,8 @@ var handtrackingactive = false
 var handtracker_name : String
 
 # readings from OpenXR interface that can be pre-calculated by OpenXRHandData
-var Roxrjps = [ ]
-var Roxrjrot = [ ]
+var oxrktrans = [ ]
+var oxrktrans_updated = false
 
 # Copied out from OpenXRInterface.HandTrackedSource so it works on v4.2
 const HAND_TRACKED_SOURCE_UNKNOWN = 0
@@ -178,6 +178,10 @@ func findxrtrackerobjects():
 
 
 func _ready():
+	for j in range(OpenXRInterface.HAND_JOINT_MAX):
+		oxrktrans.push_back(Transform3D())
+	oxrktrans_updated = false
+
 	findxrnodes()
 	findxrtrackerobjects()
 
@@ -207,6 +211,11 @@ func fixmiddlefingerpositions(oxrjps):
 	for j in [ OpenXRInterface.HAND_JOINT_MIDDLE_TIP, OpenXRInterface.HAND_JOINT_RING_TIP ]:
 		var b = xr_handtracker.get_hand_joint_transform(j).basis
 		oxrjps[j] += -0.01*b.y + 0.005*b.z
+
+func update_oxrktrans():
+	for j in range(OpenXRInterface.HAND_JOINT_MAX):
+		oxrktrans[j] = xr_handtracker.get_hand_joint_transform(j)
+
 
 func calchandnodetransform(oxrjps, xrt):
 	# solve for handnodetransform where
@@ -280,7 +289,8 @@ func process_handtrackingsource():
 	if xr_handtracker == null:
 		xr_handtracker = XRServer.get_tracker(handtracker_name)
 		if xr_handtracker == null:
-			return false
+			handtrackingactive = false
+			return
 			
 	var lhandtrackingsource = xr_handtracker.get_hand_tracking_source()
 	handwristjointvalid = ((xr_handtracker.get_hand_joint_flags(OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
@@ -299,27 +309,34 @@ func process_handtrackingsource():
 			if $AutoTracker.autotrackeractive:
 				$AutoTracker.deactivateautotracker(xr_controller_node, xr_controllertracker)
 			handnode.transform = Transform3D()
-	return handtrackingactive and handwristjointvalid
 	
 func _process(delta):
-	if process_handtrackingsource():
-		var oxrjps = getoxrjointpositions()
-		var xrt = xr_origin.global_transform
-		if $AutoTracker.autotrackeractive:
-			$AutoTracker.autotrackgestures(oxrjps, xrt, xr_camera_node)
-		if applymiddlefingerfix:
-			fixmiddlefingerpositions(oxrjps)
-		var handnodetransform = calchandnodetransform(oxrjps, xrt)
-		var fingerbonetransformsOut = calcboneposes(oxrjps, handnodetransform, xrt)
-		handnode.transform = handnodetransform
-		copyouttransformstoskel(fingerbonetransformsOut)
-		if visible and $VisibleHandTrackSkeleton.visible:
-			var oxrjrot = getoxrjointrotations()
-			$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrjps, oxrjrot, xrt)
+	if not oxrktrans_updated:
+		process_handtrackingsource()
+	if not (handtrackingactive and handwristjointvalid):
+		return
+	if not oxrktrans_updated:
+		update_oxrktrans()
+		oxrktrans_updated = true
 
-		if xr_aimpose == null:
-			xr_aimpose = xr_controllertracker.get_pose("aim")
-			print("...xr_aimpose ", xr_aimpose)
-		if xr_aimpose != null and $AutoTracker.autotrackeractive:
-			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
+	var oxrjps = getoxrjointpositions()
+	var xrt = xr_origin.global_transform
+	if $AutoTracker.autotrackeractive:
+		$AutoTracker.autotrackgestures(oxrjps, xrt, xr_camera_node)
+	if applymiddlefingerfix:
+		fixmiddlefingerpositions(oxrjps)
+	var handnodetransform = calchandnodetransform(oxrjps, xrt)
+	var fingerbonetransformsOut = calcboneposes(oxrjps, handnodetransform, xrt)
+	handnode.transform = handnodetransform
+	copyouttransformstoskel(fingerbonetransformsOut)
+	if visible and $VisibleHandTrackSkeleton.visible:
+		var oxrjrot = getoxrjointrotations()
+		$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrjps, oxrjrot, xrt)
+
+	if xr_aimpose == null:
+		xr_aimpose = xr_controllertracker.get_pose("aim")
+		print("...xr_aimpose ", xr_aimpose)
+	if xr_aimpose != null and $AutoTracker.autotrackeractive:
+		$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
+	oxrktrans_updated = false

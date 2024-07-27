@@ -153,7 +153,7 @@ func set_xr_interface(lxr_interface : OpenXRInterface):
 var prevdistancefingerbuttondepressed = false
 func _process(delta):
 	if xr_interface != null:
-		var fingerbuttonposLR = [ ]
+		var fingerbuttonposLR = [ Vector3(), Vector3() ]
 		for hand in range(2):
 			var LRd = "L%d" if hand == 0 else "R%d"
 			var handtracker_name = "/user/hand_tracker/left" if hand == 0 else "/user/hand_tracker/right"
@@ -166,7 +166,7 @@ func _process(delta):
 					joint2d.get_node("InvalidMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_VALID)
 					joint2d.get_node("UntrackedMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_TRACKED)
 					joint2d.transform.basis = xr_handtracker.get_hand_joint_transform(j).basis*0.013
-				fingerbuttonposLR.push_back(xr_handtracker.get_hand_joint_transform(OpenXRInterface.HAND_JOINT_INDEX_TIP).origin)
+				fingerbuttonposLR[hand] = xr_handtracker.get_hand_joint_transform(OpenXRInterface.HAND_JOINT_INDEX_TIP).origin
 				
 		var fingerbuttonpos = get_parent().global_transform.inverse()*$FrontOfPlayer/FingerButton.global_transform.origin
 		var distancefingerbuttonL = fingerbuttonpos.distance_to(fingerbuttonposLR[0])
