@@ -1,7 +1,8 @@
-[gd_scene load_steps=25 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=26 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
+[ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
 [ext_resource type="PackedScene" uid="uid://v6bvkjtwp1cp" path="res://Hand_low_R.gltf" id="3_5ae0k"]
 [ext_resource type="PackedScene" uid="uid://bufelcry36rw1" path="res://addons/xr-autohandtracker/auto_handtracker.tscn" id="3_7v2m6"]
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
@@ -84,6 +85,8 @@ environment = SubResource("Environment_0xu52")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.89138, 0)
+
+[node name="OpenXRHandData" parent="XROrigin3D" instance=ExtResource("2_hw7j7")]
 
 [node name="XRController3DLeft" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.169555, 1.69177, -0.268697)

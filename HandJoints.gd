@@ -153,19 +153,24 @@ func set_xr_interface(lxr_interface : OpenXRInterface):
 var prevdistancefingerbuttondepressed = false
 func _process(delta):
 	if xr_interface != null:
+		var fingerbuttonposLR = [ Vector3(), Vector3() ]
 		for hand in range(2):
 			var LRd = "L%d" if hand == 0 else "R%d"
-			for j in range(OpenXRInterface.HAND_JOINT_MAX):
-				var jointradius = xr_interface.get_hand_joint_radius(hand, j)
-				var handjointflags = xr_interface.get_hand_joint_flags(hand, j);
-				var joint2d = joints2D.get_node(LRd % j)
-				joint2d.get_node("InvalidMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_VALID)
-				joint2d.get_node("UntrackedMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_TRACKED)
-				joint2d.transform.basis = Basis(xr_interface.get_hand_joint_rotation(hand, j))*0.013
-
+			var handtracker_name = "/user/hand_tracker/left" if hand == 0 else "/user/hand_tracker/right"
+			var xr_handtracker = XRServer.get_tracker(handtracker_name)
+			if xr_handtracker != null:
+				for j in range(OpenXRInterface.HAND_JOINT_MAX):
+					var jointradius = xr_handtracker.get_hand_joint_radius(j)
+					var handjointflags = xr_handtracker.get_hand_joint_flags(j);
+					var joint2d = joints2D.get_node(LRd % j)
+					joint2d.get_node("InvalidMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_VALID)
+					joint2d.get_node("UntrackedMesh").visible = not (handjointflags & OpenXRInterface.HAND_JOINT_POSITION_TRACKED)
+					joint2d.transform.basis = xr_handtracker.get_hand_joint_transform(j).basis*0.013
+				fingerbuttonposLR[hand] = xr_handtracker.get_hand_joint_transform(OpenXRInterface.HAND_JOINT_INDEX_TIP).origin
+				
 		var fingerbuttonpos = get_parent().global_transform.inverse()*$FrontOfPlayer/FingerButton.global_transform.origin
-		var distancefingerbuttonL = fingerbuttonpos.distance_to(xr_interface.get_hand_joint_position(0, OpenXRInterface.HAND_JOINT_INDEX_TIP))
-		var distancefingerbuttonR = fingerbuttonpos.distance_to(xr_interface.get_hand_joint_position(1, OpenXRInterface.HAND_JOINT_INDEX_TIP))
+		var distancefingerbuttonL = fingerbuttonpos.distance_to(fingerbuttonposLR[0])
+		var distancefingerbuttonR = fingerbuttonpos.distance_to(fingerbuttonposLR[1])
 		var distancefingerbutton = min(distancefingerbuttonL, distancefingerbuttonR)
 		if (distancefingerbutton < 0.02) and not prevdistancefingerbuttondepressed:
 			prevdistancefingerbuttondepressed = true
