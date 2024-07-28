@@ -150,6 +150,7 @@ func set_xr_interface(lxr_interface : OpenXRInterface):
 		$FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))
 
 
+
 var prevdistancefingerbuttondepressed = false
 func _process(delta):
 	if xr_interface != null:

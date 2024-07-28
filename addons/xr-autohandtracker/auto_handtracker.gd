@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 
 # Settings that can be changed dynamically in the debugger to 
@@ -32,11 +33,12 @@ var xr_camera_node : XRCamera3D = null
 var hand : OpenXRInterface.Hand
 var tracker_name : String 
 var handtrackingsource = HAND_TRACKED_SOURCE_UNKNOWN
-var handwristjointvalid = false
-var handtrackingactive = false
 var handtracker_name : String
 
 # readings from OpenXR interface that can be pre-calculated by OpenXRHandData
+var handtrackingactive = false
+var handtrackingvalid = false
+var oxrktransRaw = [ ]
 var oxrktrans = [ ]
 var oxrktrans_updated = false
 
@@ -102,23 +104,24 @@ func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
 	print("_xr_controller_node_tracking_changed ", xr_pose.name if xr_pose else "<none>")
 
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings := PackedStringArray()
+	if not (get_parent() is XRController3D):
+		warnings.append("This node must be a child of an XRController3D node")
+	return warnings
 
 func findxrnodes():
-	# first go up the tree to find the controller and origin
-	var nd = self
-	while nd != null and not (nd is XRController3D):
-		nd = nd.get_parent()
-	if nd == null:
-		print("Warning, no controller node detected")
+	var nd = get_parent()
+	if not (nd is XRController3D):
+		push_error("Autohand not a child of XRController3D")
 		return false
 	xr_controller_node = nd
 	tracker_nhand = xr_controller_node.get_tracker_hand()
 	tracker_name = xr_controller_node.tracker
 	xr_controller_node.tracking_changed.connect(_xr_controller_node_tracking_changed)
-	while nd != null and not (nd is XROrigin3D):
-		nd = nd.get_parent()
-	if nd == null:
-		print("Warning, no xrorigin node detected")
+	nd = nd.get_parent()
+	if not (nd is XROrigin3D):
+		push_error("XRController3D not child of XROrigin3D")
 		return false
 	xr_origin = nd
 
@@ -179,6 +182,7 @@ func findxrtrackerobjects():
 
 func _ready():
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
+		oxrktransRaw.push_back(Transform3D())
 		oxrktrans.push_back(Transform3D())
 	oxrktrans_updated = false
 
@@ -199,10 +203,9 @@ func fixmiddlefingerpositions(oxrktrans):
 		var b = oxrktrans[j].basis
 		oxrktrans[j].origin += -0.01*b.y + 0.005*b.z
 
-func update_oxrktrans():
+func update_oxrktransRaw():
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
-		oxrktrans[j] = xr_handtracker.get_hand_joint_transform(j)
-
+		oxrktransRaw[j] = xr_handtracker.get_hand_joint_transform(j)
 
 func calchandnodetransform(oxrktrans, xrt):
 	# solve for handnodetransform where
@@ -265,6 +268,7 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 		for i in range(len(fingerboneindexes[f])):
 			var ix = fingerboneindexes[f][i]
 			var t = fingerbonetransformsOut[f][i]
+			assert (ix >= 0 and ix < skel.get_bone_count())
 			skel.set_bone_pose_rotation(ix, t.basis.get_rotation_quaternion())
 			if not applyscaling:
 				t = fingerboneresttransforms[f][i]
@@ -276,10 +280,10 @@ func process_handtrackingsource():
 		xr_handtracker = XRServer.get_tracker(handtracker_name)
 		if xr_handtracker == null:
 			handtrackingactive = false
+			handtrackingvalid = false
 			return
 			
 	var lhandtrackingsource = xr_handtracker.get_hand_tracking_source()
-	handwristjointvalid = ((xr_handtracker.get_hand_joint_flags(OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
 	if handtrackingsource != lhandtrackingsource:
 		handtrackingsource = lhandtrackingsource
 		handtrackingactive = (handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED) or (controllersourcefingertracking and (handtrackingsource == HAND_TRACKED_SOURCE_CONTROLLER))
@@ -287,7 +291,7 @@ func process_handtrackingsource():
 		if handanimationtree:
 			handanimationtree.active = not handtrackingactive
 		print("setting hand tracking source "+str(hand)+": ", handtrackingsource)
-		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingactive
+		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingvalid
 		if handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED:
 			if enableautotracker:
 				$AutoTracker.activateautotracker(xr_controller_node)
@@ -295,14 +299,17 @@ func process_handtrackingsource():
 			if $AutoTracker.autotrackeractive:
 				$AutoTracker.deactivateautotracker(xr_controller_node, xr_controllertracker)
 			handnode.transform = Transform3D()
+	handtrackingvalid = handtrackingactive and ((xr_handtracker.get_hand_joint_flags(OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
 	
 func _process(delta):
 	if not oxrktrans_updated:
 		process_handtrackingsource()
-	if not (handtrackingactive and handwristjointvalid):
+	if not handtrackingvalid:
 		return
 	if not oxrktrans_updated:
-		update_oxrktrans()
+		update_oxrktransRaw()
+		for j in range(OpenXRInterface.HAND_JOINT_MAX):
+			oxrktrans[j] = oxrktransRaw[j]
 		oxrktrans_updated = true
 
 	var xrt = xr_origin.global_transform
@@ -315,9 +322,9 @@ func _process(delta):
 	handnode.transform = handnodetransform
 	copyouttransformstoskel(fingerbonetransformsOut)
 	if visible and $VisibleHandTrackSkeleton.visible:
-		$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrktrans, xrt)
+		$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrktransRaw, xrt)
 
-	if xr_aimpose == null:
+	if xr_aimpose == null and xr_controllertracker != null:
 		xr_aimpose = xr_controllertracker.get_pose("aim")
 		print("...xr_aimpose ", xr_aimpose)
 	if xr_aimpose != null and $AutoTracker.autotrackeractive:

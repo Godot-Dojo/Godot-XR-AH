@@ -1,10 +1,68 @@
 extends Node
 
+var autohandleft = null
+var autohandright = null
+
 func _ready():
-	var autohands = get_tree().get_nodes_in_group("AutoHandGroup")
-	print("**** trackerws")
-	print(XRServer.get_trackers(127))
-	await get_tree().create_timer(5).timeout
-	print("**** trackerws2")
-	print(XRServer.get_trackers(127))
-	
+	for autohand in get_tree().get_nodes_in_group("AutoHandGroup"):
+		var tracker_name = autohand.get_parent().tracker
+		if tracker_name == "left_hand":
+			autohandleft = autohand
+		elif tracker_name == "right_hand":
+			autohandright = autohand
+		else:
+			print("unknown autohand ", autohand.tracker_name)
+			print("Make sure this hand data node is above the autohand in the scene tree")
+	var xr_interface = XRServer.find_interface("OpenXR")
+	set_process(autohandleft != null and autohandright != null and xr_interface != null)
+
+	if false:
+		await get_tree().create_timer(5).timeout
+		print("****")
+		print(var_to_str([autohandleft.oxrktrans, autohandright.oxrktrans]))
+		print("****")	
+
+var Dautohandspinchtrans = null
+var xpulloffset = -0.2
+func process_pinchpull_animation(delta):
+	xpulloffset += delta*0.06
+	var xrightoffs = max(0, xpulloffset)
+	for i in range(OpenXRInterface.HAND_JOINT_MAX):
+		autohandleft.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[0][i].basis, Dautohandspinchtrans[0][i].origin + Vector3(0.0, 1.1, -0.2))
+	autohandleft.oxrktrans_updated = true
+	autohandleft.handtrackingvalid = true
+	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
+	for i in range(OpenXRInterface.HAND_JOINT_MAX):
+		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(xrightoffs, 1.1, -0.18))
+	autohandright.oxrktrans_updated = true
+	autohandright.handtrackingvalid = true
+
+func process_rawtopull():
+	for i in range(OpenXRInterface.HAND_JOINT_MAX):
+		autohandright.oxrktrans[i] = autohandright.oxrktransRaw[i]
+		autohandleft.oxrktrans[i] = autohandleft.oxrktransRaw[i]
+
+
+func _process(delta):
+	if Dautohandspinchtrans != null:
+		process_pinchpull_animation(delta)
+		process_rawtopull()
+		return
+	autohandleft.process_handtrackingsource()
+	autohandright.process_handtrackingsource()
+	if autohandleft.handtrackingvalid:
+		autohandleft.update_oxrktransRaw()
+		autohandleft.oxrktrans_updated = true
+	if autohandright.handtrackingvalid:
+		autohandright.update_oxrktransRaw()
+		autohandright.oxrktrans_updated = true
+
+func _input(event):
+	if event is InputEventKey and event.is_pressed and event.keycode == KEY_P:
+		var file = FileAccess.open("res://data/handspinch.var", FileAccess.READ)
+		Dautohandspinchtrans = str_to_var(file.get_as_text())
+		xpulloffset = -0.2
+		autohandleft.get_node("VisibleHandTrackSkeleton").visible = true
+		autohandright.get_node("VisibleHandTrackSkeleton").visible = true
+		autohandleft.handnode.top_level = true
+		autohandright.handnode.top_level = true

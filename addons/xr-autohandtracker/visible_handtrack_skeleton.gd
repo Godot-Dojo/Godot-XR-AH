@@ -35,7 +35,6 @@ const knuckleradius = 0.01
 func updatevisiblehandskeleton(oxrktrans, xrt):
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
 		get_node("J%d" % j).global_transform = Transform3D(xrt.basis*oxrktrans[j].basis.scaled(Vector3(knuckleradius, knuckleradius, knuckleradius)), xrt*oxrktrans[j].origin)
-
 	for hjstick in hjsticks:
 		for i in range(0, len(hjstick)-1):
 			var j1 = hjstick[i]
