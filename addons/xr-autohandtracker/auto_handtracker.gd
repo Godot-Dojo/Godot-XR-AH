@@ -57,8 +57,11 @@ var handtoskeltransform
 var wristboneindex
 var wristboneresttransform
 var hstw
-var fingerboneindexes
-var fingerboneresttransforms
+
+var fingerboneindexes = [ ]
+var fingerboneresttransforms = [ ]
+var fingerbonescales = [ ]
+var bYalignedAxes = false
 
 static func basisfromA(a, v):
 	var vx = a.normalized()
@@ -79,6 +82,11 @@ static func rotationtoalignScaled(a, b):
 		return Basis(axis, angle_rads).scaled(Vector3(sca,sca,sca))
 	return Basis().scaled(Vector3(sca,sca,sca))
 
+#tIbasis = rotationtoalignScaled(fingerboneresttransforms[f][i+1].origin, mfg.affine_inverse()*kpositionsfip1 - atIorigin)
+#var tIorigin = mfg.affine_inverse()*kpositionsfip1 - tIbasis*fingerboneresttransforms[f][i+1].origin # should be 0
+#solve: 
+#	mfg.affine_inverse()*kpositionsfip1 = tIbasis*Vector3(0,l,0) 
+
 
 func extractrestfingerbones():
 	print(handnode.name)
@@ -87,8 +95,7 @@ func extractrestfingerbones():
 	wristboneindex = skel.find_bone("Wrist_" + lr)
 	wristboneresttransform = skel.get_bone_rest(wristboneindex)
 	hstw = handtoskeltransform * wristboneresttransform
-	fingerboneindexes = [ ]
-	fingerboneresttransforms = [ ]
+	assert (len(fingerboneindexes) == 0 and len(fingerboneresttransforms) == 0)
 	for f in ["Thumb", "Index", "Middle", "Ring", "Little"]:
 		fingerboneindexes.push_back([ ])
 		fingerboneresttransforms.push_back([ ])
@@ -97,7 +104,7 @@ func extractrestfingerbones():
 			var ix = skel.find_bone(name)
 			if ix != -1:
 				fingerboneindexes[-1].push_back(ix)
-				fingerboneresttransforms[-1].push_back(skel.get_bone_rest(ix) if ix != -1 else null)
+				fingerboneresttransforms[-1].push_back(skel.get_bone_rest(ix))
 			else:
 				assert (f == "Thumb" and b == "Intermediate")
 
@@ -218,7 +225,6 @@ func calchandnodetransform(oxrktrans, xrt):
 	#  so that avatarwristpos->avatarmiddleknucklepos is aligned along handwrist->handmiddleknuckle
 	#  and rotated so that the line between index and ring knuckles are in the same plane
 	
-	
 	# We want skel.global_transform*wristboneresttransform to have origin xrorigintransform*gg[OpenXRInterface.HAND_JOINT_WRIST].origin
 	var wristorigin = xrt*oxrktrans[OpenXRInterface.HAND_JOINT_WRIST].origin
 
@@ -264,6 +270,67 @@ func calcboneposes(oxrktrans, handnodetransform, xrt):
 			mfg = mfg*tI
 	return fingerbonetransformsOut
 
+static func rotationtoalignScaledInY(a, b, relfingerbonescale):
+	assert (is_zero_approx(a.x) and is_zero_approx(a.z))
+	var axis = a.cross(b).normalized()
+	var sca = b.length()/a.length()
+	var rot = Basis()
+	if (axis.length_squared() != 0):
+		var dot = a.dot(b)/(a.length()*b.length())
+		dot = clamp(dot, -1.0, 1.0)
+		var angle_rads = acos(dot)
+		rot = Basis(axis, angle_rads)
+	if relfingerbonescale == -1:
+		return rot
+	relfingerbonescale = sca
+	return rot.scaled(Vector3(relfingerbonescale,sca,relfingerbonescale))
+
+func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
+	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
+	for f in range(5):
+		var mfg = handnodetransform * hstw
+		# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
+		for i in range(len(fingerboneresttransforms[f])-1):
+			mfg = mfg*fingerboneresttransforms[f][i]
+			# (tIbasis,atIorigin)*fingerboneresttransforms[f][i+1]).origin = mfg.inverse()*kpositions[f][i+1]
+			# tIbasis*fingerboneresttransforms[f][i+1] = mfg.inverse()*kpositions[f][i+1] - atIorigin
+			var kpositionsfip1 = xrt*oxrktrans[carpallist[f] + i+1].origin
+			var bonerestvec = fingerboneresttransforms[f][i+1].origin
+			assert (is_zero_approx(bonerestvec.x) and is_zero_approx(bonerestvec.z))
+			var bonetargetvec = mfg.affine_inverse()*kpositionsfip1
+			var tIbasisUnscaled = rotationtoalignScaledInY(bonerestvec, bonetargetvec, -1)
+			var sca = bonetargetvec.length()/bonerestvec.length()
+			var relfingerbonescale = fingerbonescales[f][i+1]/fingerbonescales[f][i]
+			var tIscalebasis = Basis().scaled(Vector3(relfingerbonescale, sca, relfingerbonescale))
+			var tIbasis = tIbasisUnscaled*tIscalebasis
+			var tIorigin = mfg.affine_inverse()*kpositionsfip1 - tIbasis*bonerestvec # should be 0
+			var tI = Transform3D(tIbasis, tIorigin)
+			fingerbonetransformsOut[f][i] = fingerboneresttransforms[f][i]*tI
+			mfg = mfg*tI
+	return fingerbonetransformsOut
+
+
+
+func calcfingerbonescales(oxrktrans):
+	assert (len(fingerbonescales) == 0)
+	bYalignedAxes = true
+	for f in range(5):
+		fingerbonescales.push_back([ 1.0 ])
+		for i in range(len(fingerboneresttransforms[f])-1):
+			var restvec = fingerboneresttransforms[f][i+1].origin
+			if not is_zero_approx(restvec.x) or not is_zero_approx(restvec.z):
+				bYalignedAxes = false
+			var restlength = restvec.length()
+			var measuredlength = (oxrktrans[carpallist[f] + i+1].origin - oxrktrans[carpallist[f] + i].origin).length()
+			if measuredlength == 0.0:
+				fingerbonescales = [ ]
+				print("bad zero reading in calcfingerbonescales")
+				bYalignedAxes = false
+				return
+			fingerbonescales[-1].push_back(measuredlength/restlength)
+	prints("fingerbonescales", fingerbonescales)
+	prints("bYalignedAxes", bYalignedAxes)
+
 func copyouttransformstoskel(fingerbonetransformsOut):
 	for f in range(len(fingerboneindexes)):
 		for i in range(len(fingerboneindexes[f])):
@@ -292,7 +359,6 @@ func process_handtrackingsource():
 		if handanimationtree:
 			handanimationtree.active = not handtrackingactive
 		print("setting hand tracking source "+str(hand)+": ", handtrackingsource)
-		$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingvalid
 		if handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED:
 			if enableautotracker:
 				$AutoTracker.activateautotracker(xr_controller_node)
@@ -301,6 +367,7 @@ func process_handtrackingsource():
 				$AutoTracker.deactivateautotracker(xr_controller_node, xr_controllertracker)
 			handnode.transform = Transform3D()
 	handtrackingvalid = handtrackingactive and ((xr_handtracker.get_hand_joint_flags(OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
+	$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingvalid
 	
 func _process(delta):
 	if not oxrktransRaw_updated:
@@ -316,13 +383,16 @@ func _process(delta):
 		oxrktransRaw_updated = false
 		oxrktrans_updated = true
 
+	if oxrktrans_updated and len(fingerbonescales) == 0:  # should be on the raw update
+		calcfingerbonescales(oxrktransRaw)
+
 	var xrt = xr_origin.global_transform
 	if $AutoTracker.autotrackeractive:
 		$AutoTracker.autotrackgestures(oxrktrans, xrt, xr_camera_node)
 	if applymiddlefingerfix:
 		fixmiddlefingerpositions(oxrktrans)
 	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
-	var fingerbonetransformsOut = calcboneposes(oxrktrans, handnodetransform, xrt)
+	var fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt) if bYalignedAxes else calcboneposes(oxrktrans, handnodetransform, xrt)
 	handnode.transform = handnodetransform
 	copyouttransformstoskel(fingerbonetransformsOut)
 	if visible and $VisibleHandTrackSkeleton.visible:

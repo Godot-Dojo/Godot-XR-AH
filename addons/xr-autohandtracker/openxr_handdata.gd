@@ -35,7 +35,7 @@ func process_pinchpull_animation(delta):
 	autohandleft.handtrackingvalid = true
 	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
-		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(xrightoffs, 1.1, -0.18))
+		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(xrightoffs, 1.1 + xrightoffs*0.3, -0.18))
 	if xpulloffset < -0.12 or xpulloffset > 0.12:
 		autohandright.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin.z += 0.03
 	autohandright.oxrktransRaw_updated = true
