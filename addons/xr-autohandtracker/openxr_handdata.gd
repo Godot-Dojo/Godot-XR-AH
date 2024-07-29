@@ -22,40 +22,37 @@ func _ready():
 		print(var_to_str([autohandleft.oxrktrans, autohandright.oxrktrans]))
 		print("****")	
 
+# This pre-animated thing should correspond to a special kind of get_hand_tracking_source()
 var Dautohandspinchtrans = null
 var xpulloffset = -0.2
 func process_pinchpull_animation(delta):
-	xpulloffset += delta*0.06
+	if xpulloffset < 0.1:
+		xpulloffset += delta*0.06
 	var xrightoffs = max(0, xpulloffset)
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
 		autohandleft.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[0][i].basis, Dautohandspinchtrans[0][i].origin + Vector3(0.0, 1.1, -0.2))
-	autohandleft.oxrktrans_updated = true
+	autohandleft.oxrktransRaw_updated = true
 	autohandleft.handtrackingvalid = true
 	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
 		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(xrightoffs, 1.1, -0.18))
-	autohandright.oxrktrans_updated = true
+	if xpulloffset < -0.12 or xpulloffset > 0.12:
+		autohandright.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin.z += 0.03
+	autohandright.oxrktransRaw_updated = true
 	autohandright.handtrackingvalid = true
-
-func process_rawtopull():
-	for i in range(OpenXRInterface.HAND_JOINT_MAX):
-		autohandright.oxrktrans[i] = autohandright.oxrktransRaw[i]
-		autohandleft.oxrktrans[i] = autohandleft.oxrktransRaw[i]
-
 
 func _process(delta):
 	if Dautohandspinchtrans != null:
 		process_pinchpull_animation(delta)
-		process_rawtopull()
 		return
 	autohandleft.process_handtrackingsource()
 	autohandright.process_handtrackingsource()
 	if autohandleft.handtrackingvalid:
 		autohandleft.update_oxrktransRaw()
-		autohandleft.oxrktrans_updated = true
+		autohandleft.oxrktransRaw_updated = true
 	if autohandright.handtrackingvalid:
 		autohandright.update_oxrktransRaw()
-		autohandright.oxrktrans_updated = true
+		autohandright.oxrktransRaw_updated = true
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed and event.keycode == KEY_P:

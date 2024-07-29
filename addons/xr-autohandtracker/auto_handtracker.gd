@@ -40,6 +40,7 @@ var handtrackingactive = false
 var handtrackingvalid = false
 var oxrktransRaw = [ ]
 var oxrktrans = [ ]
+var oxrktransRaw_updated = false
 var oxrktrans_updated = false
 
 # Copied out from OpenXRInterface.HandTrackedSource so it works on v4.2
@@ -302,14 +303,17 @@ func process_handtrackingsource():
 	handtrackingvalid = handtrackingactive and ((xr_handtracker.get_hand_joint_flags(OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
 	
 func _process(delta):
-	if not oxrktrans_updated:
+	if not oxrktransRaw_updated:
 		process_handtrackingsource()
 	if not handtrackingvalid:
 		return
 	if not oxrktrans_updated:
-		update_oxrktransRaw()
+		if not oxrktransRaw_updated:
+			update_oxrktransRaw()
+			oxrktransRaw_updated = true
 		for j in range(OpenXRInterface.HAND_JOINT_MAX):
 			oxrktrans[j] = oxrktransRaw[j]
+		oxrktransRaw_updated = false
 		oxrktrans_updated = true
 
 	var xrt = xr_origin.global_transform
