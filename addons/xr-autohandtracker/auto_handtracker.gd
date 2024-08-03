@@ -63,7 +63,6 @@ var hstw
 
 var fingerboneindexes = [ ]
 var fingerboneresttransforms = [ ]
-var fingerbonescales = [ ]
 var bYalignedAxes = false
 
 static func basisfromA(a, v):
@@ -85,20 +84,6 @@ static func rotationtoalignScaled(a, b):
 		return Basis(axis, angle_rads).scaled(Vector3(sca,sca,sca))
 	return Basis().scaled(Vector3(sca,sca,sca))
 
-#tIbasis = rotationtoalignScaled(fingerboneresttransforms[f][i+1].origin, mfg.affine_inverse()*kpositionsfip1 - atIorigin)
-#var tIorigin = mfg.affine_inverse()*kpositionsfip1 - tIbasis*fingerboneresttransforms[f][i+1].origin # should be 0
-#solve: 
-#	mfg.affine_inverse()*kpositionsfip1 = tIbasis*Vector3(0,l,0) 
-
-static func realignfingerbases(oxrktrans):
-	for f in range(FINGERCOUNT):
-		for i in range(3 if f == 0 else 4):
-			var t0 = oxrktrans[carpallist[f]+i]
-			var t1 = oxrktrans[carpallist[f]+i+1]
-			var vec = t1.origin - t0.origin
-			prints("frfr", t0.basis.y.length(), vec.dot(t0.basis.y), vec.dot(t0.basis.x), vec.dot(t0.basis.z))
-
-
 func extractrestfingerbones():
 	print(handnode.name)
 	var lr = "L" if hand == 0 else "R"
@@ -118,6 +103,14 @@ func extractrestfingerbones():
 				fingerboneresttransforms[-1].push_back(skel.get_bone_rest(ix))
 			else:
 				assert (f == "Thumb" and b == "Intermediate")
+
+	bYalignedAxes = true
+	for f in range(FINGERCOUNT):
+		for i in range(len(fingerboneresttransforms[f])-1):
+			var restvec = fingerboneresttransforms[f][i+1].origin
+			if not is_zero_approx(restvec.x) or not is_zero_approx(restvec.z):
+				bYalignedAxes = false
+
 
 func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
@@ -295,78 +288,8 @@ static func rotationtoalignUnScaled(a, b):
 	return rot
 
 # (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
-# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
-
-# A.origin = B.origin - A.basis*B.origin
 
 func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
-	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
-	for f in range(FINGERCOUNT):
-		var mfg = handnodetransform * hstw
-		# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
-		var tIscalebasisprevInv = Basis()
-		#print(" ---- ", handnodetransform.basis.get_scale(), hstw.basis.get_scale())
-		for i in range(len(fingerboneresttransforms[f])-1):
-			var kpositionsfip0 = xrt*oxrktrans[carpallist[f] + i].origin
-			var kpositionsfip1 = xrt*oxrktrans[carpallist[f] + i+1].origin
-			var mfgS = mfg*Transform3D(tIscalebasisprevInv, Vector3())
-			var mfgR = mfgS*fingerboneresttransforms[f][i]
-			var mfgRinv = mfgR.affine_inverse()
-			print(f, " ", i, " sss ", kpositionsfip0 - mfg*fingerboneresttransforms[f][i].origin, fingerboneresttransforms[f][i].origin)
-
-			# (tIbasis,atIorigin)*fingerboneresttransforms[f][i+1]).origin = mfg.inverse()*kpositions[f][i+1]
-			# tIbasis*fingerboneresttransforms[f][i+1] = mfg.inverse()*kpositions[f][i+1] - atIorigin
-
-			var bonerestvec = fingerboneresttransforms[f][i+1].origin
-			assert (is_zero_approx(bonerestvec.x) and is_zero_approx(bonerestvec.z))
-			var bonetargetvec = mfgRinv*kpositionsfip1
-			#var bonetargetvec = mfgRinv.origin + mfgRinv.basis*kpositionsfip1
-			var tIbasisUnscaled = rotationtoalignUnScaled(bonerestvec, bonetargetvec)
-			
-			#bonetargetvec = rotationtoalignUnScaled(bonerestvec, bonetargetvec)* (tIscalebasis*bonerestvec = (0,y,0))
-			
-			var sca = bonetargetvec.length()/bonerestvec.length()
-			var tIscalebasis = Basis().scaled(Vector3(1.0, sca, 1.0))
-			var tIbasis = tIbasisUnscaled*tIscalebasis
-			var tIorigin = mfgRinv*kpositionsfip1 - tIbasis*bonerestvec # should be 0
-			assert (tIorigin.length() < 0.001)
-			var tI = Transform3D(tIbasis, tIorigin)
-
-			var fingerbonetransformsOutS = Transform3D(fingerboneresttransforms[f][i].basis*tIbasisUnscaled*tIscalebasis, fingerboneresttransforms[f][i].origin)
-			#fingerbonetransformsOutS = fingerboneresttransforms[f][i]*tI
-			fingerbonetransformsOut[f][i] = mfg.affine_inverse()*mfgS*fingerbonetransformsOutS
-
-			var mfg1 = mfg*fingerbonetransformsOut[f][i]
-
-#mfg1*fingerboneresttransforms[f][i+1].origin
-
-#mfg*(0,ly,0) == mfg.origin + mfg.basis*(0,ly,0)
-#mfg = (mfg.basis*fingerbonetransformsOut[f][i].basis,
-#		mfg.origin + mfg.basis*fingerbonetransformsOut[f][i].origin)
-
-#kpositionsfip0 - mfg*fingerboneresttransforms[f][i].origin
-#kpositionsfip1 - mfg1*fingerboneresttransforms[f][i+1].origin
-#mfg1 = mfg*fingerbonetransformsOut[f][i]
-
-#kpositionsfip0 - mfg1.origin   # wrong
-#kpositionsfip0 - (mfg*fingerbonetransformsOut[f][i]).origin
-#kpositionsfip0 - (mfgS*fingerbonetransformsOutS).origin
-#kpositionsfip0 - (mfgS.origin + mfgS.basis*fingerbonetransformsOutS.origin)
-#kpositionsfip0 - (mfg.origin + mfgS.basis*fingerboneresttransforms[f][i].origin)
-#kpositionsfip0 - (mfg.origin + mfg.basis*tIscalebasisprevInv*fingerboneresttransforms[f][i].origin)
-
-#kpositionsfip0 - mfg*fingerboneresttransforms[f][i].origin   # right
-#kpositionsfip0 - (mfg.origin + mfg.basis*fingerboneresttransforms[f][i].origin)
-
-
-#			print(f, " ", i, " ", sca, " ssk ", kpositionsfip1 - mfg1*fingerboneresttransforms[f][i+1].origin, kpositionsfip0 - mfg1.origin, kpositionsfip0 - mfg*fingerboneresttransforms[f][i].origin)
-#			print(f, " ", i, " ", sca, " ssk ", kpositionsfip1 - mfg1*fingerboneresttransforms[f][i+1].origin, kpositionsfip0 - mfg1.origin, kpositionsfip0 - (mfg.origin + mfg.basis*tIscalebasisprevInv*fingerboneresttransforms[f][i].origin))
-			mfg = mfg1
-			tIscalebasisprevInv = Basis().scaled(Vector3(1.0, 1.0/1.0, 1.0))
-			
-	return fingerbonetransformsOut
-
-func DcalcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
 		var mfg = handnodetransform * hstw
@@ -410,27 +333,6 @@ func DcalcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			mfg = mfg1  # mfg*fingerbonetransformsOut[f][i]
 			
 	return fingerbonetransformsOut
-
-
-func calcfingerbonescales(oxrktrans):
-	assert (len(fingerbonescales) == 0)
-	bYalignedAxes = true
-	for f in range(5):
-		fingerbonescales.push_back([ 1.0 ])
-		for i in range(len(fingerboneresttransforms[f])-1):
-			var restvec = fingerboneresttransforms[f][i+1].origin
-			if not is_zero_approx(restvec.x) or not is_zero_approx(restvec.z):
-				bYalignedAxes = false
-			var restlength = restvec.length()
-			var measuredlength = (oxrktrans[carpallist[f] + i+1].origin - oxrktrans[carpallist[f] + i].origin).length()
-			if measuredlength == 0.0:
-				fingerbonescales = [ ]
-				print("bad zero reading in calcfingerbonescales")
-				bYalignedAxes = false
-				return
-			fingerbonescales[-1].push_back(measuredlength/restlength)
-	prints("fingerbonescales", fingerbonescales)
-	prints("bYalignedAxes", bYalignedAxes)
 
 func copyouttransformstoskel(fingerbonetransformsOut):
 	for f in range(len(fingerboneindexes)):
@@ -491,9 +393,6 @@ func _process(delta):
 		oxrktransRaw_updated = false
 		oxrktrans_updated = true
 
-	if oxrktrans_updated and len(fingerbonescales) == 0:  # should be on the raw update
-		calcfingerbonescales(oxrktransRaw)
-		
 
 	var xrt = xr_origin.global_transform
 	if $AutoTracker.autotrackeractive:
@@ -501,7 +400,7 @@ func _process(delta):
 	if applymiddlefingerfix:
 		fixmiddlefingerpositions(oxrktrans)
 	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
-	var fingerbonetransformsOut = DcalcboneposesScaledInY(oxrktrans, handnodetransform, xrt) if bYalignedAxes else calcboneposes(oxrktrans, handnodetransform, xrt)
+	var fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt) if bYalignedAxes else calcboneposes(oxrktrans, handnodetransform, xrt)
 	handnode.transform = handnodetransform
 	copyouttransformstoskel(fingerbonetransformsOut)
 	if visible and $VisibleHandTrackSkeleton.visible:
