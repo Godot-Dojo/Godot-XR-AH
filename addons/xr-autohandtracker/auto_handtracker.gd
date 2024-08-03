@@ -378,9 +378,12 @@ func DcalcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			# if i != 0 then kpos0 = kpositionsfip0
 			var kpositionsfip1 = xrt*oxrktrans[carpallist[f] + i+1].origin # the spot we want to go to
 			var bonerestvec1 = fingerboneresttransforms[f][i+1].origin # (0,ly,0)
-			var sca = (kpositionsfip1 - kpos0).length()/bonerestvec1.length()
-
-			# we need to find mfg1 such that 
+			assert (is_zero_approx(bonerestvec1.x) and is_zero_approx(bonerestvec1.z))
+			var bonetargetvec1 = kpositionsfip1 - kpos0
+			var bonetargetvec1len = bonetargetvec1.length()
+			var sca = bonetargetvec1len/bonerestvec1.length()
+			
+			# we need to find mfg1 (transform for the next bone) such that 
 			# kpositionsfip1 = mfg1*bonerestvec1 = mfg1.origin + mfg1.basis*bonerestvec1
 			# and mfg1.basis = rot*Basis(1,sca,1)
 			# and mfg1 = mfg*fingerbonetransformsOut[f][i]
@@ -390,17 +393,21 @@ func DcalcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			# therefore kpositionsfip1 = mfg.origin + mfg.basis*bonerestvec0 + mfg1.basis*bonerestvec1
 			# so mfg1.basis*bonerestvec1 = kpositionsfip1 - mfg.origin - mfg.basis*bonerestvec0
 			# so mfg1.basis*bonerestvec1 = kpositionsfip1 - kpos0
-			var ktarg = (kpositionsfip1 - kpos0).normalized()
-			var rot = rotationtoalignUnScaled(bonerestvec1, kpositionsfip1 - kpos0)
-			print("zz ", rot.y - ktarg)
-			var mfg1 = Transform3D(rot*Basis().scaled(Vector3(1.0,sca,1.0)), mfg.origin + mfg.basis*bonerestvec0)
+			var ktarg = bonetargetvec1.normalized()
+			#var Drot = rotationtoalignUnScaled(bonerestvec1, bonetargetvec1)
+			
+			var mfgrest1basis = mfg.basis*fingerboneresttransforms[f][i].basis
+			mfgrest1basis = mfgrest1basis.orthonormalized()
+			var roty = bonetargetvec1*(1.0/bonetargetvec1len)  # normalized
+			var rotz = (mfgrest1basis.x.cross(roty)).normalized()
+			var rotx = roty.cross(rotz)
+			#var rot = Basis(rotx, roty, rotz)
+			var mfg1origin = mfg.origin + mfg.basis*bonerestvec0
+			var mfg1basis = Basis(rotx, roty*sca, rotz)
+			
+			var mfg1 = Transform3D(mfg1basis, mfg1origin)
 			fingerbonetransformsOut[f][i] = mfg.affine_inverse()*mfg1
-			print("ssame ", fingerbonetransformsOut[f][i].origin, bonerestvec0)
-			#var mfg1 = mfg*fingerbonetransformsOut[f][i]
-			mfg = mfg1
-			# endloop
-
-
+			mfg = mfg1  # mfg*fingerbonetransformsOut[f][i]
 			
 	return fingerbonetransformsOut
 
