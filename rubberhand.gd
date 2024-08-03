@@ -4,7 +4,8 @@ const hjtips = [ OpenXRInterface.HAND_JOINT_THUMB_TIP,
 				 OpenXRInterface.HAND_JOINT_INDEX_TIP, 
 				 OpenXRInterface.HAND_JOINT_MIDDLE_TIP, 
 				 OpenXRInterface.HAND_JOINT_RING_TIP, 
-				 OpenXRInterface.HAND_JOINT_LITTLE_TIP ]
+				 OpenXRInterface.HAND_JOINT_LITTLE_TIP,
+				 ]
 
 class FingerPinchHold:
 	const fingerpinchdistanceon = 0.03
@@ -13,6 +14,7 @@ class FingerPinchHold:
 
 	var bpinched = false
 	var oppositepinchedjoint = -1
+	var oppositepinchedbackfromtip = 0
 	var thumbtransformtojoint = Transform3D()
 
 	func updatepinchingstatus(oxrktransRaw, oppositeoxrktransRaw):
@@ -21,22 +23,26 @@ class FingerPinchHold:
 		if not bpinched and pinchveclen < fingerpinchdistanceon:
 			var midpinch = 0.5*(oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin + oxrktransRaw[OpenXRInterface.HAND_JOINT_INDEX_TIP].origin)
 			oppositepinchedjoint = -1
+			oppositepinchedbackfromtip = 0
 			var oppositepinchedjointdistance = fingerpinchtipgrabdistance
 			for j in hjtips:
-				var loppositepinchedjointdistance = (oppositeoxrktransRaw[j].origin - midpinch).length()
-				if loppositepinchedjointdistance < oppositepinchedjointdistance:
-					oppositepinchedjointdistance = loppositepinchedjointdistance
-					oppositepinchedjoint = j
+				for jbackfromtip in [0,1,2]:
+					var loppositepinchedjointdistance = (oppositeoxrktransRaw[j-jbackfromtip].origin - midpinch).length()
+					if loppositepinchedjointdistance < oppositepinchedjointdistance:
+						oppositepinchedjointdistance = loppositepinchedjointdistance
+						oppositepinchedjoint = j
+						oppositepinchedbackfromtip = jbackfromtip
 			if oppositepinchedjoint != -1:
-				thumbtransformtojoint = oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].inverse()*oppositeoxrktransRaw[oppositepinchedjoint]
+				thumbtransformtojoint = oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].inverse()*oppositeoxrktransRaw[oppositepinchedjoint-oppositepinchedbackfromtip]
 			bpinched = true
 		elif bpinched and pinchveclen > fingerpinchdistanceoff:
 			bpinched = false
 
 	func applypinchingdrag(oxrktrans, oppositeoxrktrans, oxrktransRaw, oppositeoxrktransRaw):
 		if bpinched and oppositepinchedjoint != -1:
-			oppositeoxrktrans[oppositepinchedjoint] = oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP]*thumbtransformtojoint
-
+			oppositeoxrktrans[oppositepinchedjoint-oppositepinchedbackfromtip] = oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP]*thumbtransformtojoint
+			for jback in range(oppositepinchedbackfromtip-1, -1, -1):
+				oppositeoxrktrans[oppositepinchedjoint-jback] = oppositeoxrktransRaw[oppositepinchedjoint-jback]*oppositeoxrktransRaw[oppositepinchedjoint-oppositepinchedbackfromtip].inverse()*oppositeoxrktrans[oppositepinchedjoint-oppositepinchedbackfromtip]
 			
 var leftpinchhold = FingerPinchHold.new()
 var rightpinchhold = FingerPinchHold.new()

@@ -21,6 +21,11 @@ func _ready():
 		print("****")
 		print(var_to_str([autohandleft.oxrktrans, autohandright.oxrktrans]))
 		print("****")	
+	if true:
+		await get_tree().create_timer(5).timeout
+		print("**RADS**")
+		print(var_to_str([autohandleft.oxrkradii, autohandright.oxrkradii]))
+		print("****")	
 
 # This pre-animated thing should correspond to a special kind of get_hand_tracking_source()
 var Dautohandspinchtrans = null
@@ -34,13 +39,16 @@ func process_pinchpull_animation(delta):
 	autohandleft.oxrktransRaw_updated = true
 	autohandleft.handtrackingvalid = true
 	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
+	const rightxdisp = -0.01
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
-		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(xrightoffs, 1.1 + xrightoffs*0.3, -0.18))
+		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(rightxdisp + xrightoffs*0.1, 1.1 + xrightoffs*0.9, -0.18))
 	if xpulloffset < -0.12 or xpulloffset > 0.12:
 		autohandright.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin.z += 0.03
 	autohandright.oxrktransRaw_updated = true
 	autohandright.handtrackingvalid = true
-
+	
+#	autohandleft.realignfingerbases(autohandright.oxrktransRaw)
+	
 func _process(delta):
 	if Dautohandspinchtrans != null:
 		process_pinchpull_animation(delta)
