@@ -103,8 +103,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_anl0v")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 applymiddlefingerfix = false
-visiblehandtrackskeletonRaw = false
-enableautotracker = false
 
 [node name="XRController3DRight" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.169251, 1.69625, -0.288043)
@@ -117,7 +115,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_s8gw2")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
 applymiddlefingerfix = false
-visiblehandtrackskeletonRaw = false
 enableautotracker = false
 
 [node name="HandJoints" type="Node3D" parent="XROrigin3D"]

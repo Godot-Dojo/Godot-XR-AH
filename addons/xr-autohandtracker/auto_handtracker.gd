@@ -174,7 +174,9 @@ func findxrtrackerobjects():
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface == null:
 		return
-	
+	if xr_controller_node == null:
+		return
+
 	var tracker_name = xr_controller_node.tracker
 	xr_controllertracker = XRServer.get_tracker(tracker_name)
 	if xr_controllertracker == null:
@@ -394,7 +396,7 @@ func _process(delta):
 		oxrktrans_updated = true
 
 
-	var xrt = xr_origin.global_transform
+	var xrt = xr_origin.global_transform*XRServer.get_reference_frame()
 	if $AutoTracker.autotrackeractive:
 		$AutoTracker.autotrackgestures(oxrktrans, xrt, xr_camera_node)
 	if applymiddlefingerfix:

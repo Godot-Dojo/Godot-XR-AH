@@ -73,7 +73,6 @@ size = Vector3(0.005, 0.19, 0.005)
 [node name="AutoHandtracker" type="Node3D" groups=["AutoHandGroup"]]
 top_level = true
 script = ExtResource("1_kokq6")
-visiblehandtrackskeletonRaw = null
 
 [node name="VisibleHandTrackSkeleton" type="Node3D" parent="."]
 script = ExtResource("2_51p5j")
