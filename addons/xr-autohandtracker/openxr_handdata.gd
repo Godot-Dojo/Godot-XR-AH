@@ -29,7 +29,7 @@ func _ready():
 
 # This pre-animated thing should correspond to a special kind of get_hand_tracking_source()
 var Dautohandspinchtrans = null
-var xpulloffset = -0.2
+var xpulloffset = -0.2  # actually the movement in y
 func process_pinchpull_animation(delta):
 	if xpulloffset < 0.1:
 		xpulloffset += delta*0.06
@@ -38,7 +38,14 @@ func process_pinchpull_animation(delta):
 		autohandleft.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[0][i].basis, Dautohandspinchtrans[0][i].origin + Vector3(0.0, 1.1, -0.2))
 	autohandleft.oxrktransRaw_updated = true
 	autohandleft.handtrackingvalid = true
-	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
+
+#	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
+	var Dtt = Vector3(0,-0.05,0)
+	#autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_PROXIMAL].origin += Dtt
+	#autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_INTERMEDIATE].origin += Dtt
+	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_DISTAL].origin += Dtt
+	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_TIP].origin += Dtt
+
 	const rightxdisp = -0.01
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
 		autohandright.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[1][i].basis, Dautohandspinchtrans[1][i].origin + Vector3(rightxdisp + xrightoffs*0.1, 1.1 + xrightoffs*0.9, -0.18))
@@ -46,12 +53,12 @@ func process_pinchpull_animation(delta):
 		autohandright.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin.z += 0.03
 	autohandright.oxrktransRaw_updated = true
 	autohandright.handtrackingvalid = true
-	
-#	autohandleft.realignfingerbases(autohandright.oxrktransRaw)
-	
+		
 func _process(delta):
 	if Dautohandspinchtrans != null:
 		process_pinchpull_animation(delta)
+		#print("ll ", autohandleft.skel.get_bone_global_pose(autohandleft.fingerboneindexes[1]p[3]))
+		#print("ll ", autohandleft.skel.get_bone_pose_scale(autohandleft.fingerboneindexes[1][2]), autohandleft.skel.get_bone_pose_scale(autohandleft.fingerboneindexes[1][3]))
 		return
 	autohandleft.process_handtrackingsource()
 	autohandright.process_handtrackingsource()

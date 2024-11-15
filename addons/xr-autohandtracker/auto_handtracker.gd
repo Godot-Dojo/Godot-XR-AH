@@ -295,6 +295,8 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
 		var mfg = handnodetransform * hstw
+		print(mfg.basis.get_scale())
+		var prevscale = 1.0
 		for i in range(len(fingerboneresttransforms[f])-1):
 			var kpositionsfip0 = xrt*oxrktrans[carpallist[f] + i].origin
 			var bonerestvec0 = fingerboneresttransforms[f][i].origin
@@ -328,11 +330,16 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			var rotx = roty.cross(rotz)
 			#var rot = Basis(rotx, roty, rotz)
 			var mfg1origin = mfg.origin + mfg.basis*bonerestvec0
-			var mfg1basis = Basis(rotx, roty*sca, rotz)
-			
+			var mfg1basis = Basis.from_scale(Vector3(1,1.0/prevscale,1))*Basis(rotx, roty, rotz)*Basis.from_scale(Vector3(1,sca,1))
+
 			var mfg1 = Transform3D(mfg1basis, mfg1origin)
+
 			fingerbonetransformsOut[f][i] = mfg.affine_inverse()*mfg1
+			prints(i, mfg1.basis.get_scale())
+			assert ((fingerbonetransformsOut[f][i].origin - fingerboneresttransforms[f][i].origin).is_zero_approx())
+
 			mfg = mfg1  # mfg*fingerbonetransformsOut[f][i]
+			prevscale = sca
 			
 	return fingerbonetransformsOut
 

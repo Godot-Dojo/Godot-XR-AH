@@ -107,7 +107,6 @@ func switch_to_vr() -> bool:
 		else:
 			return false
 
-
 	viewport.transparent_bg = false
 	environment.background_mode = Environment.BG_SKY
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_BG
