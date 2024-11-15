@@ -1,10 +1,11 @@
-[gd_scene load_steps=26 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=27 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
 [ext_resource type="PackedScene" uid="uid://v6bvkjtwp1cp" path="res://Hand_low_R.gltf" id="3_5ae0k"]
 [ext_resource type="PackedScene" uid="uid://bufelcry36rw1" path="res://addons/xr-autohandtracker/auto_handtracker.tscn" id="3_7v2m6"]
+[ext_resource type="Script" path="res://rubberhand.gd" id="3_86svk"]
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="PackedScene" uid="uid://chd0t404yk7ws" path="res://oxr_compatible_hands/LeftHandHumanoid.gltf" id="7_qbuxi"]
@@ -84,9 +85,12 @@ environment = SubResource("Environment_0xu52")
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.89138, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.89138, -0.0580661)
 
 [node name="OpenXRHandData" parent="XROrigin3D" instance=ExtResource("2_hw7j7")]
+
+[node name="RubberHand" type="Node" parent="XROrigin3D/OpenXRHandData"]
+script = ExtResource("3_86svk")
 
 [node name="XRController3DLeft" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.169555, 1.69177, -0.268697)
@@ -98,6 +102,7 @@ tracker = &"left_hand"
 surface_material_override/0 = SubResource("StandardMaterial3D_anl0v")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
+applymiddlefingerfix = false
 
 [node name="XRController3DRight" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.169251, 1.69625, -0.288043)
@@ -109,6 +114,8 @@ tracker = &"right_hand"
 surface_material_override/0 = SubResource("StandardMaterial3D_s8gw2")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
+applymiddlefingerfix = false
+enableautotracker = false
 
 [node name="HandJoints" type="Node3D" parent="XROrigin3D"]
 script = ExtResource("4_eaqi8")

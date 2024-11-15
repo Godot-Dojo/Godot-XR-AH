@@ -5,7 +5,7 @@ var xr_interface : OpenXRInterface
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	xr_interface = XRServer.find_interface("OpenXR")
-	if xr_interface and xr_interface.is_initialized():
+	if xr_interface and xr_interface.initialize():
 		var vp = get_viewport()
 
 		# Enable XR on the main viewport
@@ -15,6 +15,34 @@ func _ready():
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
 		$XROrigin3D/HandJoints.set_xr_interface(xr_interface)
+
+		xr_interface.play_area_changed.connect(_on_play_area_changed)
+		xr_interface.pose_recentered.connect(_on_openxr_pose_recentered)
+		print("OpenXR initialized successfully")
+	else:
+		print("OpenXR not initialized, please check if your headset is connected")
+
+
+# this really hacky and is supposed to be called every frame
+@onready var uninitialized_hmd_transform:Transform3D = XRServer.get_hmd_transform()
+var hmd_synchronized = false
+func sync_headset_orientation():
+	"""
+	Synchronizes headset ORIENTATION as soon as tracking information begins to arrive :
+	"""
+	if not hmd_synchronized:
+		if uninitialized_hmd_transform != XRServer.get_hmd_transform():
+			hmd_synchronized = true
+			_on_openxr_pose_recentered()
+
+func _on_openxr_pose_recentered() -> void:
+	print("  _on_openxr_pose_recentered")
+	XRServer.center_on_hmd(XRServer.RESET_BUT_KEEP_TILT, true)
+	print("New reference frame!! ", XRServer.get_reference_frame())
+
+func _on_play_area_changed(mode):
+	print(" on_play_area_changed ", mode)
+
 
 
 const joyvelocity = 1.1
