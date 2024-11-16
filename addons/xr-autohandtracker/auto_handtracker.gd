@@ -112,6 +112,26 @@ func extractrestfingerbones():
 				bYalignedAxes = false
 
 
+func testzboneoriented(oxrktrans):
+	var bZBoneoriented = true
+	for f in range(FINGERCOUNT):
+		for i in range(len(fingerboneresttransforms[f])-1):
+			var j0 = carpallist[f] + i
+			var btip = (i == len(fingerboneresttransforms[f]) - 1)
+			var j1 = carpallist[f] + i+(1 if not btip else -1)
+			var t0 = oxrktrans[j0]
+			var t1 = oxrktrans[j1]
+			if not t1.basis.is_conformal():
+				bZBoneoriented = false
+			var v01 = (t1.origin - t0.origin).normalized()
+			if btip:
+				v01 = -v01
+			var dv = v01 - t0.basis.y
+			if dv.length() > 0.01:
+				bZBoneoriented = false
+	return bZBoneoriented
+	
+
 func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
 	print("_xr_controller_node_tracking_changed ", xr_pose.name if xr_pose else "<none>")
@@ -295,7 +315,7 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
 		var mfg = handnodetransform * hstw
-		print(mfg.basis.get_scale())
+		#print(mfg.basis.get_scale())
 		var prevscale = 1.0
 		for i in range(len(fingerboneresttransforms[f])-1):
 			var kpositionsfip0 = xrt*oxrktrans[carpallist[f] + i].origin
@@ -330,12 +350,13 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			var rotx = roty.cross(rotz)
 			#var rot = Basis(rotx, roty, rotz)
 			var mfg1origin = mfg.origin + mfg.basis*bonerestvec0
-			var mfg1basis = Basis.from_scale(Vector3(1,1.0/prevscale,1))*Basis(rotx, roty, rotz)*Basis.from_scale(Vector3(1,sca,1))
+			var mfg1basis = Basis(rotx, roty, rotz)*Basis.from_scale(Vector3(1,sca,1))
+			#var mfg1basis = Basis.from_scale(Vector3(1,1.0/prevscale,1))*Basis(rotx, roty, rotz)*Basis.from_scale(Vector3(1,sca,1))
 
 			var mfg1 = Transform3D(mfg1basis, mfg1origin)
 
 			fingerbonetransformsOut[f][i] = mfg.affine_inverse()*mfg1
-			prints(i, mfg1.basis.get_scale())
+			#prints(i, mfg1.basis.get_scale())
 			assert ((fingerbonetransformsOut[f][i].origin - fingerboneresttransforms[f][i].origin).is_zero_approx())
 
 			mfg = mfg1  # mfg*fingerbonetransformsOut[f][i]
@@ -409,7 +430,12 @@ func _process(delta):
 	if applymiddlefingerfix:
 		fixmiddlefingerpositions(oxrktrans)
 	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
-	var fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt) if bYalignedAxes else calcboneposes(oxrktrans, handnodetransform, xrt)
+	var fingerbonetransformsOut
+	if bYalignedAxes:
+		testzboneoriented(oxrktrans)
+		fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt)
+	else:
+		fingerbonetransformsOut = calcboneposes(oxrktrans, handnodetransform, xrt)
 	handnode.transform = handnodetransform
 	copyouttransformstoskel(fingerbonetransformsOut)
 	if visible and $VisibleHandTrackSkeleton.visible:

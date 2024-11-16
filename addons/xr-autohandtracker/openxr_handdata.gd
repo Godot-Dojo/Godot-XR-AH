@@ -40,7 +40,7 @@ func process_pinchpull_animation(delta):
 	autohandleft.handtrackingvalid = true
 
 #	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP].origin += 0.001*Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
-	var Dtt = Vector3(0,-0.05,0)
+	var Dtt = Vector3(0.05,-0.05,0)
 	#autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_PROXIMAL].origin += Dtt
 	#autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_INTERMEDIATE].origin += Dtt
 	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_DISTAL].origin += Dtt
