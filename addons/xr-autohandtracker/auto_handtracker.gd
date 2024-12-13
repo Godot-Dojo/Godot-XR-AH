@@ -283,8 +283,9 @@ const FINGERCOUNT = 5
 func calcboneposes(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
-		var mfg = handnodetransform * hstw
+		var mfg = hstw * handnodetransform
 		# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
+		
 		for i in range(len(fingerboneresttransforms[f])-1):
 			mfg = mfg*fingerboneresttransforms[f][i]
 			# (tIbasis,atIorigin)*fingerboneresttransforms[f][i+1]).origin = mfg.inverse()*kpositions[f][i+1]
@@ -310,7 +311,7 @@ static func rotationtoalignUnScaled(a, b):
 	return rot
 
 # (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
-
+# https://github.com/godotengine/godot/issues/99330
 func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
@@ -329,7 +330,7 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			var bonetargetvec1 = kpositionsfip1 - kpos0
 			var bonetargetvec1len = bonetargetvec1.length()
 			var sca = bonetargetvec1len/bonerestvec1.length()
-			
+				
 			# we need to find mfg1 (transform for the next bone) such that 
 			# kpositionsfip1 = mfg1*bonerestvec1 = mfg1.origin + mfg1.basis*bonerestvec1
 			# and mfg1.basis = rot*Basis(1,sca,1)
@@ -338,7 +339,7 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			# so mfg1.basis = mfg.basis*b
 			# and mfg1.origin = mfg.origin + mfg.basis*bonerestvec0
 			# therefore kpositionsfip1 = mfg.origin + mfg.basis*bonerestvec0 + mfg1.basis*bonerestvec1
-			# so mfg1.basis*bonerestvec1 = kpositionsfip1 - mfg.origin - mfg.basis*bonerestvec0
+			# so mfg1.basicalcboneposesScaledInYs*bonerestvec1 = kpositionsfip1 - mfg.origin - mfg.basis*bonerestvec0
 			# so mfg1.basis*bonerestvec1 = kpositionsfip1 - kpos0
 			var ktarg = bonetargetvec1.normalized()
 			#var Drot = rotationtoalignUnScaled(bonerestvec1, bonetargetvec1)
@@ -353,6 +354,9 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			var mfg1basis = Basis(rotx, roty, rotz)*Basis.from_scale(Vector3(1,sca,1))
 			#var mfg1basis = Basis.from_scale(Vector3(1,1.0/prevscale,1))*Basis(rotx, roty, rotz)*Basis.from_scale(Vector3(1,sca,1))
 
+			if f == 1:
+				prints(f, i, kpositionsfip1, mfg1origin)
+
 			var mfg1 = Transform3D(mfg1basis, mfg1origin)
 
 			fingerbonetransformsOut[f][i] = mfg.affine_inverse()*mfg1
@@ -363,6 +367,59 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 			prevscale = sca
 			
 	return fingerbonetransformsOut
+
+
+# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
+# https://github.com/godotengine/godot/issues/99330
+func calcboneposesScaledInYbadconformal(oxrktrans, handnodetransform, xrt):
+	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
+	for f in range(FINGERCOUNT):
+		var mfg = handnodetransform * hstw
+		#print(mfg.basis.get_scale())
+		for i in range(len(fingerboneresttransforms[f])-1):
+			var kpositionsfip0 = xrt*oxrktrans[carpallist[f] + i].origin
+			var bonerestvec0 = fingerboneresttransforms[f][i].origin
+			var kpos0 = mfg*bonerestvec0 # the spot we are at
+			#var kpos0 = mfg.origin + mfg.basis*bonerestvec0 # the spot we are at
+			# if i != 0 then kpos0 = kpositionsfip0
+			var kpositionsfip1 = xrt*oxrktrans[carpallist[f] + i+1].origin # the spot we want to go to
+			var bonerestvec1 = fingerboneresttransforms[f][i+1].origin # (0,ly,0)
+			assert (is_zero_approx(bonerestvec1.x) and is_zero_approx(bonerestvec1.z))
+			var bonetargetvec1 = kpositionsfip1 - kpos0
+			var bonetargetvec1len = bonetargetvec1.length()
+				
+			# given mfg1 = mfg*F, F = fingerbonetransformsOut[f][i], Fr = fingerboneresttransforms[f][i]
+			# require F.origin = Fr.origin, kpositionsfip1 = mfg1*bonerestvec1
+			#   and F.basis = rot*scale
+			
+			# kpositionsfip1 = mfg1*bonerestvec1 = mfg1.origin + mfg1.basis*bonerestvec1
+			# mfg1.origin = mfg.origin + mfg.basis*F.origin = kpos0
+			# mfg1.basis = mfg.basis*F.basis
+			# kpositionsfip1 - mfg1.origin = mfg1.basis*bonerestvec1
+			# bonetargetvec1 = kpositionsfip1 - kpos0 = mfg.basis*F.basis*bonerestvec1
+			# F.basis*bonerestvec1 = mfg.basis.inverse()*bonetargetvec1
+			var fbv = mfg.basis.inverse()*bonetargetvec1
+			var rot = rotationtoalignUnScaled(bonerestvec1, fbv)
+			
+			var mfgR = mfg.basis*rot
+			# bonetargetvec1 = mfg.basis*rot*sca*bonerestvec1
+			var scay = fbv.length()/bonerestvec1.length()
+			var sca = Vector3(1, scay, 1)
+#			prints("n", bonetargetvec1.length(), (mfgR.y*bonerestvec1.y*scay).length())
+			prints("r", (mfgR.x).length())
+			
+			var F = Transform3D(rot*Basis.from_scale(sca), fingerboneresttransforms[f][i].origin)
+			#print("mm ", mfg.basis*F.basis*bonerestvec1 - bonetargetvec1)
+			fingerbonetransformsOut[f][i] = F
+			var mfg1 = mfg*F
+			#prints(i, mfg1.basis.get_scale())
+			assert ((fingerbonetransformsOut[f][i].origin - fingerboneresttransforms[f][i].origin).is_zero_approx())
+
+			mfg = mfg1  # mfg*fingerbonetransformsOut[f][i]
+			
+	return fingerbonetransformsOut
+
+
 
 func copyouttransformstoskel(fingerbonetransformsOut):
 	for f in range(len(fingerboneindexes)):
@@ -376,8 +433,30 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 				skel.set_bone_pose_position(ix, t.origin)
 				skel.set_bone_pose_scale(ix, t.basis.get_scale())
 			else:
-				skel.set_bone_pose(ix, t)
+				# forces it to be a scaled conformal transform
+				#t.basis = Basis(t.basis.get_rotation_quaternion())*Basis.from_scale(t.basis.get_scale())
 
+				skel.set_bone_pose(ix, t)
+				var Dbt = skel.get_bone_pose(ix)
+				print(" : ", Dbt.basis.y - t.basis.y)
+
+func Dcheckskeltobonetrans(oxrktrans, handnodetransform, xrt, fingerbonetransformsOut):
+	for f in range(len(fingerboneindexes)):
+		var fg = skel.get_bone_pose(0)
+		for i in range(len(fingerboneindexes[f])):
+			var ix = fingerboneindexes[f][i]
+			var tbone = skel.get_bone_global_pose(ix)
+			var tj = xrt*handnodetransform*tbone
+			var pos = xrt*oxrktrans[carpallist[f] + i].origin
+			if f == 1:
+				prints(i, pos)
+			#prints(f, i, tj.origin - pos)
+			#fg = fg*fingerbonetransformsOut[f][i]
+			fg = fg*skel.get_bone_pose(ix)
+			print(" h ", skel.get_bone_pose(ix).origin - fingerbonetransformsOut[f][i].origin)
+			print("z ", tbone.origin - fg.origin)
+
+			
 func process_handtrackingsource():
 	if xr_handtracker == null:
 		xr_handtracker = XRServer.get_tracker(handtracker_name)
@@ -423,7 +502,6 @@ func _process(delta):
 		oxrktransRaw_updated = false
 		oxrktrans_updated = true
 
-
 	var xrt = xr_origin.global_transform*XRServer.get_reference_frame()
 	if $AutoTracker.autotrackeractive:
 		$AutoTracker.autotrackgestures(oxrktrans, xrt, xr_camera_node)
@@ -432,12 +510,16 @@ func _process(delta):
 	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
 	var fingerbonetransformsOut
 	if bYalignedAxes:
-		testzboneoriented(oxrktrans)
-		fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt)
+		var bZBoneoriented = testzboneoriented(oxrktrans)
+		#fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt)
+		fingerbonetransformsOut = calcboneposesScaledInYbadconformal(oxrktrans, handnodetransform, xrt)
 	else:
 		fingerbonetransformsOut = calcboneposes(oxrktrans, handnodetransform, xrt)
 	handnode.transform = handnodetransform
 	copyouttransformstoskel(fingerbonetransformsOut)
+	#Dcheckskeltobonetrans(oxrktrans, handnodetransform, xrt, fingerbonetransformsOut)
+	#print()
+	
 	if visible and $VisibleHandTrackSkeleton.visible:
 		$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrktransRaw if visiblehandtrackskeletonRaw else oxrktrans, xrt)
 

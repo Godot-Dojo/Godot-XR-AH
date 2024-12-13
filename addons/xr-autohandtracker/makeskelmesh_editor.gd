@@ -2,8 +2,20 @@
 extends EditorScript
 
 
-
 func _run():
+	var s = Skeleton3D.new()
+	s.add_bone("one")
+	var rot = Basis(Vector3(1,0,0), deg_to_rad(10))
+	var scaA = Basis.from_scale(Vector3(1,0.5,1))
+	var scaB = Basis.from_scale(Vector3(1,2,1))
+	var b = rot*scaA
+	var t = Transform3D(b, Vector3(0,0,0))
+	s.set_bone_pose(0, t)
+	var r = s.get_bone_pose(0)
+	print(r)
+	print(t)
+
+func D_run():
 	var x = load("res://Hand_low_L.gltf").instantiate()
 	var skel : Skeleton3D = x.get_node("Armature/Skeleton3D")
 	var meshnode = skel.get_child(0)

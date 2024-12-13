@@ -53,6 +53,7 @@ func makeboneboxmesh(skel, iboneparent, ibone):
 
 
 func _ready():
+	return
 	print($mesh_Hand_low_L.mesh.surface_get_primitive_type(0))
 	var handmesharrays = $mesh_Hand_low_L.mesh.surface_get_arrays(0)
 

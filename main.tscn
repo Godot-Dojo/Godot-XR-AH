@@ -139,7 +139,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.169251, 1.69625, -0.288043)
 tracker = &"right_hand"
 
 [node name="Hand_low_R" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_5ae0k")]
-visible = false
 
 [node name="Skeleton3D" parent="XROrigin3D/XRController3DRight/Hand_low_R/Armature" index="0"]
 bones/0/scale = Vector3(1, 1, 1)

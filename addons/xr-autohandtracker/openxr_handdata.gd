@@ -60,6 +60,15 @@ func _process(delta):
 		#print("ll ", autohandleft.skel.get_bone_global_pose(autohandleft.fingerboneindexes[1]p[3]))
 		#print("ll ", autohandleft.skel.get_bone_pose_scale(autohandleft.fingerboneindexes[1][2]), autohandleft.skel.get_bone_pose_scale(autohandleft.fingerboneindexes[1][3]))
 		return
+
+	if Input.is_action_just_pressed("debugfingermove"):
+		print("hi")
+		autohandleft.oxrktransRaw
+		for i in range(OpenXRInterface.HAND_JOINT_MAX):
+			autohandleft.oxrktransRaw[i] = Transform3D(Dautohandspinchtrans[0][i].basis, Dautohandspinchtrans[0][i].origin + Vector3(0.0, 1.1, -0.2))
+		autohandleft.oxrktransRaw_updated = true
+		autohandleft.handtrackingvalid = true
+
 	autohandleft.process_handtrackingsource()
 	autohandright.process_handtrackingsource()
 	if autohandleft.handtrackingvalid:
