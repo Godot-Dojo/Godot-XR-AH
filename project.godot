@@ -38,4 +38,5 @@ openxr/enabled=true
 openxr/environment_blend_mode=2
 openxr/foveation_level=1
 openxr/foveation_dynamic=true
+openxr/extensions/eye_gaze_interaction=true
 shaders/enabled=true

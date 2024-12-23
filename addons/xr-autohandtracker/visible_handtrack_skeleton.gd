@@ -15,6 +15,7 @@ func _ready():
 	var jointnode = $ExampleJoint
 	remove_child(jointnode)
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
+		jointnode.visible
 		var rj = jointnode.duplicate()
 		rj.name = "J%d" % j
 		rj.scale = Vector3(0.01, 0.01, 0.01)
