@@ -134,7 +134,7 @@ func testzboneoriented(oxrktrans):
 
 func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
-	print("_xr_controller_node_tracking_changed ", xr_pose.name if xr_pose else "<none>")
+	prints("_xr_controller_node_tracking_changed", tracker_nhand, tracking, xr_pose.name if xr_pose else "<none>")
 
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings := PackedStringArray()

@@ -1,8 +1,8 @@
 [gd_scene load_steps=21 format=3 uid="uid://bufelcry36rw1"]
 
-[ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
+[ext_resource type="Script" uid="uid://x8bypytrodfl" path="res://addons/xr-autohandtracker/auto_handtracker.gd" id="1_kokq6"]
 [ext_resource type="Script" uid="uid://pjb8j1c0u81v" path="res://addons/xr-autohandtracker/visible_handtrack_skeleton.gd" id="2_51p5j"]
-[ext_resource type="Script" path="res://addons/xr-autohandtracker/auto_tracker.gd" id="3_6kyde"]
+[ext_resource type="Script" uid="uid://saoaf58nvwtp" path="res://addons/xr-autohandtracker/auto_tracker.gd" id="3_6kyde"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_lsd0h"]
 size = Vector3(0.1, 0.8, 0.1)

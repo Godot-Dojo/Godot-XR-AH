@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=30 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://clmflmidvs4bx" path="res://oxr_compatible_hands/RightHandHumanoid.gltf" id="8_alnal"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
+[ext_resource type="PackedScene" uid="uid://bs2ynmgqhbjj4" path="res://oxr_compatible_hands/hand1.glb" id="14_w48qg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -74,6 +75,9 @@ size = Vector3(10, 0.01, 10)
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_cagca")
+
+[node name="MeshInstance3DFLA" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79506, -0.430125)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.972307, 0.231448, -0.0324247, -0.168036, 0.788752, 0.591299, 0.16243, -0.569476, 0.8058, 0, 4.78147, -0.461351)
@@ -213,7 +217,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
 [node name="LeftTrackedHand" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.201679, 1.78448, -0.284881)
-visible = false
 tracker = &"/user/hand_tracker/left"
 show_when_tracked = true
 
@@ -266,7 +269,6 @@ bones/24/scale = Vector3(1, 1, 1)
 
 [node name="RightTrackedHand" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.234468, 1.76984, -0.387242)
-visible = false
 tracker = &"/user/hand_tracker/right"
 
 [node name="RightHandHumanoid2" parent="XROrigin3D/RightTrackedHand" instance=ExtResource("8_alnal")]
@@ -325,6 +327,9 @@ script = ExtResource("13_p61xh")
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
+
+[node name="MeshInstance3DFLA2" parent="." instance=ExtResource("14_w48qg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4516, -0.429994)
 
 [editable path="XROrigin3D/XRController3DLeft/Hand_low_L"]
 [editable path="XROrigin3D/XRController3DRight/Hand_low_R"]
