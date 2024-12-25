@@ -27,21 +27,10 @@ func _ready():
 	XRServer.tracker_updated.connect(Dtracker_updated)
 	XRServer.interface_added.connect(Dinterface_added)
 	XRServer.interface_removed.connect(Dinterface_removed)
-
-	var fin = FileAccess.open("handhand.txt", FileAccess.READ)
-	var fl = str_to_var(fin.get_line())
-	print(len(fl))
-	var fla = ArrayMesh.new()
-	fla.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fl)
-	$MeshInstance3DFLA.mesh = fla
-	
-	await get_tree().create_timer(0.1).timeout
-	var gltf_document_save := GLTFDocument.new()
-	var gltf_state_save := GLTFState.new()
-	gltf_document_save.append_from_scene($MeshInstance3DFLA, gltf_state_save)
-	gltf_document_save.write_to_filesystem(gltf_state_save, "user://hand1.glb")
-	print(gltf_document_save.get_supported_gltf_extensions())
-	#print(FileAccess.open("user://hand1.gltf", FileAccess.READ).get_path_absolute())
+	print("XRServer.TRACKER_ANY ", XRServer.get_trackers(XRServer.TRACKER_ANY))
+	print("XRServer.TRACKER_FACE ", XRServer.get_trackers(XRServer.TRACKER_FACE))
+	print("XRServer.TRACKER_HAND ", XRServer.get_trackers(XRServer.TRACKER_HAND))
+	print("XRServer.TRACKER_CONTROLLER ", XRServer.get_trackers(XRServer.TRACKER_CONTROLLER))
 
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface and xr_interface.initialize():

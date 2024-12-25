@@ -13,7 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://clmflmidvs4bx" path="res://oxr_compatible_hands/RightHandHumanoid.gltf" id="8_alnal"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
-[ext_resource type="PackedScene" uid="uid://bs2ynmgqhbjj4" path="res://oxr_compatible_hands/hand1.glb" id="14_w48qg"]
+[ext_resource type="PackedScene" uid="uid://gqy3826fqpd6" path="res://oxr_compatible_hands/metahandL.glb" id="14_w48qg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -223,9 +223,6 @@ show_when_tracked = true
 [node name="LeftHandHumanoid2" parent="XROrigin3D/LeftTrackedHand" instance=ExtResource("7_qbuxi")]
 
 [node name="Skeleton3D" parent="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2/LeftHandHumanoid" index="0"]
-bones/0/rotation = Quaternion(-0.499588, 0.500421, -0.499578, 0.500412)
-bones/0/scale = Vector3(1, 1, 1)
-bones/1/rotation = Quaternion(-0.0986638, 0.361927, 0.309326, 0.873837)
 bones/2/rotation = Quaternion(0.0857067, -0.0271357, 0.0207231, 0.995735)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/rotation = Quaternion(-0.00564059, 0.0116012, 0.0289768, 0.999497)
@@ -328,10 +325,11 @@ script = ExtResource("13_p61xh")
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
 
-[node name="MeshInstance3DFLA2" parent="." instance=ExtResource("14_w48qg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4516, -0.429994)
+[node name="metahandL" parent="." instance=ExtResource("14_w48qg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0937991, 1.62206, -0.241916)
 
 [editable path="XROrigin3D/XRController3DLeft/Hand_low_L"]
 [editable path="XROrigin3D/XRController3DRight/Hand_low_R"]
 [editable path="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2"]
 [editable path="XROrigin3D/RightTrackedHand/RightHandHumanoid2"]
+[editable path="metahandL"]

@@ -220,6 +220,8 @@ func _ready():
 		oxrktrans.push_back(Transform3D())
 		oxrkradii.push_back(0.0) 
 	oxrktrans_updated = false
+	if not ProjectSettings.get_setting("xr/openxr/extensions/hand_tracking"):
+		print("Warning ProjectSettings: xr/openxr/extensions/hand_tracking is not enabled")
 
 	findxrnodes()
 	findxrtrackerobjects()
