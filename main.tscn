@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=34 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
 [ext_resource type="PackedScene" uid="uid://gqy3826fqpd6" path="res://oxr_compatible_hands/metahandL.glb" id="14_w48qg"]
+[ext_resource type="PackedScene" uid="uid://dn0klb2ugwotq" path="res://oxr_compatible_hands/metahandR.glb" id="15_vivmo"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -27,10 +28,20 @@ background_mode = 2
 sky = SubResource("Sky_tsis2")
 tonemap_mode = 2
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vivmo"]
+resource_name = "Material_1"
+transparency = 1
+albedo_color = Color(0, 0.682353, 1, 0.623529)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s8gw2"]
 albedo_color = Color(0, 0.717647, 0.717647, 1)
 metallic = 0.8
 roughness = 0.14
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yaehf"]
+resource_name = "Material_1"
+transparency = 1
+albedo_color = Color(0, 0, 1, 0.686275)
 
 [sub_resource type="QuadMesh" id="QuadMesh_eslsg"]
 size = Vector2(0.8, 0.5)
@@ -73,6 +84,11 @@ uv1_scale = Vector3(4, 4, 4)
 material = SubResource("StandardMaterial3D_3vxx6")
 size = Vector3(10, 0.01, 10)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2cqfq"]
+resource_name = "Material_1"
+transparency = 4
+albedo_color = Color(0.7331, 0.419908, 0.211613, 0.686275)
+
 [node name="Main" type="Node3D"]
 script = ExtResource("1_cagca")
 
@@ -88,7 +104,7 @@ environment = SubResource("Environment_0xu52")
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.89138, -0.0580661)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79704, 0.0822801)
 
 [node name="OpenXRHandData" parent="XROrigin3D" instance=ExtResource("2_hw7j7")]
 
@@ -100,6 +116,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.169555, 1.69177, -0.268697
 tracker = &"left_hand"
 
 [node name="Hand_low_L" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("2_0obas")]
+visible = false
 
 [node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/Hand_low_L/Armature" index="0"]
 bones/0/scale = Vector3(1, 1, 1)
@@ -139,11 +156,18 @@ script = ExtResource("5_cy21g")
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 applymiddlefingerfix = false
 
+[node name="metahandL" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("14_w48qg")]
+
+[node name="_MeshInstance3D_84" parent="XROrigin3D/XRController3DLeft/metahandL/Armature/Skeleton3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000146434, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
+
 [node name="XRController3DRight" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.169251, 1.69625, -0.288043)
 tracker = &"right_hand"
 
 [node name="Hand_low_R" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_5ae0k")]
+visible = false
 
 [node name="Skeleton3D" parent="XROrigin3D/XRController3DRight/Hand_low_R/Armature" index="0"]
 bones/0/scale = Vector3(1, 1, 1)
@@ -184,7 +208,12 @@ surface_material_override/0 = SubResource("StandardMaterial3D_s8gw2")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
 applymiddlefingerfix = false
-enableautotracker = false
+visiblehandtrackskeletonRaw = true
+
+[node name="metahandR" parent="XROrigin3D/XRController3DRight" instance=ExtResource("15_vivmo")]
+
+[node name="_MeshInstance3D_85" parent="XROrigin3D/XRController3DRight/metahandR/Armature/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_yaehf")
 
 [node name="HandJoints" type="Node3D" parent="XROrigin3D"]
 script = ExtResource("4_eaqi8")
@@ -193,7 +222,7 @@ script = ExtResource("4_eaqi8")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65802, -0.491668)
 
 [node name="FlatDisplayMesh" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.169554, -0.0442287)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0258811, 0.169554, -0.0442287)
 mesh = SubResource("QuadMesh_eslsg")
 skeleton = NodePath("../../../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_6gabm")
@@ -217,12 +246,15 @@ surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
 [node name="LeftTrackedHand" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.201679, 1.78448, -0.284881)
+visible = false
 tracker = &"/user/hand_tracker/left"
-show_when_tracked = true
 
 [node name="LeftHandHumanoid2" parent="XROrigin3D/LeftTrackedHand" instance=ExtResource("7_qbuxi")]
 
 [node name="Skeleton3D" parent="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2/LeftHandHumanoid" index="0"]
+bones/0/rotation = Quaternion(-0.499588, 0.500421, -0.499578, 0.500412)
+bones/0/scale = Vector3(1, 1, 1)
+bones/1/rotation = Quaternion(-0.0986638, 0.361927, 0.309326, 0.873837)
 bones/2/rotation = Quaternion(0.0857067, -0.0271357, 0.0207231, 0.995735)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/rotation = Quaternion(-0.00564059, 0.0116012, 0.0289768, 0.999497)
@@ -266,6 +298,7 @@ bones/24/scale = Vector3(1, 1, 1)
 
 [node name="RightTrackedHand" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.234468, 1.76984, -0.387242)
+visible = false
 tracker = &"/user/hand_tracker/right"
 
 [node name="RightHandHumanoid2" parent="XROrigin3D/RightTrackedHand" instance=ExtResource("8_alnal")]
@@ -326,10 +359,62 @@ mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
 
 [node name="metahandL" parent="." instance=ExtResource("14_w48qg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0937991, 1.62206, -0.241916)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 1.6, -0.1)
+visible = false
+
+[node name="Skeleton3D" parent="metahandL/Armature" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.143893, 0, 0)
+
+[node name="metahandR" parent="." instance=ExtResource("15_vivmo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18686, 1.64245, -0.234505)
+visible = false
+
+[node name="Hand_low_L" parent="." instance=ExtResource("2_0obas")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 1.6, -0.1)
+visible = false
+
+[node name="Skeleton3D" parent="Hand_low_L/Armature" index="0"]
+bones/0/scale = Vector3(1, 1, 1)
+bones/1/rotation = Quaternion(0.323537, -2.56565e-05, -0.0272204, 0.945824)
+bones/1/scale = Vector3(1, 1, 1)
+bones/2/rotation = Quaternion(-0.0459503, -0.0271357, -0.0752572, 0.995735)
+bones/2/scale = Vector3(1, 1, 1)
+bones/3/rotation = Quaternion(0.0556407, 0.0103261, 0.0139847, 0.9983)
+bones/4/rotation = Quaternion(-0.0757687, -0.019257, -0.0337124, 0.996369)
+bones/4/scale = Vector3(1, 1, 1)
+bones/5/scale = Vector3(1, 1, 1)
+bones/6/rotation = Quaternion(0.111223, -0.00277812, 0.117574, 0.986812)
+bones/6/scale = Vector3(1, 1, 1)
+bones/7/rotation = Quaternion(-0.0136832, -0.0246682, -0.235071, 0.971569)
+bones/7/scale = Vector3(1, 1, 1)
+bones/9/rotation = Quaternion(-0.0522884, -0.000557213, 0.103621, 0.993241)
+bones/10/rotation = Quaternion(-0.0358546, 4.20051e-05, 0.0499776, 0.998107)
+bones/11/rotation = Quaternion(-0.0119466, 0.000966737, -0.0105008, 0.999873)
+bones/13/rotation = Quaternion(-0.0139315, -0.000142422, -0.168612, 0.985584)
+bones/14/rotation = Quaternion(0.0136882, 7.99239e-05, 0.168411, 0.985622)
+bones/14/scale = Vector3(1, 1, 1)
+bones/15/rotation = Quaternion(-0.0711949, 1.57336e-05, 0.0180856, 0.997298)
+bones/16/scale = Vector3(1, 1, 1)
+bones/17/rotation = Quaternion(0.0173263, 0.0186085, -0.160829, 0.986655)
+bones/17/scale = Vector3(1, 1, 1)
+bones/18/rotation = Quaternion(-0.0113518, 0.0126214, -0.131984, 0.991107)
+bones/18/scale = Vector3(1, 1, 1)
+bones/19/rotation = Quaternion(0.0330517, -0.00671975, 0.126351, 0.991412)
+bones/19/scale = Vector3(1, 1, 1)
+bones/20/rotation = Quaternion(-0.0917695, 2.45622e-05, 0.0284477, 0.995374)
+bones/20/scale = Vector3(1, 1, 1)
+bones/21/rotation = Quaternion(-0.089286, 0.00316807, -0.00673912, 0.995978)
+bones/23/rotation = Quaternion(-0.0180548, 0.0114553, -0.107075, 0.994021)
+bones/23/scale = Vector3(1, 1, 1)
+
+[node name="mesh_Hand_low_L" parent="Hand_low_L/Armature/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_2cqfq")
 
 [editable path="XROrigin3D/XRController3DLeft/Hand_low_L"]
+[editable path="XROrigin3D/XRController3DLeft/metahandL"]
 [editable path="XROrigin3D/XRController3DRight/Hand_low_R"]
+[editable path="XROrigin3D/XRController3DRight/metahandR"]
 [editable path="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2"]
 [editable path="XROrigin3D/RightTrackedHand/RightHandHumanoid2"]
 [editable path="metahandL"]
+[editable path="Hand_low_L"]

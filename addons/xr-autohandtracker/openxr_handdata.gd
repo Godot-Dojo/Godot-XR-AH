@@ -43,8 +43,8 @@ func process_pinchpull_animation(delta):
 	var Dtt = Vector3(0.05,-0.05,0)
 	#autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_PROXIMAL].origin += Dtt
 	#autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_INTERMEDIATE].origin += Dtt
-	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_DISTAL].origin += Dtt
-	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_TIP].origin += Dtt
+#	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_DISTAL].origin += Dtt
+#	autohandleft.oxrktransRaw[OpenXRInterface.HAND_JOINT_LITTLE_TIP].origin += Dtt
 
 	const rightxdisp = -0.01
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
