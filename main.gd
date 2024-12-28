@@ -2,8 +2,36 @@ extends Node3D
 
 var xr_interface : OpenXRInterface
 
-# Called when the node enters the scene tree for the first time.
+var facetracker : XRFaceTracker = null
+func Dtracker_added(tracker_name: StringName, type: int):
+	prints("Dtracker_added", tracker_name, type)
+	if type == XRServer.TRACKER_FACE:
+		facetracker = XRServer.get_tracker(tracker_name)
+		print("***** facetracker added ", facetracker)
+
+func Dtracker_removed(tracker_name: StringName, type: int):
+	prints("Dtracker_removed", tracker_name, type)
+
+func Dtracker_updated(tracker_name: StringName, type: int):
+	prints("Dtracker_updated", tracker_name, type)
+
+func Dinterface_added(interface_name: StringName):
+	prints("Dinterface_added", interface_name)
+	
+func Dinterface_removed(interface_name: StringName):
+	prints("Dinterface_removed", interface_name)
+
 func _ready():
+	XRServer.tracker_added.connect(Dtracker_added)
+	XRServer.tracker_removed.connect(Dtracker_removed)
+	XRServer.tracker_updated.connect(Dtracker_updated)
+	XRServer.interface_added.connect(Dinterface_added)
+	XRServer.interface_removed.connect(Dinterface_removed)
+	print("XRServer.TRACKER_ANY ", XRServer.get_trackers(XRServer.TRACKER_ANY))
+	print("XRServer.TRACKER_FACE ", XRServer.get_trackers(XRServer.TRACKER_FACE))
+	print("XRServer.TRACKER_HAND ", XRServer.get_trackers(XRServer.TRACKER_HAND))
+	print("XRServer.TRACKER_CONTROLLER ", XRServer.get_trackers(XRServer.TRACKER_CONTROLLER))
+
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface and xr_interface.initialize():
 		var vp = get_viewport()
@@ -51,6 +79,14 @@ func _process(delta):
 	var camerafore = Vector3($XROrigin3D/XRCamera3D.transform.basis.z.x, 0.0, $XROrigin3D/XRCamera3D.transform.basis.z.z).normalized()
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
+
+	var bbbb = [ ]
+	if facetracker != null:
+		for b in facetracker.blend_shapes:
+			if b != 0:
+				bbbb.push_back(b)
+		if bbbb:
+			print("BB ", bbbb)
 
 var Dvr = true
 func triggerfingerbutton(hand):

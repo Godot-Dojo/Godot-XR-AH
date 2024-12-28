@@ -12,12 +12,24 @@ config_version=5
 
 config/name="Godot-xr-ah"
 run/main_scene="res://main.tscn"
-config/features=PackedStringArray("4.3", "Mobile")
+config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.png"
+
+[audio]
+
+driver/enable_input=true
 
 [editor_plugins]
 
 enabled=PackedStringArray()
+
+[input]
+
+debugfingermove={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":79,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
 
 [rendering]
 
@@ -30,4 +42,10 @@ openxr/enabled=true
 openxr/environment_blend_mode=2
 openxr/foveation_level=1
 openxr/foveation_dynamic=true
+openxr/extensions/hand_tracking=true
+openxr/extensions/hand_tracking_unobstructed_data_source=true
+openxr/extensions/hand_tracking_controller_data_source=true
+openxr/extensions/hand_interaction_profile=true
+openxr/extensions/eye_gaze_interaction=true
 shaders/enabled=true
+openxr/extensions/hand_tracking_aim=true

@@ -41,8 +41,8 @@ offset_bottom = 40.0
 
 [node name="Button" type="Button" parent="VBoxTrackers0"]
 layout_mode = 2
-theme_override_colors/font_pressed_color = Color(0.878431, 0.917647, 0.0627451, 1)
 theme_override_colors/font_outline_color = Color(0, 0.631373, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.878431, 0.917647, 0.0627451, 1)
 toggle_mode = true
 text = "sdfkkkk"
 
@@ -55,8 +55,8 @@ offset_bottom = 40.0
 
 [node name="Button" type="Button" parent="VBoxTrackers1"]
 layout_mode = 2
-theme_override_colors/font_pressed_color = Color(0.878431, 0.917647, 0.0627451, 1)
 theme_override_colors/font_outline_color = Color(0, 0.631373, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.878431, 0.917647, 0.0627451, 1)
 toggle_mode = true
 text = "sdfkkkk"
 
@@ -86,6 +86,7 @@ disabled = true
 selected = 0
 item_count = 3
 popup/item_0/text = "Unknown"
+popup/item_0/id = 0
 popup/item_1/text = "Hand"
 popup/item_1/id = 1
 popup/item_2/text = "Controller"
@@ -117,6 +118,7 @@ disabled = true
 selected = 0
 item_count = 3
 popup/item_0/text = "Unknown"
+popup/item_0/id = 0
 popup/item_1/text = "Hand"
 popup/item_1/id = 1
 popup/item_2/text = "Controller"
@@ -163,6 +165,7 @@ offset_bottom = 278.0
 selected = 0
 item_count = 2
 popup/item_0/text = "AH"
+popup/item_0/id = 0
 popup/item_1/text = "XR"
 popup/item_1/id = 1
 
@@ -175,5 +178,6 @@ offset_bottom = 279.0
 selected = 0
 item_count = 2
 popup/item_0/text = "AH"
+popup/item_0/id = 0
 popup/item_1/text = "XR"
 popup/item_1/id = 1
