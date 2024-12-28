@@ -3,7 +3,6 @@ extends Node3D
 
 # Settings that can be changed dynamically in the debugger to 
 # see how they alter the mapping to the hand skeleton
-@export var applymiddlefingerfix : bool = true
 @export var applyscaling : bool = true
 @export var coincidewristorknuckle : bool = true
 @export var visiblehandtrackskeleton : bool = true
@@ -27,13 +26,12 @@ var xr_headtracker : XRPositionalTracker = null
 var xr_camera_node : XRCamera3D = null
 
 
-
 # Note the that the enumerations disagree
 # XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT = 1 
 # OpenXRInterface.Hand.HAND_LEFT = 0
 var hand : OpenXRInterface.Hand
 var tracker_name : String 
-var handtrackingsource = HAND_TRACKED_SOURCE_UNKNOWN
+var handtrackingsource = OpenXRInterface.HAND_TRACKED_SOURCE_UNKNOWN
 var handtracker_name : String
 
 # readings from OpenXR interface that can be pre-calculated by OpenXRHandData
@@ -44,12 +42,6 @@ var oxrktrans = [ ]
 var oxrktransRaw_updated = false
 var oxrktrans_updated = false
 var oxrkradii = [ ]
-
-
-# Copied out from OpenXRInterface.HandTrackedSource so it works on v4.2
-const HAND_TRACKED_SOURCE_UNKNOWN = 0
-const HAND_TRACKED_SOURCE_UNOBSTRUCTED = 1
-const HAND_TRACKED_SOURCE_CONTROLLER = 2
 
 var handnode = null
 var skel = null
@@ -64,25 +56,6 @@ var hstw
 var fingerboneindexes = [ ]
 var fingerboneresttransforms = [ ]
 var bYalignedAxes = false
-
-static func basisfromA(a, v):
-	var vx = a.normalized()
-	var vy = vx.cross(v.normalized())
-	var vz = vx.cross(vy)
-	return Basis(vx, vy, vz)
-
-static func rotationtoalignB(a, b, va, vb):
-	return basisfromA(b, vb)*basisfromA(a, va).inverse()
-
-static func rotationtoalignScaled(a, b):
-	var axis = a.cross(b).normalized()
-	var sca = b.length()/a.length()
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		return Basis(axis, angle_rads).scaled(Vector3(sca,sca,sca))
-	return Basis().scaled(Vector3(sca,sca,sca))
 
 func extractrestfingerbones():
 	print(handnode.name)
@@ -118,35 +91,11 @@ func extractrestfingerbones():
 				bYalignedAxes = false
 	print("bYalignedAxes ", bYalignedAxes)
 
-func testzboneoriented(oxrktrans):
-	var bZBoneoriented = true
-	for f in range(FINGERCOUNT):
-		for i in range(len(fingerboneresttransforms[f])-1):
-			var j0 = carpallist[f] + i
-			var btip = (i == len(fingerboneresttransforms[f]) - 1)
-			var j1 = carpallist[f] + i+(1 if not btip else -1)
-			var t0 = oxrktrans[j0]
-			var t1 = oxrktrans[j1]
-			if not t1.basis.is_conformal():
-				bZBoneoriented = false
-			var v01 = (t1.origin - t0.origin).normalized()
-			if btip:
-				v01 = -v01
-			var dv = v01 - t0.basis.y
-			if dv.length() > 0.01:
-				bZBoneoriented = false
-	return bZBoneoriented
-	
 
 func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
 	prints("_xr_controller_node_tracking_changed", tracker_nhand, tracking, xr_pose.name if xr_pose else "<none>")
 
-func _get_configuration_warnings() -> PackedStringArray:
-	var warnings := PackedStringArray()
-	if not (get_parent() is XRController3D):
-		warnings.append("This node must be a child of an XRController3D node")
-	return warnings
 
 func findxrnodes():
 	var nd = get_parent()
@@ -241,11 +190,6 @@ func _ready():
 	findhandnodes()
 	set_process(xr_interface != null)
 	
-func fixmiddlefingerpositions(oxrktrans):
-	for j in [ OpenXRInterface.HAND_JOINT_MIDDLE_TIP, OpenXRInterface.HAND_JOINT_RING_TIP ]:
-		var b = oxrktrans[j].basis
-		oxrktrans[j].origin += -0.01*b.y + 0.005*b.z
-
 func update_oxrktransRaw():
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
 		oxrktransRaw[j] = xr_handtracker.get_hand_joint_transform(j)
@@ -275,7 +219,7 @@ func calchandnodetransform(oxrktrans, xrt):
 	var skelmiddleknuckle = handnode.transform * hstw * middlerestreltransform
 
 	var m2g1g3 = leftrestreltransform.origin - rightrestreltransform.origin
-	var hnbasis = rotationtoalignB(hstw.basis*m2g1.origin, middleknuckle - wristorigin, 
+	var hnbasis = AutoHandFuncs.rotationtoalignB(hstw.basis*m2g1.origin, middleknuckle - wristorigin, 
 								   hstw.basis*m2g1g3, leftknuckle - rightknuckle)
 
 	var hnorigin = wristorigin - hnbasis*hstw.origin
@@ -300,7 +244,7 @@ func calcboneposes(oxrktrans, handnodetransform, xrt):
 			# tIbasis*fingerboneresttransforms[f][i+1] = mfg.inverse()*kpositions[f][i+1] - atIorigin
 			var atIorigin = Vector3(0,0,0)  
 			var kpositionsfip1 = xrt*oxrktrans[carpallist[f] + i+1].origin
-			var tIbasis = rotationtoalignScaled(fingerboneresttransforms[f][i+1].origin, mfg.affine_inverse()*kpositionsfip1 - atIorigin)
+			var tIbasis = AutoHandFuncs.rotationtoalignScaled(fingerboneresttransforms[f][i+1].origin, mfg.affine_inverse()*kpositionsfip1 - atIorigin)
 			var tIorigin = mfg.affine_inverse()*kpositionsfip1 - tIbasis*fingerboneresttransforms[f][i+1].origin # should be 0
 			assert (tIorigin.is_zero_approx())
 			var tI = Transform3D(tIbasis, tIorigin)
@@ -320,23 +264,13 @@ func calcboneposesDisplaceOrigins(oxrktrans, handnodetransform, xrt):
 			# tIbasis*fingerboneresttransforms[f][i+1] = mfg.inverse()*kpositions[f][i+1] - atIorigin
 			var atIorigin = Vector3(0,0,0)  
 			var kpositionsfip1 = xrt*oxrktrans[carpallist[f] + i+1].origin
-			var tIbasis = rotationtoalignUnScaled(fingerboneresttransforms[f][i+1].origin, mfg.affine_inverse()*kpositionsfip1 - atIorigin)
+			var tIbasis = AutoHandFuncs.rotationtoalignUnScaled(fingerboneresttransforms[f][i+1].origin, mfg.affine_inverse()*kpositionsfip1 - atIorigin)
 			var tIorigin = mfg.affine_inverse()*kpositionsfip1 - tIbasis*fingerboneresttransforms[f][i+1].origin # should be 0
 			var tI = Transform3D(tIbasis, tIorigin)
 			fingerbonetransformsOut[f][i] = fingerboneresttransforms[f][i]*tI
 			mfg = mfg*tI
 	return fingerbonetransformsOut
 
-static func rotationtoalignUnScaled(a, b):
-	#assert (is_zero_approx(a.x) and is_zero_approx(a.z))
-	var axis = a.cross(b).normalized()
-	var rot = Basis()
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		rot = Basis(axis, angle_rads)
-	return rot
 
 # (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
 # https://github.com/godotengine/godot/issues/99330
@@ -427,7 +361,7 @@ func calcboneposesScaledInYbadconformal(oxrktrans, handnodetransform, xrt):
 			# bonetargetvec1 = kpositionsfip1 - kpos0 = mfg.basis*F.basis*bonerestvec1
 			# F.basis*bonerestvec1 = mfg.basis.inverse()*bonetargetvec1
 			var fbv = mfg.basis.inverse()*bonetargetvec1
-			var rot = rotationtoalignUnScaled(bonerestvec1, fbv)
+			var rot = AutoHandFuncs.rotationtoalignUnScaled(bonerestvec1, fbv)
 			
 			var mfgR = mfg.basis*rot
 			# bonetargetvec1 = mfg.basis*rot*sca*bonerestvec1
@@ -496,12 +430,12 @@ func process_handtrackingsource():
 	var lhandtrackingsource = xr_handtracker.get_hand_tracking_source()
 	if handtrackingsource != lhandtrackingsource:
 		handtrackingsource = lhandtrackingsource
-		handtrackingactive = (handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED) or (controllersourcefingertracking and (handtrackingsource == HAND_TRACKED_SOURCE_CONTROLLER))
+		handtrackingactive = (handtrackingsource == OpenXRInterface.HAND_TRACKED_SOURCE_UNOBSTRUCTED) or (controllersourcefingertracking and (handtrackingsource == OpenXRInterface.HAND_TRACKED_SOURCE_CONTROLLER))
 		handnode.top_level = handtrackingactive
 		if handanimationtree:
 			handanimationtree.active = not handtrackingactive
 		print("setting hand tracking source "+str(hand)+": ", handtrackingsource)
-		if handtrackingsource == HAND_TRACKED_SOURCE_UNOBSTRUCTED:
+		if handtrackingsource == OpenXRInterface.HAND_TRACKED_SOURCE_UNOBSTRUCTED:
 			if enableautotracker:
 				$AutoTracker.activateautotracker(xr_controller_node)
 		else:
@@ -533,13 +467,10 @@ func _process(delta):
 	var xrt = xr_origin.global_transform*XRServer.get_reference_frame()
 	if $AutoTracker.autotrackeractive:
 		$AutoTracker.autotrackgestures(oxrktrans, xrt, xr_camera_node)
-	if applymiddlefingerfix:
-		fixmiddlefingerpositions(oxrktrans)
 	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
 
 	var fingerbonetransformsOut
-	if false and bYalignedAxes:
-		var bZBoneoriented = testzboneoriented(oxrktrans)
+	if bYalignedAxes:
 		#fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt)
 		fingerbonetransformsOut = calcboneposesScaledInYbadconformal(oxrktrans, handnodetransform, xrt)
 	else:
@@ -562,3 +493,10 @@ func _process(delta):
 		$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
 	oxrktrans_updated = false
+
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings := PackedStringArray()
+	if not (get_parent() is XRController3D):
+		warnings.append("This node must be a child of an XRController3D node")
+	return warnings

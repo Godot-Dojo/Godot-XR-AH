@@ -1,15 +1,5 @@
 extends Skeleton3D
 
-static func rotationtoalignUnScaled(a, b):
-	assert (is_zero_approx(a.x) and is_zero_approx(a.z))
-	var axis = a.cross(b).normalized()
-	var rot = Basis()
-	if (axis.length_squared() != 0):
-		var dot = a.dot(b)/(a.length()*b.length())
-		dot = clamp(dot, -1.0, 1.0)
-		var angle_rads = acos(dot)
-		rot = Basis(axis, angle_rads)
-	return rot
 
 func makeboneboxmesh(skel, iboneparent, ibone):
 	assert (iboneparent != -1 and iboneparent == skel.get_bone_parent(ibone))
@@ -18,7 +8,7 @@ func makeboneboxmesh(skel, iboneparent, ibone):
 	var t1 = skel.get_bone_global_pose(ibone) # = t0*tp
 	var v01 = t1.origin - t0.origin
 	var boneleng = tp.origin.length()
-	var rot = rotationtoalignUnScaled(Vector3(0,1,0), v01)
+	var rot = AutoHandFuncs.rotationtoalignUnScaled(Vector3(0,1,0), v01)
 	var cpos = (t0.origin + t1.origin)*0.5
 	assert (is_equal_approx(boneleng, v01.length()))
 
