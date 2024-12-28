@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=33 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="Script" uid="uid://dcvq5ddpglr84" path="res://addons/xr-autohandtracker/makeskelmesh.gd" id="5_cy21g"]
+[ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
 [ext_resource type="PackedScene" uid="uid://gqy3826fqpd6" path="res://oxr_compatible_hands/metahandL.glb" id="14_w48qg"]
@@ -26,16 +27,11 @@ background_mode = 2
 sky = SubResource("Sky_tsis2")
 tonemap_mode = 2
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_ycdy4"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_w48qg"]
-noise = SubResource("FastNoiseLite_ycdy4")
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vivmo"]
 resource_name = "Material_1"
 transparency = 1
-albedo_color = Color(0, 0.682353, 1, 0.623529)
-albedo_texture = SubResource("NoiseTexture2D_w48qg")
+albedo_color = Color(0.945596, 0.976528, 1, 0.623529)
+albedo_texture = ExtResource("7_w48qg")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s8gw2"]
 albedo_color = Color(0, 0.717647, 0.717647, 1)
