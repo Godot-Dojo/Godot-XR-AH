@@ -111,7 +111,7 @@ func _input_float_changed(name, value, hand):
 func _input_vector2_changed(name, vector, hand):
 	var ifstick = flat_display.get_node_or_null("Thumbstick%d" % hand)
 	if ifstick:
-		ifstick.get_node("Pos").position = (vector + Vector2(1,1))*(70/2)
+		ifstick.get_node("Pos").position = (Vector2(vector.x, -vector.y) + Vector2(1,1))*(70/2)
 	else:
 		print("inputvector2changed ", hand, " ", name, " ", vector)
 	#print("inputvector2changed ", name)  # it's always primary
