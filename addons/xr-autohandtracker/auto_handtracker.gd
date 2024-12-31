@@ -130,11 +130,11 @@ func findhandnodes():
 		return
 	for ch in xr_controller_node.get_children():
 		var lskel = ch.find_child("Skeleton3D")
-		if ch.visible and lskel:
-			if lskel.get_bone_count() == 26:
+		if lskel and ch.visible:
+			if lskel.get_bone_count() == 26 or lskel.get_bone_count() == 25:
 				handnode = ch
 			else:
-				print("unrecognized skeleton in controller")
+				print("unrecognized skeleton in controller ", lskel.get_bone_count())
 	if handnode == null:
 		print("Warning, no handnode (mesh and animationtree) detected")
 		return false
@@ -168,8 +168,14 @@ func findxrtrackerobjects():
 	print("action_sets: ", xr_interface.get_action_sets())
 	$AutoTracker.setupautotracker(tracker_nhand, islefthand, xr_controller_node)
 
+func xrserver_tracker_removed(tracker_name: StringName, type: int):
+	if tracker_name == handtracker_name: 
+		if xr_handtracker != null:
+			print("Invalidating hand tracker ", handtracker_name)
+			xr_handtracker = null
 
 func _ready():
+	XRServer.tracker_removed.connect(xrserver_tracker_removed)
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
 		oxrktransRaw.push_back(Transform3D())
 		oxrktrans.push_back(Transform3D())
@@ -427,11 +433,13 @@ func process_handtrackingsource():
 			handtrackingvalid = false
 			return
 			
-	var lhandtrackingsource = xr_handtracker.get_hand_tracking_source()
+	var lhandtrackingsource = xr_handtracker.hand_tracking_source
 	if handtrackingsource != lhandtrackingsource:
 		handtrackingsource = lhandtrackingsource
 		handtrackingactive = (handtrackingsource == OpenXRInterface.HAND_TRACKED_SOURCE_UNOBSTRUCTED) or (controllersourcefingertracking and (handtrackingsource == OpenXRInterface.HAND_TRACKED_SOURCE_CONTROLLER))
 		handnode.top_level = handtrackingactive
+
+		# OpenXRInterface.HAND_TRACKING_SOURCE_NOT_TRACKED == 3
 		if handanimationtree:
 			handanimationtree.active = not handtrackingactive
 		print("setting hand tracking source "+str(hand)+": ", handtrackingsource)
@@ -470,7 +478,7 @@ func _process(delta):
 	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
 
 	var fingerbonetransformsOut
-	if bYalignedAxes:
+	if false and bYalignedAxes:
 		#fingerbonetransformsOut = calcboneposesScaledInY(oxrktrans, handnodetransform, xrt)
 		fingerbonetransformsOut = calcboneposesScaledInYbadconformal(oxrktrans, handnodetransform, xrt)
 	else:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=35 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="Script" uid="uid://dcvq5ddpglr84" path="res://addons/xr-autohandtracker/makeskelmesh.gd" id="5_cy21g"]
 [ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
+[ext_resource type="PackedScene" uid="uid://dxetpro3mti2t" path="res://oxr_compatible_hands/PLeftHandHumanoid.glb" id="8_vivmo"]
+[ext_resource type="PackedScene" uid="uid://c53hpud76ouvx" path="res://oxr_compatible_hands/PRightHandHumanoid.glb" id="12_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
 [ext_resource type="PackedScene" uid="uid://gqy3826fqpd6" path="res://oxr_compatible_hands/metahandL.glb" id="14_w48qg"]
@@ -153,9 +155,15 @@ bones/23/scale = Vector3(1, 1, 1)
 script = ExtResource("5_cy21g")
 
 [node name="metahandL" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("14_w48qg")]
+visible = false
 
 [node name="_MeshInstance3D_84" parent="XROrigin3D/XRController3DLeft/metahandL/Armature/Skeleton3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000146434, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
+
+[node name="PLeftHandHumanoid" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("8_vivmo")]
+
+[node name="LeftHandHumanoidMesh" parent="XROrigin3D/XRController3DLeft/PLeftHandHumanoid/LeftHandHumanoid/Skeleton3D" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
@@ -205,9 +213,15 @@ bones/23/scale = Vector3(1, 1, 1)
 surface_material_override/0 = SubResource("StandardMaterial3D_s8gw2")
 
 [node name="metahandR" parent="XROrigin3D/XRController3DRight" instance=ExtResource("15_vivmo")]
+visible = false
 
 [node name="_MeshInstance3D_85" parent="XROrigin3D/XRController3DRight/metahandR/Armature/Skeleton3D" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_yaehf")
+
+[node name="PRightHandHumanoid" parent="XROrigin3D/XRController3DRight" instance=ExtResource("12_2cqfq")]
+
+[node name="RightHandHumanoidMesh" parent="XROrigin3D/XRController3DRight/PRightHandHumanoid/RightHandHumanoid/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
 visiblehandtrackskeletonRaw = true
@@ -248,6 +262,7 @@ script = ExtResource("13_p61xh")
 
 [node name="LeftHandTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)
+visible = false
 tracker = &"/user/hand_tracker/left"
 
 [node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/LeftHandTracker"]
@@ -257,6 +272,7 @@ material = SubResource("StandardMaterial3D_074og")
 
 [node name="RightHandTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.440078, 1.24593, -0.590358)
+visible = false
 tracker = &"/user/hand_tracker/right"
 
 [node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/RightHandTracker"]
@@ -298,5 +314,7 @@ skeleton = NodePath("../XROrigin3D")
 
 [editable path="XROrigin3D/XRController3DLeft/Hand_low_L"]
 [editable path="XROrigin3D/XRController3DLeft/metahandL"]
+[editable path="XROrigin3D/XRController3DLeft/PLeftHandHumanoid"]
 [editable path="XROrigin3D/XRController3DRight/Hand_low_R"]
 [editable path="XROrigin3D/XRController3DRight/metahandR"]
+[editable path="XROrigin3D/XRController3DRight/PRightHandHumanoid"]
