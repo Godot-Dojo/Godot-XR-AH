@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=32 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://cnkv0gppp011j" path="res://Hand_low_L.gltf" id="2_0obas"]
@@ -9,13 +9,11 @@
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="Script" uid="uid://dcvq5ddpglr84" path="res://addons/xr-autohandtracker/makeskelmesh.gd" id="5_cy21g"]
+[ext_resource type="PackedScene" uid="uid://8jsauvbqvkou" path="res://addons/xr-autohandtracker/simplelefthand.glb" id="6_vivmo"]
 [ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
-[ext_resource type="PackedScene" uid="uid://dxetpro3mti2t" path="res://oxr_compatible_hands/PLeftHandHumanoid.glb" id="8_vivmo"]
-[ext_resource type="PackedScene" uid="uid://c53hpud76ouvx" path="res://oxr_compatible_hands/PRightHandHumanoid.glb" id="12_2cqfq"]
+[ext_resource type="PackedScene" uid="uid://coc7xo1jkpppe" path="res://addons/xr-autohandtracker/simplerighgthand.glb" id="11_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
-[ext_resource type="PackedScene" uid="uid://gqy3826fqpd6" path="res://oxr_compatible_hands/metahandL.glb" id="14_w48qg"]
-[ext_resource type="PackedScene" uid="uid://dn0klb2ugwotq" path="res://oxr_compatible_hands/metahandR.glb" id="15_vivmo"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -35,10 +33,10 @@ transparency = 1
 albedo_color = Color(0.945596, 0.976528, 1, 0.623529)
 albedo_texture = ExtResource("7_w48qg")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yaehf"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cegan"]
 resource_name = "Material_1"
-transparency = 1
-albedo_color = Color(0, 0, 1, 0.686275)
+albedo_color = Color(0.945596, 0.976528, 1, 0.623529)
+albedo_texture = ExtResource("7_w48qg")
 
 [sub_resource type="QuadMesh" id="QuadMesh_eslsg"]
 size = Vector2(0.8, 0.5)
@@ -149,17 +147,10 @@ bones/23/rotation = Quaternion(-0.0180548, 0.0114553, -0.107075, 0.994021)
 bones/23/scale = Vector3(1, 1, 1)
 script = ExtResource("5_cy21g")
 
-[node name="metahandL" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("14_w48qg")]
-visible = false
+[node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("6_vivmo")]
+transform = Transform3D(0.0471668, 0.545034, -0.837086, 0.0306621, -0.838414, -0.544171, -0.998416, 0, -0.0562571, 0, 0, 0)
 
-[node name="_MeshInstance3D_84" parent="XROrigin3D/XRController3DLeft/metahandL/Armature/Skeleton3D" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000146434, 0, 0)
-surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
-
-[node name="PLeftHandHumanoid" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("8_vivmo")]
-
-[node name="LeftHandHumanoidMesh" parent="XROrigin3D/XRController3DLeft/PLeftHandHumanoid/LeftHandHumanoid/Skeleton3D" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.000345081, 0)
+[node name="LeftHandHumanoidMesh" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid/Skeleton3D" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
@@ -205,19 +196,14 @@ bones/21/rotation = Quaternion(-0.089286, -0.00316807, 0.00673912, 0.995978)
 bones/23/rotation = Quaternion(-0.0180548, -0.0114553, 0.107075, 0.994021)
 bones/23/scale = Vector3(1, 1, 1)
 
-[node name="metahandR" parent="XROrigin3D/XRController3DRight" instance=ExtResource("15_vivmo")]
-visible = false
-
-[node name="_MeshInstance3D_85" parent="XROrigin3D/XRController3DRight/metahandR/Armature/Skeleton3D" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_yaehf")
-
-[node name="PRightHandHumanoid" parent="XROrigin3D/XRController3DRight" instance=ExtResource("12_2cqfq")]
-
-[node name="RightHandHumanoidMesh" parent="XROrigin3D/XRController3DRight/PRightHandHumanoid/RightHandHumanoid/Skeleton3D" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
-
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
 visiblehandtrackskeletonRaw = true
+
+[node name="simplerighgthand" parent="XROrigin3D/XRController3DRight" instance=ExtResource("11_2cqfq")]
+transform = Transform3D(0.277673, 0.232614, 0.932088, -0.0664122, 0.972569, -0.222932, -0.958377, 0, 0.285504, 0, 0, 0)
+
+[node name="RightHandHumanoidMesh" parent="XROrigin3D/XRController3DRight/simplerighgthand/RightHandHumanoid/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
 
 [node name="HandJoints" type="Node3D" parent="XROrigin3D"]
 script = ExtResource("4_eaqi8")
@@ -306,9 +292,8 @@ mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
 
 [editable path="XROrigin3D/XRController3DLeft/Hand_low_L"]
-[editable path="XROrigin3D/XRController3DLeft/metahandL"]
-[editable path="XROrigin3D/XRController3DLeft/PLeftHandHumanoid"]
+[editable path="XROrigin3D/XRController3DLeft/simplelefthand"]
 [editable path="XROrigin3D/XRController3DLeft/AutoHandtracker"]
 [editable path="XROrigin3D/XRController3DRight/Hand_low_R"]
-[editable path="XROrigin3D/XRController3DRight/metahandR"]
-[editable path="XROrigin3D/XRController3DRight/PRightHandHumanoid"]
+[editable path="XROrigin3D/XRController3DRight/AutoHandtracker"]
+[editable path="XROrigin3D/XRController3DRight/simplerighgthand"]

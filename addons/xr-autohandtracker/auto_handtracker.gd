@@ -15,7 +15,6 @@ var xr_origin : XROrigin3D
 
 # Controller and its tracker with the aim pose that we can use when hand-tracking active
 var xr_controller_node : XRController3D = null
-var tracker_nhand : XRPositionalTracker.TrackerHand = XRPositionalTracker.TrackerHand.TRACKER_HAND_UNKNOWN
 var xr_controllertracker : XRPositionalTracker = null
 var xr_handtracker : XRPositionalTracker = null
 var xr_aimpose : XRPose = null
@@ -89,7 +88,7 @@ func extractrestfingerbones():
 
 func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
-	prints("_xr_controller_node_tracking_changed", tracker_nhand, tracking, xr_pose.name if xr_pose else "<none>")
+	prints("_xr_controller_node_tracking_changed", tracking, xr_pose.name if xr_pose else "<none>")
 
 
 func findxrnodesandtrackers():
@@ -113,13 +112,13 @@ func findxrnodesandtrackers():
 	print("All nodes for %s detected" % tracker_name)
 
 	xr_controllertracker = XRServer.get_tracker(tracker_name)
-	tracker_nhand = xr_controller_node.get_tracker_hand()
+	var tracker_nhand = xr_controller_node.get_tracker_hand()
 	if xr_controllertracker != null:
 		assert (tracker_nhand == (XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT if islefthand else XRPositionalTracker.TrackerHand.TRACKER_HAND_RIGHT))
 		assert (xr_controllertracker.hand == tracker_nhand)
 		print(xr_controllertracker.description, " ", xr_controllertracker.hand, " ", xr_controllertracker.name, " ", xr_controllertracker.profile, " ", xr_controllertracker.type)
 		handtracker_name = "/user/hand_tracker/left" if islefthand else "/user/hand_tracker/right"
-		$AutoTracker.setupautotracker(tracker_nhand, islefthand, xr_controller_node)
+		$AutoTracker.setupautotracker(xr_controller_node, islefthand)
 	else:
 		assert (tracker_nhand == XRPositionalTracker.TrackerHand.TRACKER_HAND_UNKNOWN)
 	return true

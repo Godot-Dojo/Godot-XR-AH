@@ -22,12 +22,12 @@ func _ready():
 	$ThumbstickBoundaries/UpDisc.transform.origin.y = updowndistbutton
 	$ThumbstickBoundaries/DownDisc.transform.origin.y = -updowndistbutton
 
-func setupautotracker(tracker_nhand, islefthand, xr_controller_node):
+func setupautotracker(xr_controller_node, islefthand):
 	xr_autotracker = XRPositionalTracker.new()
-	xr_autotracker.hand = tracker_nhand
+	xr_autotracker.hand = XRPositionalTracker.TRACKER_HAND_LEFT if islefthand else XRPositionalTracker.TRACKER_HAND_RIGHT
 	xr_autotracker.name = "left_autohand" if islefthand else "right_autohand"
 	xr_autotracker.profile = "/interaction_profiles/autohand" # "/interaction_profiles/none"
-	xr_autotracker.type = 2
+	xr_autotracker.type = XRServer.TRACKER_CONTROLLER
 
 	xr_autotracker.set_pose(xr_controller_node.pose, Transform3D(), Vector3(), Vector3(), XRPose.TrackingConfidence.XR_TRACKING_CONFIDENCE_NONE)
 	xr_autopose = xr_autotracker.get_pose(xr_controller_node.pose)
