@@ -45,7 +45,7 @@ var handanimationtree = null
 var handtoskeltransform
 var wristboneindex
 var wristboneresttransform
-var hstw
+var wristboneresthandtransform
 
 var fingerboneindexes = [ ]
 var fingerboneresttransforms = [ ]
@@ -60,7 +60,7 @@ func extractrestfingerbones():
 	if wristboneindex == -1:
 		wristboneindex = skel.find_bone(lrN + "Hand")
 	wristboneresttransform = skel.get_bone_rest(wristboneindex)
-	hstw = handtoskeltransform * wristboneresttransform
+	wristboneresthandtransform = handtoskeltransform * wristboneresttransform
 	assert (len(fingerboneindexes) == 0 and len(fingerboneresttransforms) == 0)
 	for f in ["Thumb", "Index", "Middle", "Ring", "Little"]:
 		fingerboneindexes.push_back([ ])
@@ -166,37 +166,45 @@ func update_oxrktransRaw():
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
 		oxrktransRaw[j] = xr_handtracker.get_hand_joint_transform(j)
 
-func calchandnodetransform(oxrktrans, xrt):
-	# solve for handnodetransform where
-	# avatarwristtrans = handnode.get_parent().global_transform * handnodetransform * handtoskeltransform * wristboneresttransform
-	# avatarwristpos = avatarwristtrans.origin
-	# avatarmiddleknucklepos = avatarwristtrans * fingerboneresttransforms[2][0] * fingerboneresttransforms[2][1]
-	# handwrist = xrorigintransform * oxrjps[OpenXRInterface.HAND_JOINT_WRIST]
-	# handmiddleknuckle = xrorigintransform * oxrjps[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL]
-	#  so that avatarwristpos->avatarmiddleknucklepos is aligned along handwrist->handmiddleknuckle
-	#  and rotated so that the line between index and ring knuckles are in the same plane
-	
-	# We want skel.global_transform*wristboneresttransform to have origin xrorigintransform*gg[OpenXRInterface.HAND_JOINT_WRIST].origin
-	var wristorigin = xrt*oxrktrans[OpenXRInterface.HAND_JOINT_WRIST].origin
+func calchandnodetransform(oxrktrans):
+	#  measured joints:
+	var hjleftproximal = (OpenXRInterface.HAND_JOINT_RING_PROXIMAL if islefthand else OpenXRInterface.HAND_JOINT_INDEX_PROXIMAL)
+	var hjrightproximal = (OpenXRInterface.HAND_JOINT_INDEX_PROXIMAL if islefthand else OpenXRInterface.HAND_JOINT_RING_PROXIMAL)
+	var wristorigin = oxrktrans[OpenXRInterface.HAND_JOINT_WRIST].origin
+	var middleknuckle = oxrktrans[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL].origin
+	var leftknuckle = oxrktrans[hjleftproximal].origin
+	var rightknuckle = oxrktrans[hjrightproximal].origin
 
-	var middleknuckle = xrt*oxrktrans[OpenXRInterface.HAND_JOINT_MIDDLE_PROXIMAL].origin
-	var leftknuckle = xrt*oxrktrans[OpenXRInterface.HAND_JOINT_RING_PROXIMAL if islefthand else OpenXRInterface.HAND_JOINT_INDEX_PROXIMAL].origin
-	var rightknuckle = xrt*oxrktrans[OpenXRInterface.HAND_JOINT_INDEX_PROXIMAL if islefthand else OpenXRInterface.HAND_JOINT_RING_PROXIMAL].origin
-
+	# avatar relative bone positions
+	var ileftfinger = (3 if islefthand else 1)
+	var irightfinger = (1 if islefthand else 3)
 	var middlerestreltransform = fingerboneresttransforms[2][0] * fingerboneresttransforms[2][1]
-	var leftrestreltransform = fingerboneresttransforms[3 if islefthand else 1][0] * fingerboneresttransforms[3 if islefthand else 1][1]
-	var rightrestreltransform = fingerboneresttransforms[1 if islefthand else 3][0] * fingerboneresttransforms[1 if islefthand else 3][1]
+	var leftrestreltransform = fingerboneresttransforms[ileftfinger][0] * fingerboneresttransforms[ileftfinger][1]
+	var rightrestreltransform = fingerboneresttransforms[irightfinger][0] * fingerboneresttransforms[irightfinger][1]
+
+	# solving for handnodetransform
+	# Let: 
+	#     avatarwristtrans = handnodetransform * wristboneresthandtransform
+	#     avatarmiddleknuckletransform = avatarwristtrans * middlerestreltransform
+	# and align: avatarwristtrans.origin -> avatarmiddleknuckletransform.origin
+	#      with: wristorigin -> middleknuckle
+	# then rotate about this axis so that the plane between the wrist, left and right knuckles coincide
 	
 	var m2g1 = middlerestreltransform
-	var skelmiddleknuckle = handnode.transform * hstw * middlerestreltransform
+	var skelmiddleknuckle = handnode.transform * wristboneresthandtransform * middlerestreltransform
 
 	var m2g1g3 = leftrestreltransform.origin - rightrestreltransform.origin
-	var hnbasis = AutoHandFuncs.rotationtoalignB(hstw.basis*m2g1.origin, middleknuckle - wristorigin, 
-								   hstw.basis*m2g1g3, leftknuckle - rightknuckle)
+	var hnbasis = AutoHandFuncs.rotationtoalignB(wristboneresthandtransform.basis*m2g1.origin, middleknuckle - wristorigin, 
+								   wristboneresthandtransform.basis*m2g1g3, leftknuckle - rightknuckle)
 
-	var hnorigin = middleknuckle - hnbasis*(hstw*middlerestreltransform).origin if coincidemiddleknuckle \
-					else wristorigin - hnbasis*hstw.origin
+	var hnorigin
+	if coincidemiddleknuckle:
+		hnorigin = middleknuckle - hnbasis*(wristboneresthandtransform*middlerestreltransform).origin 
+	else:
+		hnorigin = wristorigin - hnbasis*wristboneresthandtransform.origin
 	return Transform3D(hnbasis, hnorigin)
+	
+	
 		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, 
 					OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, 
@@ -205,7 +213,7 @@ const FINGERCOUNT = 5
 func calcboneposes(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
-		var mfg = handnodetransform * hstw
+		var mfg = handnodetransform * wristboneresthandtransform
 		# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
 		
 		for i in range(len(fingerboneresttransforms[f])-1):
@@ -225,7 +233,7 @@ func calcboneposes(oxrktrans, handnodetransform, xrt):
 func calcboneposesDisplaceOrigins(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
-		var mfg = handnodetransform * hstw
+		var mfg = handnodetransform * wristboneresthandtransform
 		# (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
 		
 		for i in range(len(fingerboneresttransforms[f])-1):
@@ -247,7 +255,7 @@ func calcboneposesDisplaceOrigins(oxrktrans, handnodetransform, xrt):
 func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
-		var mfg = handnodetransform * hstw
+		var mfg = handnodetransform * wristboneresthandtransform
 		#print(mfg.basis.get_scale())
 		var prevscale = 1.0
 		for i in range(len(fingerboneresttransforms[f])-1):
@@ -306,7 +314,7 @@ func calcboneposesScaledInY(oxrktrans, handnodetransform, xrt):
 func calcboneposesScaledInYbadconformal(oxrktrans, handnodetransform, xrt):
 	var fingerbonetransformsOut = fingerboneresttransforms.duplicate(true)
 	for f in range(FINGERCOUNT):
-		var mfg = handnodetransform * hstw
+		var mfg = handnodetransform * wristboneresthandtransform
 		#print(mfg.basis.get_scale())
 		for i in range(len(fingerboneresttransforms[f])-1):
 			var kpositionsfip0 = xrt*oxrktrans[carpallist[f] + i].origin
@@ -372,22 +380,6 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 				var Dbt = skel.get_bone_pose(ix)
 				#print(" : ", Dbt.basis.y - t.basis.y)
 
-func Dcheckskeltobonetrans(oxrktrans, handnodetransform, xrt, fingerbonetransformsOut):
-	for f in range(len(fingerboneindexes)):
-		var fg = skel.get_bone_pose(0)
-		for i in range(len(fingerboneindexes[f])):
-			var ix = fingerboneindexes[f][i]
-			var tbone = skel.get_bone_global_pose(ix)
-			var tj = xrt*handnodetransform*tbone
-			var pos = xrt*oxrktrans[carpallist[f] + i].origin
-			if f == 1:
-				prints(i, pos)
-			#prints(f, i, tj.origin - pos)
-			#fg = fg*fingerbonetransformsOut[f][i]
-			fg = fg*skel.get_bone_pose(ix)
-			print(" h ", skel.get_bone_pose(ix).origin - fingerbonetransformsOut[f][i].origin)
-			print("z ", tbone.origin - fg.origin)
-
 			
 func process_handtrackingsource():
 	if xr_handtracker == null:
@@ -439,7 +431,7 @@ func _process(delta):
 	var xrt = xr_origin.global_transform*XRServer.get_reference_frame()
 	if $AutoTracker.autotrackeractive:
 		$AutoTracker.autotrackgestures(oxrktrans, xrt)
-	var handnodetransform = calchandnodetransform(oxrktrans, xrt)
+	var handnodetransform = xrt*calchandnodetransform(oxrktrans)
 
 	var fingerbonetransformsOut
 	if false and bYalignedAxes:
@@ -452,8 +444,6 @@ func _process(delta):
 	handnode.transform = handnodetransform
 
 	copyouttransformstoskel(fingerbonetransformsOut)
-	#Dcheckskeltobonetrans(oxrktrans, handnodetransform, xrt, fingerbonetransformsOut)
-	#print()
 	
 	if visible and $VisibleHandTrackSkeleton.visible:
 		$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrktransRaw if visiblehandtrackskeletonRaw else oxrktrans, xrt)
