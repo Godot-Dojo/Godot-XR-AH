@@ -14,19 +14,15 @@ extends Node3D
 var xr_origin : XROrigin3D
 
 # Controller and its tracker with the aim pose that we can use when hand-tracking active
+var islefthand = true
 var xr_controller_node : XRController3D = null
-var xr_controllertracker : XRPositionalTracker = null
-var xr_handtracker : XRPositionalTracker = null
+var controllertracker_name : String 
+var xr_controllertracker : XRControllerTracker = null
+var handtracker_name : String
+var xr_handtracker : XRHandTracker = null
 var xr_aimpose : XRPose = null
 
-
-# Note the that the enumerations disagree
-# XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT = 1 
-# OpenXRInterface.Hand.HAND_LEFT = 0
-var islefthand = true
-var tracker_name : String 
 var handtrackingsource = OpenXRInterface.HAND_TRACKED_SOURCE_UNKNOWN
-var handtracker_name : String
 
 # readings from OpenXR interface that can be pre-calculated by OpenXRHandData
 var handtrackingactive = false
@@ -50,6 +46,8 @@ var wristboneresthandtransform
 var fingerboneindexes = [ ]
 var fingerboneresttransforms = [ ]
 var bYalignedAxes = false
+
+
 
 func extractrestfingerbones():
 	print(handnode.name)
@@ -91,36 +89,48 @@ func _xr_controller_node_tracking_changed(tracking):
 	prints("_xr_controller_node_tracking_changed", tracking, xr_pose.name if xr_pose else "<none>")
 
 
+func xrserver_tracker_added(tracker_name: StringName, type: int):
+	if tracker_name == handtracker_name: 
+		assert (type == XRServer.TRACKER_HAND)
+		xr_handtracker = XRServer.get_tracker(handtracker_name)
+
+func xrserver_tracker_removed(tracker_name: StringName, type: int):
+	if tracker_name == handtracker_name: 
+		print("Invalidating hand tracker ", handtracker_name)
+		assert (type == XRServer.TRACKER_HAND)
+		xr_handtracker = null
+	elif tracker_name == controllertracker_name: 
+		print("Invalidating controller tracker ", controllertracker_name)
+		assert (type == XRServer.TRACKER_CONTROLLER)
+		xr_handtracker = null
+
 func findxrnodesandtrackers():
 	if not (get_parent() is XRController3D):
 		push_error("Autohand not a child of XRController3D")
 		return false
 	xr_controller_node = get_parent()
-	tracker_name = xr_controller_node.tracker
-	islefthand = (tracker_name == "left_hand")
-	assert (tracker_name == ("left_hand" if islefthand else "right_hand"))
-	xr_controller_node.tracking_changed.connect(_xr_controller_node_tracking_changed)
+	controllertracker_name = xr_controller_node.tracker
+	islefthand = (controllertracker_name == "left_hand")
+	assert (controllertracker_name == ("left_hand" if islefthand else "right_hand"))
 	if not (xr_controller_node.get_parent() is XROrigin3D):
 		push_error("XRController3D not child of XROrigin3D")
 		return false
 	xr_origin = xr_controller_node.get_parent()
+	xr_controller_node.tracking_changed.connect(_xr_controller_node_tracking_changed)
 
 	for cch in xr_origin.get_children():
 		if cch is XRCamera3D:
 			$AutoTracker.xr_camera_node = cch
 
-	print("All nodes for %s detected" % tracker_name)
+	xr_controllertracker = XRServer.get_tracker(controllertracker_name)
+	assert ((xr_controllertracker == null) or (xr_controller_node.get_tracker_hand() == xr_controllertracker.hand))
+	assert ((xr_controllertracker != null) or (xr_controller_node.get_tracker_hand() == XRPositionalTracker.TRACKER_HAND_UNKNOWN))
 
-	xr_controllertracker = XRServer.get_tracker(tracker_name)
-	var tracker_nhand = xr_controller_node.get_tracker_hand()
-	if xr_controllertracker != null:
-		assert (tracker_nhand == (XRPositionalTracker.TrackerHand.TRACKER_HAND_LEFT if islefthand else XRPositionalTracker.TrackerHand.TRACKER_HAND_RIGHT))
-		assert (xr_controllertracker.hand == tracker_nhand)
-		print(xr_controllertracker.description, " ", xr_controllertracker.hand, " ", xr_controllertracker.name, " ", xr_controllertracker.profile, " ", xr_controllertracker.type)
-		handtracker_name = "/user/hand_tracker/left" if islefthand else "/user/hand_tracker/right"
-		$AutoTracker.setupautotracker(xr_controller_node, islefthand)
-	else:
-		assert (tracker_nhand == XRPositionalTracker.TrackerHand.TRACKER_HAND_UNKNOWN)
+	handtracker_name = "/user/hand_tracker/left" if islefthand else "/user/hand_tracker/right"
+	xr_handtracker = XRServer.get_tracker(handtracker_name)
+
+	$AutoTracker.setupautotracker(xr_controller_node, islefthand)
+
 	return true
 
 func findhandnodes():
@@ -144,14 +154,11 @@ func findhandnodes():
 	extractrestfingerbones()
 	
 
-func xrserver_tracker_removed(tracker_name: StringName, type: int):
-	if tracker_name == handtracker_name: 
-		if xr_handtracker != null:
-			print("Invalidating hand tracker ", handtracker_name)
-			xr_handtracker = null
 
 func _ready():
 	XRServer.tracker_removed.connect(xrserver_tracker_removed)
+	XRServer.tracker_added.connect(xrserver_tracker_added)
+	
 	for j in range(OpenXRInterface.HAND_JOINT_MAX):
 		oxrktransRaw.push_back(Transform3D())
 		oxrktrans.push_back(Transform3D())
@@ -178,9 +185,9 @@ func calchandnodetransform(oxrktrans):
 	# avatar relative bone positions
 	var ileftfinger = (3 if islefthand else 1)
 	var irightfinger = (1 if islefthand else 3)
-	var middlerestreltransform = fingerboneresttransforms[2][0] * fingerboneresttransforms[2][1]
-	var leftrestreltransform = fingerboneresttransforms[ileftfinger][0] * fingerboneresttransforms[ileftfinger][1]
-	var rightrestreltransform = fingerboneresttransforms[irightfinger][0] * fingerboneresttransforms[irightfinger][1]
+	var middleknucklerestwristtransform = fingerboneresttransforms[2][0] * fingerboneresttransforms[2][1]
+	var leftknucklerestwristtransform = fingerboneresttransforms[ileftfinger][0] * fingerboneresttransforms[ileftfinger][1]
+	var rightknucklerestwristtransform = fingerboneresttransforms[irightfinger][0] * fingerboneresttransforms[irightfinger][1]
 
 	# solving for handnodetransform
 	# Let: 
@@ -189,21 +196,18 @@ func calchandnodetransform(oxrktrans):
 	# and align: avatarwristtrans.origin -> avatarmiddleknuckletransform.origin
 	#      with: wristorigin -> middleknuckle
 	# then rotate about this axis so that the plane between the wrist, left and right knuckles coincide
-	
-	var m2g1 = middlerestreltransform
-	var skelmiddleknuckle = handnode.transform * wristboneresthandtransform * middlerestreltransform
+	var knucklevector = leftknucklerestwristtransform.origin - rightknucklerestwristtransform.origin
+	var hnbasis = AutoHandFuncs.rotationtoalignB(
+		wristboneresthandtransform.basis*middleknucklerestwristtransform.origin, middleknuckle - wristorigin, 
+		wristboneresthandtransform.basis*knucklevector, leftknuckle - rightknuckle)
 
-	var m2g1g3 = leftrestreltransform.origin - rightrestreltransform.origin
-	var hnbasis = AutoHandFuncs.rotationtoalignB(wristboneresthandtransform.basis*m2g1.origin, middleknuckle - wristorigin, 
-								   wristboneresthandtransform.basis*m2g1g3, leftknuckle - rightknuckle)
-
+	# now decide if the origin is to align the wrist or the middle knuckle
 	var hnorigin
 	if coincidemiddleknuckle:
-		hnorigin = middleknuckle - hnbasis*(wristboneresthandtransform*middlerestreltransform).origin 
+		hnorigin = middleknuckle - hnbasis*(wristboneresthandtransform*middleknucklerestwristtransform).origin 
 	else:
 		hnorigin = wristorigin - hnbasis*wristboneresthandtransform.origin
 	return Transform3D(hnbasis, hnorigin)
-	
 	
 		
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, 
@@ -383,11 +387,9 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 			
 func process_handtrackingsource():
 	if xr_handtracker == null:
-		xr_handtracker = XRServer.get_tracker(handtracker_name)
-		if xr_handtracker == null:
-			handtrackingactive = false
-			handtrackingvalid = false
-			return
+		handtrackingactive = false
+		handtrackingvalid = false
+		return
 			
 	var lhandtrackingsource = xr_handtracker.hand_tracking_source
 	if handtrackingsource != lhandtrackingsource:
@@ -410,7 +412,7 @@ func process_handtrackingsource():
 		for j in range(OpenXRInterface.HAND_JOINT_MAX):
 			oxrkradii[j] = xr_handtracker.get_hand_joint_radius(j)
 
-	handtrackingvalid = handtrackingactive and ((xr_handtracker.get_hand_joint_flags(OpenXRInterface.HAND_JOINT_WRIST) & OpenXRInterface.HAND_JOINT_POSITION_VALID) != 0)
+	handtrackingvalid = handtrackingactive and ((xr_handtracker.get_hand_joint_flags(XRHandTracker.HAND_JOINT_WRIST) & XRHandTracker.HAND_JOINT_FLAG_POSITION_VALID) != 0)
 	$VisibleHandTrackSkeleton.visible = visiblehandtrackskeleton and handtrackingvalid
 	
 	
