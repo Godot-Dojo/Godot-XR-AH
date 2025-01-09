@@ -4,7 +4,7 @@ extends Node3D
 
 signal menuitemselected(menutext)
 
-@export var contextbutton = "by_button"
+@export var contextbutton = "ax_button"
 @export var actionbutton = "trigger_click"
 @export var collisionlayer = 23
 @export var diskdistance = 0.2
@@ -34,7 +34,12 @@ func controller_button_released(name):
 		actreleaseradialmenu()
 
 func makeradialmenu():
-	aimglobaltransform = Transform3D(global_transform.basis, global_transform.origin - global_transform.basis.z * diskdistance)
+	var rbasis = global_transform.basis
+	var rx = Vector3(0,1,0).cross(rbasis.z).normalized()
+	var ry = rbasis.z.cross(rx)
+	rbasis = Basis(rx, ry, rbasis.z)
+	aimglobaltransform = Transform3D(rbasis, global_transform.origin - rbasis.z * diskdistance)
+	
 	aimtransform = xrorigin.global_transform.affine_inverse()*aimglobaltransform
 	set_process(true)
 	$RayCast3D.enabled = true
