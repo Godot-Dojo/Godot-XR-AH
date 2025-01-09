@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=29 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -11,7 +11,6 @@
 [ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
 [ext_resource type="PackedScene" uid="uid://coc7xo1jkpppe" path="res://addons/xr-autohandtracker/simplerighgthand.glb" id="11_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
-[ext_resource type="Script" path="res://xrfacetracker.gd" id="13_p61xh"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -174,9 +173,6 @@ mesh = SubResource("BoxMesh_yct16")
 surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
 [node name="XRSimulator" parent="XROrigin3D" instance=ExtResource("12_f86bf")]
-
-[node name="XRFaceTracker" type="Node" parent="XROrigin3D"]
-script = ExtResource("13_p61xh")
 
 [node name="LeftHandTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)

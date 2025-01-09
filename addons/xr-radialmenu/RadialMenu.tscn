@@ -3,22 +3,27 @@
 [ext_resource type="Script" uid="uid://rfgrmh0pp762" path="res://addons/xr-radialmenu/RadialMenu.gd" id="1_ghppp"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_tk54u"]
-size = Vector3(0.01, 0.01, 0.4)
+size = Vector3(0.002, 0.002, 0.4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ee2ii"]
-albedo_color = Color(0.76725, 0.448728, 0.156234, 1)
+shading_mode = 0
+albedo_color = Color(0.768627, 0.105882, 0.156863, 1)
 
 [node name="RadialMenu" type="Node3D"]
 script = ExtResource("1_ghppp")
-
-[node name="AimRay" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2)
-mesh = SubResource("BoxMesh_tk54u")
-surface_material_override/0 = SubResource("StandardMaterial3D_ee2ii")
 
 [node name="MenuDisk" type="Node3D" parent="."]
 top_level = true
 visible = false
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
+visible = false
+enabled = false
 target_position = Vector3(0, 0, -1)
+collision_mask = 2
+
+[node name="AimRay" type="MeshInstance3D" parent="RayCast3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2)
+mesh = SubResource("BoxMesh_tk54u")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_ee2ii")

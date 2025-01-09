@@ -1,19 +1,20 @@
 extends Node3D
 
-# Hold E and 2 down to simulate the context sensitive menu
+# Hold E and 1 down to simulate the context sensitive menu
 
 signal menuitemselected(menutext)
 
+@export var contextbutton = "by_button"
+@export var actionbutton = "trigger_click"
+@export var collisionlayer = 23
+@export var diskdistance = 0.2
+@export var diskradius = 0.1
+
+var menuitemtexts = ["one", "two", "three", "four", "five"]
+
 var selectedsignmaterial = load("res://addons/xr-radialmenu/selectedsign.tres")
 var unselectedsignmaterial = load("res://addons/xr-radialmenu/unselectedsign.tres")
-var contextbutton = "ax_button"
-var actionbutton = "trigger_click"
 var radialmenuitemclass = load("res://addons/xr-radialmenu/RadialMenuItem.tscn")
-
-var diskdistance = 0.4
-var diskradius = 0.15
-
-var menuitemtexts = [ ]
 
 var xrorigin = null
 var aimglobaltransform = null
@@ -33,10 +34,12 @@ func controller_button_released(name):
 		actreleaseradialmenu()
 
 func makeradialmenu():
-	menuitemtexts = ["one", "two", "three", "four", "five"]
 	aimglobaltransform = Transform3D(global_transform.basis, global_transform.origin - global_transform.basis.z * diskdistance)
 	aimtransform = xrorigin.global_transform.affine_inverse()*aimglobaltransform
-	
+	set_process(true)
+	$RayCast3D.enabled = true
+	$RayCast3D.visible = true
+
 	$MenuDisk.transform = Transform3D(global_transform.basis, global_transform.origin - global_transform.basis.z * diskdistance)
 	for i in range(len(menuitemtexts)):
 		var radialmenuitem = radialmenuitemclass.instantiate()
@@ -49,6 +52,8 @@ func makeradialmenu():
 	
 func actreleaseradialmenu():
 	$MenuDisk.visible = false
+	$RayCast3D.visible = false
+	$RayCast3D.enabled = false
 	if currentradialitem != null:
 		var menutextselected = currentradialitem.get_node("Label3D").text
 		print("Selecting menu item: ", menutextselected)
@@ -56,23 +61,22 @@ func actreleaseradialmenu():
 	for contextmenuitem in $MenuDisk.get_children():
 		contextmenuitem.queue_free()
 	currentradialitem = null
+	set_process(false)
 	aimtransform = null
 	aimglobaltransform = null
-	menuitemtexts.clear()
 
 func _process(delta):
-	if aimtransform != null:
-		$MenuDisk.transform = xrorigin.global_transform*aimtransform
-		var citem = $RayCast3D.get_collider()
-		if citem != null and citem.get_parent() != $MenuDisk:
-			citem = null
-		if citem != currentradialitem:
-			if currentradialitem != null:
-				currentradialitem.get_node("Label3D/MeshInstance3D").set_surface_override_material(0, unselectedsignmaterial)
-				currentradialitem = null
-			if citem != null:
-				currentradialitem = citem
-				currentradialitem.get_node("Label3D/MeshInstance3D").set_surface_override_material(0, selectedsignmaterial)
+	$MenuDisk.transform = xrorigin.global_transform*aimtransform
+	var citem = $RayCast3D.get_collider()
+	if citem != null and citem.get_parent() != $MenuDisk:
+		citem = null
+	if citem != currentradialitem:
+		if currentradialitem != null:
+			currentradialitem.get_node("Label3D/MeshInstance3D").set_surface_override_material(0, unselectedsignmaterial)
+			currentradialitem = null
+		if citem != null:
+			currentradialitem = citem
+			currentradialitem.get_node("Label3D/MeshInstance3D").set_surface_override_material(0, selectedsignmaterial)
 
 func findandattachbuttonpresstocorrespondingcontroller():
 	var xrnode = get_parent()
@@ -101,6 +105,7 @@ func setupnamepos(radialmenuitem, text, clock, rad):
 	radialmenuitem.get_node("Label3D").text = text
 	radialmenuitem.get_node("Label3D").visible = false
 	radialmenuitem.get_node("CollisionShape3D").disabled = false
+	radialmenuitem.collision_layer = $RayCast3D.collision_mask
 	var ang = deg_to_rad(clock*30)
 	radialmenuitem.transform.origin.x = sin(ang)*rad if (clock % 6) != 0 else 0.0
 	radialmenuitem.transform.origin.y = cos(ang)*rad
@@ -118,7 +123,14 @@ func setbackgroundcollision(radialmenuitem):
 func _ready():
 	findandattachbuttonpresstocorrespondingcontroller()
 	assert ($MenuDisk.top_level)
-	
+	set_process(false)
+	assert ($RayCast3D.enabled == false)
+	assert ($RayCast3D.visible == false)
+	assert ($MenuDisk.visible == false)
+	$RayCast3D/AimRay.mesh.size.z = diskdistance + 0.1
+	$RayCast3D.target_position = Vector3(0,0,-(diskdistance + 1))
+	$RayCast3D.collision_mask = pow(2, collisionlayer-1)
+
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings := PackedStringArray()
 	if not (get_parent() is XRNode3D):

@@ -14,7 +14,6 @@ collision_mask = 0
 
 [node name="Label3D" type="Label3D" parent="."]
 pixel_size = 0.002
-no_depth_test = true
 text = "HI THERE"
 font_size = 16
 outline_size = 6
