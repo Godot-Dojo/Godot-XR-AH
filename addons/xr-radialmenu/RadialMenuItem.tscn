@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwxfgb6ys2iri"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_u11d0"]
+resource_local_to_scene = true
+size = Vector2(0.1, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xwuge"]
+resource_local_to_scene = true
+margin = 0.01
+size = Vector3(0.1, 0.1, 0.04)
+
+[node name="RadialMenuItem" type="StaticBody3D"]
+collision_mask = 0
+
+[node name="Label3D" type="Label3D" parent="."]
+pixel_size = 0.002
+text = "HI THERE"
+font_size = 16
+outline_size = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Label3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.0050954)
+mesh = SubResource("QuadMesh_u11d0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.025)
+shape = SubResource("BoxShape3D_xwuge")
+disabled = true
+debug_color = Color(0, 0.6, 0.7, 0.42)

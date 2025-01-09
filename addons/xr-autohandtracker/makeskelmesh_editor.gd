@@ -1,7 +1,6 @@
 @tool
 extends EditorScript
 
-
 func _run():
 	var s = Skeleton3D.new()
 	s.add_bone("one")

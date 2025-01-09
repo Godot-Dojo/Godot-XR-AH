@@ -13,8 +13,7 @@ func _ready():
 		else:
 			print("unknown autohand ", autohand.tracker_name)
 			print("Make sure this hand data node is above the autohand in the scene tree")
-	var xr_interface = XRServer.find_interface("OpenXR")
-	set_process(autohandleft != null and autohandright != null and xr_interface != null)
+	set_process(autohandleft != null and autohandright != null)
 
 	if false:
 		await get_tree().create_timer(5).timeout

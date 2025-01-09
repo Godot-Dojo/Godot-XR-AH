@@ -17,6 +17,7 @@ var left_controller: XRController3D
 var right_controller: XRController3D
 var left_tracker: XRPositionalTracker
 var right_tracker: XRPositionalTracker
+var xrnodes_aim = [ ]
 
 var toggle_left_controller = false
 var toggle_right_controller = false
@@ -57,6 +58,10 @@ func _on_node_added(node: Node):
 			right_controller = node
 			right_tracker.set_pose(pose, node.transform, Vector3.ZERO, Vector3.ZERO, XRPose.XR_TRACKING_CONFIDENCE_HIGH)
 			XRServer.add_tracker(right_tracker)
+	elif node is XRNode3D:
+		if node.tracker == "left_hand" or node.tracker == "right_hand":
+			if node.pose == "aim":
+				xrnodes_aim.append(node)
 
 func _search_first_xr_nodes(node: Node):
 	for child in node.get_children():
@@ -68,6 +73,7 @@ func _ready():
 		enabled = false
 		return
 	
+	print("XRServer.get_trackers() ", XRServer.get_trackers(XRServer.TRACKER_ANY))
 	var left_hand = XRServer.get_tracker("left_hand")
 	if left_hand == null:
 		left_tracker = XRPositionalTracker.new()
@@ -93,6 +99,11 @@ func _ready():
 func _process(_delta):
 	if enabled and disable_xr_in_editor and OS.has_feature("editor") and viewport.use_xr:
 		viewport.use_xr = false
+	for xrnode in xrnodes_aim:
+		if xrnode.tracker == "left_hand":
+			xrnode.transform = left_controller.transform
+		if xrnode.tracker == "right_hand":
+			xrnode.transform = right_controller.transform
 
 func _input(event):
 	if not enabled or not OS.has_feature("editor"):
