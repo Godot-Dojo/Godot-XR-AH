@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=30 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -7,10 +7,11 @@
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="PackedScene" uid="uid://8jsauvbqvkou" path="res://addons/xr-autohandtracker/simplelefthand.glb" id="6_vivmo"]
+[ext_resource type="PackedScene" uid="uid://c7d3acll3wppi" path="res://addons/xr-radialmenu/RadialMenu.tscn" id="7_dg77c"]
 [ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
 [ext_resource type="PackedScene" uid="uid://coc7xo1jkpppe" path="res://addons/xr-autohandtracker/simplerighgthand.glb" id="11_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
-[ext_resource type="Script" uid="uid://cxbk3x86du8yo" path="res://xrfacetracker.gd" id="13_p61xh"]
+[ext_resource type="Script" path="res://xrfacetracker.gd" id="13_p61xh"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -113,6 +114,22 @@ transform = Transform3D(0.0471668, 0.545034, -0.837086, 0.0306621, -0.838414, -0
 surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
+
+[node name="XRAimLeft" type="XRNode3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.462758, 1.39293, -0.234335)
+tracker = &"left_hand"
+pose = &"aim"
+show_when_tracked = true
+
+[node name="RadialMenu" parent="XROrigin3D/XRAimLeft" instance=ExtResource("7_dg77c")]
+
+[node name="XRAimRight" type="XRNode3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.462758, 1.39293, -0.234335)
+tracker = &"right_hand"
+pose = &"aim"
+show_when_tracked = true
+
+[node name="RadialMenu" parent="XROrigin3D/XRAimRight" instance=ExtResource("7_dg77c")]
 
 [node name="XRController3DRight" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.169251, 1.69625, -0.288043)

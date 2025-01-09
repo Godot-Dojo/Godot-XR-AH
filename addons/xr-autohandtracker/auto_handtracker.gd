@@ -304,10 +304,10 @@ func _process(delta):
 	if visible and $VisibleHandTrackSkeleton.visible:
 		$VisibleHandTrackSkeleton.updatevisiblehandskeleton(oxrktransRaw if visiblehandtrackskeletonRaw else oxrktrans, xrt)
 
-	if xr_controllertracker != null:
-		var xr_aimpose = xr_controllertracker.get_pose("aim")
-		if xr_aimpose != null and $AutoTracker.autotrackeractive:
-			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
+#	if xr_controllertracker != null:
+#		var xr_aimpose = xr_controllertracker.get_pose("aim")
+#		if xr_aimpose != null and $AutoTracker.autotrackeractive:
+#			$AutoTracker.xr_autotracker.set_pose(xr_controller_node.pose, xr_aimpose.transform, xr_aimpose.linear_velocity, xr_aimpose.angular_velocity, xr_aimpose.tracking_confidence)
 		
 	oxrktrans_updated = false
 
