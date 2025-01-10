@@ -9,8 +9,7 @@ signal menuitemselected(menutext)
 @export var collisionlayer = 23
 @export var diskdistance = 0.2
 @export var diskradius = 0.1
-
-var menuitemtexts = ["one", "two", "three", "four", "five"]
+@export var menuitemtexts = ["one", "two", "three", "four", "five"]
 
 var selectedsignmaterial = load("res://addons/xr-radialmenu/selectedsign.tres")
 var unselectedsignmaterial = load("res://addons/xr-radialmenu/unselectedsign.tres")

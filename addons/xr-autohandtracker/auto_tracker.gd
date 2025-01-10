@@ -7,7 +7,7 @@ extends Node3D
 var xr_autotracker : XRPositionalTracker = null
 var xr_autopose : XRPose = null
 var autotrackeractive = false
-var xr_camera_node : XRCamera3D = null  # for relative thumbstick motion calculations
+var xr_camera_node = null  # for relative thumbstick motion calculations
 
 var graspsqueezer = SqueezeButton.new()
 var pinchsqueezer = SqueezeButton.new()

@@ -50,6 +50,7 @@ func _ready():
 	else:
 		print("OpenXR not initialized, please check if your headset is connected")
 
+	$XROrigin3D/XRAimRight/RadialMenu.menuitemtexts = [ "VR", "AR", "FBTrackerL", "AutoTrackerL", "camerapos" ]
 
 # this really hacky and is supposed to be called every frame
 @onready var uninitialized_hmd_transform:Transform3D = XRServer.get_hmd_transform()
@@ -147,3 +148,18 @@ func switch_to_vr() -> bool:
 	environment.background_mode = Environment.BG_SKY
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_BG
 	return true
+
+func _on_radial_menu_menuitemselected(menutext):
+	if menutext == "VR":
+		switch_to_vr()
+	elif menutext == "AR":
+		switch_to_ar()
+	elif menutext == "FBTrackerL":
+		$XROrigin3D/XRController3DLeft/AutoHandtracker.visible = false
+		$XROrigin3D/LeftHandFbTracker.visible = true
+	elif menutext == "AutoTrackerL":
+		$XROrigin3D/XRController3DLeft/AutoHandtracker.visible = true
+		$XROrigin3D/LeftHandFbTracker.visible = false
+	elif menutext == "camerapos":
+		var headtransform = get_node("XROrigin3D/XRCamera3D").transform	
+		$XROrigin3D/HandJoints/FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))

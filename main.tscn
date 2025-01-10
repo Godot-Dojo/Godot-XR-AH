@@ -114,22 +114,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 
-[node name="XRAimLeft" type="XRNode3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.462758, 1.39293, -0.234335)
-tracker = &"left_hand"
-pose = &"aim"
-show_when_tracked = true
-
-[node name="RadialMenu" parent="XROrigin3D/XRAimLeft" instance=ExtResource("7_dg77c")]
-
-[node name="XRAimRight" type="XRNode3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.462758, 1.39293, -0.234335)
-tracker = &"right_hand"
-pose = &"aim"
-show_when_tracked = true
-
-[node name="RadialMenu" parent="XROrigin3D/XRAimRight" instance=ExtResource("7_dg77c")]
-
 [node name="XRController3DRight" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.169251, 1.69625, -0.288043)
 tracker = &"right_hand"
@@ -142,6 +126,14 @@ surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
 visiblehandtrackskeletonRaw = true
+
+[node name="XRAimRight" type="XRNode3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.462758, 1.39293, -0.234335)
+tracker = &"right_hand"
+pose = &"aim"
+show_when_tracked = true
+
+[node name="RadialMenu" parent="XROrigin3D/XRAimRight" instance=ExtResource("7_dg77c")]
 
 [node name="HandJoints" type="Node3D" parent="XROrigin3D"]
 script = ExtResource("4_eaqi8")
@@ -174,22 +166,22 @@ surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
 [node name="XRSimulator" parent="XROrigin3D" instance=ExtResource("12_f86bf")]
 
-[node name="LeftHandTracker" type="XRNode3D" parent="XROrigin3D"]
+[node name="LeftHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)
 visible = false
 tracker = &"/user/hand_tracker/left"
 
-[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/LeftHandTracker"]
+[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/LeftHandFbTracker"]
 material = SubResource("StandardMaterial3D_074og")
 
-[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/LeftHandTracker/OpenXRFbHandTrackingMesh"]
+[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/LeftHandFbTracker/OpenXRFbHandTrackingMesh"]
 
-[node name="RightHandTracker" type="XRNode3D" parent="XROrigin3D"]
+[node name="RightHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.440078, 1.24593, -0.590358)
 visible = false
 tracker = &"/user/hand_tracker/right"
 
-[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/RightHandTracker"]
+[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/RightHandFbTracker"]
 hand = 1
 material = SubResource("StandardMaterial3D_074og")
 bones/0/name = "RightPalm"
@@ -219,12 +211,14 @@ bones/23/name = "RightLittleIntermediate"
 bones/24/name = "RightLittleDistal"
 bones/25/name = "RightLittleTip"
 
-[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/RightHandTracker/OpenXRFbHandTrackingMesh"]
+[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/RightHandFbTracker/OpenXRFbHandTrackingMesh"]
 hand_tracker = &"/user/hand_tracker/right"
 
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
+
+[connection signal="menuitemselected" from="XROrigin3D/XRAimRight/RadialMenu" to="." method="_on_radial_menu_menuitemselected"]
 
 [editable path="XROrigin3D/XRController3DLeft/simplelefthand"]
 [editable path="XROrigin3D/XRController3DLeft/AutoHandtracker"]
