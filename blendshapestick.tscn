@@ -1,12 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://b40ftc18h5u7g"]
+[gd_scene load_steps=5 format=3 uid="uid://b40ftc18h5u7g"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sssg3"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_74axf"]
 shading_mode = 0
 albedo_color = Color(1, 1, 0.0509804, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_lsd0h"]
-material = SubResource("StandardMaterial3D_sssg3")
+material = SubResource("StandardMaterial3D_74axf")
 size = Vector3(1, 0.2, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fhylg"]
+shading_mode = 0
+albedo_color = Color(0.763084, 0.102582, 1.92523e-07, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_olmli"]
+material = SubResource("StandardMaterial3D_fhylg")
+size = Vector3(1.02, 0.22, 0.1)
 
 [node name="BSstick" type="Node3D"]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
@@ -14,6 +22,10 @@ transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 [node name="Stick" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.0755413)
 mesh = SubResource("BoxMesh_lsd0h")
+
+[node name="StickSensitive" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.0854575)
+mesh = SubResource("BoxMesh_olmli")
 
 [node name="Label3D" type="Label3D" parent="."]
 alpha_cut = 1
