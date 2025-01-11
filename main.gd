@@ -81,14 +81,6 @@ func _process(delta):
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
 
-	var bbbb = [ ]
-	if facetracker != null:
-		for b in facetracker.blend_shapes:
-			if b != 0:
-				bbbb.push_back(b)
-		if bbbb:
-			print("BB ", bbbb)
-
 var Dvr = true
 func triggerfingerbutton(hand):
 	var handname = "Left" if hand == 0 else "Right"

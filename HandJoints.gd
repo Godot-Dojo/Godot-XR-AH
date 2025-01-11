@@ -41,10 +41,11 @@ static func sticktransformB(j1, j2):
 		b = Basis().scaled(Vector3(0.01, 0.0, 0.01))
 	return Transform3D(b, (j1 + j2)*0.5)
 
+	
 # Set up the displayed axes for each hand and each joint of the hand 
 func _ready():
 	play_area_changed(-1)
-
+	
 	var axes3dscene = load("res://axes3d.tscn")
 	var stickscene = load("res://stick.tscn")
 	
@@ -150,7 +151,6 @@ func set_xr_interface(lxr_interface : OpenXRInterface):
 		$FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))
 
 
-
 var prevdistancefingerbuttondepressed = false
 func _process(delta):
 	if xr_interface != null:
@@ -186,7 +186,7 @@ func _process(delta):
 		flat_display.get_node("PlayAreaRect/PlayArea/HeadCam").rotation = Vector2(headtransform.basis.z.z, -headtransform.basis.z.x).angle()
 		flat_display.get_node("TrackingSource0").selected = get_node("../XRController3DLeft/AutoHandtracker").handtrackingsource
 		flat_display.get_node("TrackingSource1").selected = get_node("../XRController3DRight/AutoHandtracker").handtrackingsource
-
+	
 		
 var flatlefthandjointsfromwrist = [
 	Vector3(0.000861533, -0.0012695, -0.0477441), Vector3(0, 0, 0), Vector3(0.0315846, -0.0131271, -0.0329833), Vector3(0.0545926, -0.0174885, -0.0554602), 

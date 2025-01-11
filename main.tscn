@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=31 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -6,11 +6,13 @@
 [ext_resource type="Script" uid="uid://8goj51u7g0kk" path="res://rubberhand.gd" id="3_86svk"]
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
+[ext_resource type="PackedScene" uid="uid://cgncwf8upgevn" path="res://avatrobothand/robot_hand_left.glb" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://8jsauvbqvkou" path="res://addons/xr-autohandtracker/simplelefthand.glb" id="6_vivmo"]
 [ext_resource type="PackedScene" uid="uid://c7d3acll3wppi" path="res://addons/xr-radialmenu/RadialMenu.tscn" id="7_dg77c"]
 [ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
 [ext_resource type="PackedScene" uid="uid://coc7xo1jkpppe" path="res://addons/xr-autohandtracker/simplerighgthand.glb" id="11_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
+[ext_resource type="Script" uid="uid://caest0w4mjxt5" path="res://FaceAudioTracking.gd" id="12_ycdy4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -108,9 +110,15 @@ tracker = &"left_hand"
 
 [node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("6_vivmo")]
 transform = Transform3D(0.0471668, 0.545034, -0.837086, 0.0306621, -0.838414, -0.544171, -0.998416, 0, -0.0562571, 0, 0, 0)
+visible = false
 
 [node name="LeftHandHumanoidMesh" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid/Skeleton3D" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_vivmo")
+
+[node name="robot_hand_left" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("6_dg77c")]
+
+[node name="Cover_Index_03a" parent="XROrigin3D/XRController3DLeft/robot_hand_left/Armature/Skeleton3D" index="11"]
+visible = false
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 
@@ -164,7 +172,11 @@ visible = false
 mesh = SubResource("BoxMesh_yct16")
 surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
-[node name="XRSimulator" parent="XROrigin3D" instance=ExtResource("12_f86bf")]
+[node name="FaceAudioTracking" type="Node3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.394503, 1.38851, -0.522603)
+script = ExtResource("12_ycdy4")
+
+[node name="FaceTrackSticks" type="Node3D" parent="XROrigin3D/FaceAudioTracking"]
 
 [node name="LeftHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)
@@ -214,6 +226,8 @@ bones/25/name = "RightLittleTip"
 [node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/RightHandFbTracker/OpenXRFbHandTrackingMesh"]
 hand_tracker = &"/user/hand_tracker/right"
 
+[node name="XRSimulator" parent="XROrigin3D" instance=ExtResource("12_f86bf")]
+
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
@@ -221,6 +235,7 @@ skeleton = NodePath("../XROrigin3D")
 [connection signal="menuitemselected" from="XROrigin3D/XRAimRight/RadialMenu" to="." method="_on_radial_menu_menuitemselected"]
 
 [editable path="XROrigin3D/XRController3DLeft/simplelefthand"]
+[editable path="XROrigin3D/XRController3DLeft/robot_hand_left"]
 [editable path="XROrigin3D/XRController3DLeft/AutoHandtracker"]
 [editable path="XROrigin3D/XRController3DRight/simplerighgthand"]
 [editable path="XROrigin3D/XRController3DRight/AutoHandtracker"]

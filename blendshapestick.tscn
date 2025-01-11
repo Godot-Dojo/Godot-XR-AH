@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://b40ftc18h5u7g"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sssg3"]
+shading_mode = 0
+albedo_color = Color(1, 1, 0.0509804, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lsd0h"]
+material = SubResource("StandardMaterial3D_sssg3")
+size = Vector3(1, 0.2, 0.1)
+
+[node name="BSstick" type="Node3D"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+
+[node name="Stick" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.0755413)
+mesh = SubResource("BoxMesh_lsd0h")
+
+[node name="Label3D" type="Label3D" parent="."]
+alpha_cut = 1
+text = "thing"

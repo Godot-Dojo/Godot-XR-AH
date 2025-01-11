@@ -91,6 +91,7 @@ func xrserver_tracker_added(tracker_name: StringName, type: int):
 	elif tracker_name == controllertracker_name: 
 		assert (type == XRServer.TRACKER_CONTROLLER)
 		xr_controllertracker = XRServer.get_tracker(controllertracker_name)
+	
 
 func xrserver_tracker_removed(tracker_name: StringName, type: int):
 	if tracker_name == handtracker_name: 
@@ -135,7 +136,7 @@ func findhandnodes():
 	for ch in xr_controller_node.get_children():
 		var lskel = ch.find_child("Skeleton3D")
 		if lskel and ch.visible:
-			if lskel.get_bone_count() == 26 or lskel.get_bone_count() == 25:
+			if lskel.get_bone_count() >= 25:
 				handnode = ch
 			else:
 				print("unrecognized skeleton in controller ", lskel.get_bone_count())
