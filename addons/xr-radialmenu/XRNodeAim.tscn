@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://2h8mjimpo5ra"]
+
+[ext_resource type="PackedScene" uid="uid://c7d3acll3wppi" path="res://addons/xr-radialmenu/RadialMenu.tscn" id="1_k45d7"]
+
+[node name="XRAim3D" type="XRNode3D"]
+tracker = &"right_hand"
+pose = &"aim"
+
+[node name="RadialMenu" parent="." instance=ExtResource("1_k45d7")]
