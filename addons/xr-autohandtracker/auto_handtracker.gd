@@ -12,6 +12,8 @@ extends Node3D
 # Local origin for the hand tracking positions
 var xr_origin : XROrigin3D
 
+signal hand_active_changed(hand: int, active: bool)
+
 # Controller and its tracker with the aim pose that we can use when hand-tracking active
 var islefthand = true
 var xr_controller_node : XRController3D = null
@@ -261,6 +263,7 @@ func process_handtrackingsource():
 		if handanimationtree:
 			handanimationtree.active = not handtrackingactive
 		print("setting hand tracking source "+str(islefthand)+": ", handtrackingsource)
+		hand_active_changed.emit(OpenXRInterface.Hand.HAND_LEFT if islefthand else OpenXRInterface.Hand.HAND_RIGHT, handtrackingactive)
 		if handtrackingsource == OpenXRInterface.HAND_TRACKED_SOURCE_UNOBSTRUCTED:
 			if enableautotracker:
 				$AutoTracker.activateautotracker(xr_controller_node)
