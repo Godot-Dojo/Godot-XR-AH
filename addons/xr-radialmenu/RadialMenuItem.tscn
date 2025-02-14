@@ -26,4 +26,3 @@ mesh = SubResource("QuadMesh_u11d0")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.025)
 shape = SubResource("BoxShape3D_xwuge")
 disabled = true
-debug_color = Color(0, 0.6, 0.7, 0.42)

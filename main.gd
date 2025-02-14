@@ -50,7 +50,9 @@ func _ready():
 	else:
 		print("OpenXR not initialized, please check if your headset is connected")
 
-	$XROrigin3D/XRAimRight/RadialMenu.menuitemtexts = [ "VR", "AR", "FBTrackerL", "AutoTrackerL", "camerapos" ]
+func getcontextmenutexts():
+	return [ "VR", "AR", "FBTrackerL", "AutoTrackerL", "camerapos" ]
+
 
 # this really hacky and is supposed to be called every frame
 @onready var uninitialized_hmd_transform:Transform3D = XRServer.get_hmd_transform()
@@ -64,15 +66,19 @@ func sync_headset_orientation():
 			hmd_synchronized = true
 			_on_openxr_pose_recentered()
 
+var siglogcount = 0
 func _on_openxr_pose_recentered() -> void:
 	print("  _on_openxr_pose_recentered")
 	XRServer.center_on_hmd(XRServer.RESET_BUT_KEEP_TILT, true)
+	$XROrigin3D/XRCamera3D/SignalLog.text = "%dposrec" % siglogcount
+	siglogcount += 1
 	print("New reference frame!! ", XRServer.get_reference_frame())
 
 func _on_play_area_changed(mode):
 	print(" on_play_area_changed ", mode)
-
-
+	$XROrigin3D/XRCamera3D/SignalLog2.text = "%dplayareach %d" % [siglogcount, mode]
+	$XROrigin3D/XRCamera3D/SignalLog2.visible = true
+	siglogcount += 1
 
 const joyvelocity = 1.1
 func _process(delta):

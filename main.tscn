@@ -98,6 +98,15 @@ environment = SubResource("Environment_0xu52")
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79704, 0.0822801)
 
+[node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D"]
+transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0705969, -0.0605885, -0.151146)
+text = "Ding"
+
+[node name="SignalLog2" type="Label3D" parent="XROrigin3D/XRCamera3D"]
+transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0577948, -0.08284, -0.151146)
+visible = false
+text = "Dong"
+
 [node name="OpenXRHandData" parent="XROrigin3D" instance=ExtResource("2_hw7j7")]
 
 [node name="RubberHand" type="Node" parent="XROrigin3D/OpenXRHandData"]
@@ -175,7 +184,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.394503, 1.38851, -0.522603
 script = ExtResource("12_ycdy4")
 
 [node name="FaceTrackSticks" type="Node3D" parent="XROrigin3D/FaceAudioTracking"]
-transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.343815, 0.101502, 0.0309352)
+transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.343816, 0.1015, 0.030935)
 
 [node name="LeftHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)

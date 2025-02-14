@@ -9,7 +9,6 @@ signal menuitemselected(menutext)
 @export var collisionlayer = 23
 @export var diskdistance = 0.2
 @export var diskradius = 0.1
-@export var menuitemtexts = ["one", "two", "three", "four", "five"]
 
 var selectedsignmaterial = load("res://addons/xr-radialmenu/selectedsign.tres")
 var unselectedsignmaterial = load("res://addons/xr-radialmenu/unselectedsign.tres")
@@ -24,7 +23,7 @@ var contextclocksequence = [6, 8, 4, 9, 3, 10, 2, 12, 1, 11, 5, 7]
 
 func controller_button_pressed(name):
 	if name == contextbutton and aimtransform == null:
-		makeradialmenu()
+		makeradialmenu(get_node("/root/Main").getcontextmenutexts())
 	if name == actionbutton and aimtransform != null:
 		actreleaseradialmenu()
 
@@ -32,7 +31,7 @@ func controller_button_released(name):
 	if name == contextbutton and aimtransform != null:
 		actreleaseradialmenu()
 
-func makeradialmenu():
+func makeradialmenu(menuitemtexts):
 	var rbasis = global_transform.basis
 	var rx = Vector3(0,1,0).cross(rbasis.z).normalized()
 	var ry = rbasis.z.cross(rx)
@@ -140,3 +139,11 @@ func _get_configuration_warnings() -> PackedStringArray:
 	if not (get_parent() is XRNode3D):
 		warnings.append("This node must be a child of an XRNode3D tracker pose node")
 	return warnings
+
+func _input(event):
+	if event is InputEventKey:
+		if event.keycode == KEY_R:
+			if event.pressed:
+				controller_button_pressed(contextbutton)
+			else:
+				controller_button_released(contextbutton)
