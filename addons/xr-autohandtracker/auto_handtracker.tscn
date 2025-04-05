@@ -84,6 +84,7 @@ mesh = SubResource("BoxMesh_lsd0h")
 surface_material_override/0 = SubResource("StandardMaterial3D_dawss")
 
 [node name="ExampleJoint" type="Node3D" parent="VisibleHandTrackSkeleton"]
+visible = false
 
 [node name="Box" type="MeshInstance3D" parent="VisibleHandTrackSkeleton/ExampleJoint"]
 mesh = SubResource("BoxMesh_h2ysa")

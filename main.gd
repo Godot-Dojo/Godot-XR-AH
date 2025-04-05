@@ -4,10 +4,25 @@ var xr_interface : OpenXRInterface
 
 var facetracker : XRFaceTracker = null
 func Dtracker_added(tracker_name: StringName, type: int):
-	prints("Dtracker_added", tracker_name, type)
-	if type == XRServer.TRACKER_FACE:
+	if type == XRServer.TRACKER_ANCHOR:
+		var anchortracker : XRPositionalTracker= XRServer.get_tracker(tracker_name)
+		var pp = anchortracker.get_pose("default")
+		prints("anchor_tracker_added", tracker_name, anchortracker)
+		var aa = load("res://scenemanager/xr_anchor_3d.tscn").instantiate()
+		aa.tracker = tracker_name
+		$XROrigin3D.add_child(aa)
+		
+	elif type == XRServer.TRACKER_FACE:
 		facetracker = XRServer.get_tracker(tracker_name)
-		print("***** facetracker added ", facetracker)
+		print("***** facetracker added ", tracker_name, facetracker)
+	elif type == XRServer.TRACKER_CONTROLLER:
+		prints("controller tracker added", tracker_name, type)
+	elif type == XRServer.TRACKER_BODY:
+		prints("body tracker_added", tracker_name, type)
+	elif type == XRServer.TRACKER_HAND:
+		prints("hand tracker_added", tracker_name, type)
+	else:
+		prints("Dtracker_added", tracker_name, type)
 
 func Dtracker_removed(tracker_name: StringName, type: int):
 	prints("Dtracker_removed", tracker_name, type)
@@ -36,7 +51,7 @@ func _ready():
 	if xr_interface and xr_interface.initialize():
 		var vp = get_viewport()
 
-		# Enable XR on the main viewport
+		# Enable XR on the main viewpoCrt
 		vp.use_xr = true
 
 		# Make sure v-sync is disabled, we're using the headsets v-sync
@@ -67,11 +82,16 @@ func sync_headset_orientation():
 			_on_openxr_pose_recentered()
 
 var siglogcount = 0
+var ignore_recentre = true
 func _on_openxr_pose_recentered() -> void:
 	print("  _on_openxr_pose_recentered")
-	XRServer.center_on_hmd(XRServer.RESET_BUT_KEEP_TILT, true)
+	if ignore_recentre:
+		print("Ignore poser_recentred signal")
+	else:
+			XRServer.center_on_hmd(XRServer.RESET_BUT_KEEP_TILT, true)
 	$XROrigin3D/XRCamera3D/SignalLog.text = "%dposrec" % siglogcount
 	siglogcount += 1
+	print(" headpos ", $XROrigin3D/XRCamera3D.transform)
 	print("New reference frame!! ", XRServer.get_reference_frame())
 
 func _on_play_area_changed(mode):
@@ -81,11 +101,18 @@ func _on_play_area_changed(mode):
 	siglogcount += 1
 
 const joyvelocity = 1.1
+var prevhmdpos = Vector3(0,0,0)
 func _process(delta):
 	var joyleft = $XROrigin3D/XRController3DLeft.get_vector2("primary")
 	var camerafore = Vector3($XROrigin3D/XRCamera3D.transform.basis.z.x, 0.0, $XROrigin3D/XRCamera3D.transform.basis.z.z).normalized()
 	var cameraside = Vector3(camerafore.z, 0.0, -camerafore.x)
 	$XROrigin3D.transform.origin += -camerafore*(joyleft.y*joyvelocity*delta) + cameraside*(joyleft.x*joyvelocity*delta)
+
+	var hmdpos = $XROrigin3D/XRCamera3D.position
+	if (prevhmdpos - hmdpos).length() > 1:
+		$XROrigin3D/XRCamera3D/SignalLog.text = "%.1f,%.1f,%.1f" % [hmdpos.x,hmdpos.y,hmdpos.z]
+		prevhmdpos = hmdpos
+	# look for save_to_storage!!!
 
 var Dvr = true
 func triggerfingerbutton(hand):

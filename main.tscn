@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=37 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -12,6 +12,9 @@
 [ext_resource type="PackedScene" uid="uid://coc7xo1jkpppe" path="res://addons/xr-autohandtracker/simplerighgthand.glb" id="11_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://caest0w4mjxt5" path="res://FaceAudioTracking.gd" id="12_ycdy4"]
+[ext_resource type="PackedScene" uid="uid://cmyouov3wf235" path="res://scenemanager/sceneanchor.tscn" id="13_w48qg"]
+[ext_resource type="Script" uid="uid://c1jp1xxsyiyhg" path="res://scenemanager/open_xr_fb_scene_manager.gd" id="13_ycdy4"]
+[ext_resource type="Script" uid="uid://binshs17pl7bm" path="res://scenemanager/open_xr_fb_spatial_anchor_manager.gd" id="15_vivmo"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -35,6 +38,12 @@ albedo_texture = ExtResource("7_w48qg")
 resource_name = "Material_1"
 albedo_color = Color(0.945596, 0.976528, 1, 0.623529)
 albedo_texture = ExtResource("7_w48qg")
+
+[sub_resource type="BoxMesh" id="BoxMesh_vivmo"]
+size = Vector3(0.1, 0.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2cqfq"]
+albedo_color = Color(0.274621, 0.648482, 0.297847, 1)
 
 [sub_resource type="QuadMesh" id="QuadMesh_eslsg"]
 size = Vector2(0.8, 0.5)
@@ -66,6 +75,12 @@ albedo_color = Color(0.992157, 0.0117647, 0.0666667, 1)
 transparency = 1
 albedo_color = Color(1, 0.168627, 1, 0.6)
 
+[sub_resource type="PrismMesh" id="PrismMesh_dg77c"]
+size = Vector3(0.1, 8, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dg77c"]
+albedo_color = Color(0.852053, 0.00058989, 0.854236, 1)
+
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_rm4v2"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bkxwk"]
@@ -88,7 +103,7 @@ script = ExtResource("1_cagca")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79506, -0.430125)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.972307, 0.231448, -0.0324247, -0.168036, 0.788752, 0.591299, 0.16243, -0.569476, 0.8058, 0, 4.78147, -0.461351)
+transform = Transform3D(0.972307, 0.231448, -0.0324245, -0.168036, 0.788752, 0.591299, 0.16243, -0.569476, 0.8058, 0, 4.78147, -0.575441)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_0xu52")
@@ -100,6 +115,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79704, 0.0822801)
 
 [node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D"]
 transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0705969, -0.0605885, -0.151146)
+visible = false
 text = "Ding"
 
 [node name="SignalLog2" type="Label3D" parent="XROrigin3D/XRCamera3D"]
@@ -144,6 +160,15 @@ pose = &"aim"
 show_when_tracked = true
 
 [node name="RadialMenu" parent="XROrigin3D/XRAimRight" instance=ExtResource("7_dg77c")]
+
+[node name="XRNode3D" type="XRNode3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.60491, 2.07751, -6.98268)
+tracker = &"/user/eyes_ext"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/XRNode3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.73947)
+mesh = SubResource("BoxMesh_vivmo")
+surface_material_override/0 = SubResource("StandardMaterial3D_2cqfq")
 
 [node name="HandJoints" type="Node3D" parent="XROrigin3D"]
 script = ExtResource("4_eaqi8")
@@ -236,9 +261,31 @@ hand_tracker = &"/user/hand_tracker/right"
 
 [node name="XRSimulator" parent="XROrigin3D" instance=ExtResource("12_f86bf")]
 
+[node name="OriginStick" type="MeshInstance3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+visible = false
+mesh = SubResource("PrismMesh_dg77c")
+surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
+
+[node name="OriginStick2" type="MeshInstance3D" parent="XROrigin3D/OriginStick"]
+transform = Transform3D(1, 0, 0, 0, -2.18557e-08, 1, 0, -0.5, -4.37114e-08, 0, -0.613974, 1.8672)
+mesh = SubResource("PrismMesh_dg77c")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
+
+[node name="OpenXRFbSceneManager" type="OpenXRFbSceneManager" parent="XROrigin3D"]
+default_scene = ExtResource("13_w48qg")
+script = ExtResource("13_ycdy4")
+
+[node name="OpenXRFbSpatialAnchorManager" type="OpenXRFbSpatialAnchorManager" parent="XROrigin3D"]
+script = ExtResource("15_vivmo")
+
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
+
+[node name="MiniScene" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.98709, 0.825349, -0.519652)
 
 [connection signal="menuitemselected" from="XROrigin3D/XRAimRight/RadialMenu" to="." method="_on_radial_menu_menuitemselected"]
 

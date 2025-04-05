@@ -6,31 +6,45 @@ func _on_request_permissions_result(permission: String, granted: bool):
 	if permission == "RECORD_AUDIO" and granted:
 		print("RECORD_AUDIO----SECOND_TIME ", OS.request_permission("RECORD_AUDIO"))
 
+var limittoaudiotracking = true
 func _ready():
 	get_tree().on_request_permissions_result.connect(_on_request_permissions_result)
 	print("RECORD_AUDIO---- ", OS.request_permission("RECORD_AUDIO"))
-	for bb in faudioblendshapegroups:
-		if bb[1] >= faudiocutoff:
-			audioblendshapegroups.append(bb)
+	var ncolumns = 4
+	if limittoaudiotracking:
+		for bb in faudioblendshapegroups:
+			if bb[1] >= faudiocutoff:
+				audioblendshapegroups.append(bb)
+	else:
+		ncolumns = 8
+		for bb in faudioblendshapegroups:
+			if len(bb) == 3:
+				audioblendshapegroups.append(bb)
+			else:
+				for i in range(2, len(bb)):
+					var suff = ("R" if i == 2 else ("L" if i == 3 else ""))
+					audioblendshapegroups.append([bb[0]+suff, bb[1], bb[i]])
+
 	var vaudioblendshapes = [ ]
 	for bb in audioblendshapegroups:
 		vaudioblendshapes.append_array(bb.slice(2))
-	for i in range(XRFaceTracker.FT_MAX):
-		if not vaudioblendshapes.has(i):
-			zeroedaudioblendshapes.append(i)
+	if limittoaudiotracking:
+		for i in range(XRFaceTracker.FT_MAX):
+			if not vaudioblendshapes.has(i):
+				zeroedaudioblendshapes.append(i)
 	var blendstickscene = load("res://blendshapestick.tscn")
 	print(len(audioblendshapegroups))
-	var ncolumnsize = int(len(audioblendshapegroups)/4)
+	var ncolumnsize = int(len(audioblendshapegroups)/ncolumns)
 	for j in range(len(audioblendshapegroups)):
 		var bss = blendstickscene.instantiate()
 		bss.name = "bs%d" % j
 		bss.transform.origin = Vector3(int(j/ncolumnsize-ncolumnsize/2+1)*0.13,(j%ncolumnsize)*0.03,0)
 		bss.get_node("Label3D").text = audioblendshapegroups[j][0]
 		$FaceTrackSticks.add_child(bss)
-	
 
 var Dmaxbs = [ ]
 var T0 = 10
+var bPrintMaxBlendshapes = true
 func _process(delta):
 	var xr_facetracker = XRServer.get_tracker("/user/face_tracker")
 	if xr_facetracker != null:
@@ -41,11 +55,12 @@ func _process(delta):
 			$FaceTrackSticks.get_child(j).get_node("StickSensitive").scale.x = min(1.0, ablendshapes[j]*10)
 			if len(Dmaxbs) <= j:
 				Dmaxbs.append(0)
-			Dmaxbs[j] = max(Dmaxbs[j],ablendshapes[j])
+			Dmaxbs[j] = max(Dmaxbs[j], ablendshapes[j])
 		T0 -= delta
 		if T0 < 0:
 			T0 = 10
-			print("Dmaxbs", Dmaxbs)
+			if bPrintMaxBlendshapes:
+				print("Dmaxbs", Dmaxbs)
 			Dmaxbs = [ ]
 		#print(ablendshapes)
 		
@@ -59,6 +74,7 @@ func toaudioblendshapes(blendshapes):
 	for i in zeroedaudioblendshapes:
 		if blendshapes[i] > faudiocutoff:
 			prints("non-zero blendshape", i, blendshapes[i], ">", faudiocutoff)
+			zeroedaudioblendshapes.erase(i)
 	return ablendshapes
 
 var zeroedaudioblendshapes = [ ]
