@@ -110,10 +110,10 @@ value = 20.0
 
 [node name="TrackingSource1" type="OptionButton" parent="."]
 layout_mode = 0
-offset_left = 556.0
-offset_top = 245.0
-offset_right = 667.0
-offset_bottom = 276.0
+offset_left = 523.0
+offset_top = 246.0
+offset_right = 634.0
+offset_bottom = 277.0
 disabled = true
 selected = 0
 item_count = 3
@@ -171,10 +171,10 @@ popup/item_1/id = 1
 
 [node name="HandDisplay1" type="OptionButton" parent="."]
 layout_mode = 0
-offset_left = 471.0
-offset_top = 248.0
-offset_right = 526.0
-offset_bottom = 279.0
+offset_left = 458.0
+offset_top = 245.0
+offset_right = 513.0
+offset_bottom = 276.0
 selected = 0
 item_count = 2
 popup/item_0/text = "AH"

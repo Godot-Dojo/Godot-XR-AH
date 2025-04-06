@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=40 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://c7d3acll3wppi" path="res://addons/xr-radialmenu/RadialMenu.tscn" id="7_dg77c"]
 [ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="7_w48qg"]
 [ext_resource type="PackedScene" uid="uid://coc7xo1jkpppe" path="res://addons/xr-autohandtracker/simplerighgthand.glb" id="11_2cqfq"]
+[ext_resource type="Script" uid="uid://bys2i3bex48tg" path="res://BodyTrackingData.gd" id="12_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://caest0w4mjxt5" path="res://FaceAudioTracking.gd" id="12_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://cmyouov3wf235" path="res://scenemanager/sceneanchor.tscn" id="13_w48qg"]
@@ -70,6 +71,13 @@ size = Vector3(0.01, 0.07, 0.01)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g60ck"]
 albedo_color = Color(0.992157, 0.0117647, 0.0666667, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2cqfq"]
+size = Vector3(0.6, 0.4, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yaehf"]
+transparency = 1
+albedo_color = Color(1, 1, 0.521569, 0.231373)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_074og"]
 transparency = 1
@@ -204,12 +212,28 @@ transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 
 remote_path = NodePath("../../../FaceAudioTracking/FaceTrackSticks")
 update_scale = false
 
+[node name="RemoteTransform3D2" type="RemoteTransform3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.594036, 0)
+remote_path = NodePath("../../../BodyTrackingData")
+update_scale = false
+
 [node name="FaceAudioTracking" type="Node3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.394503, 1.38851, -0.522603)
 script = ExtResource("12_ycdy4")
 
 [node name="FaceTrackSticks" type="Node3D" parent="XROrigin3D/FaceAudioTracking"]
 transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.343816, 0.1015, 0.030935)
+
+[node name="BodyTrackingData" type="Node3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25206, -0.491668)
+script = ExtResource("12_2cqfq")
+
+[node name="MiniBody" type="Node3D" parent="XROrigin3D/BodyTrackingData"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/BodyTrackingData"]
+mesh = SubResource("BoxMesh_2cqfq")
+surface_material_override/0 = SubResource("StandardMaterial3D_yaehf")
 
 [node name="LeftHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)

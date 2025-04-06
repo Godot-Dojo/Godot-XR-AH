@@ -121,6 +121,7 @@ func findxrnodesandtrackers():
 
 	for cch in xr_origin.get_children():
 		if cch is XRCamera3D:
+			prints("setting xr_camera_node ", $AutoTracker.xr_camera_node, cch)
 			$AutoTracker.xr_camera_node = cch
 
 	xr_controllertracker = XRServer.get_tracker(controllertracker_name)

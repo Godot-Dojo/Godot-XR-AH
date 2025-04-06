@@ -1,6 +1,6 @@
 extends Node3D
 
-
+# Receives position from a RemoteTransform in HandJoints
 func _on_request_permissions_result(permission: String, granted: bool):
 	prints("_on_request_permissions_result", permission, granted)
 	if permission == "RECORD_AUDIO" and granted:
@@ -103,7 +103,7 @@ var faudioblendshapegroups = [
 	["MouthTight", 0.001, XRFaceTracker.FT_MOUTH_TIGHTENER_RIGHT,XRFaceTracker.FT_MOUTH_TIGHTENER_LEFT, XRFaceTracker.FT_MOUTH_TIGHTENER],
 	["TongFlat", 1.0, XRFaceTracker.FT_TONGUE_FLAT],
 	["BrowDown", 0.0001, XRFaceTracker.FT_BROW_DOWN_RIGHT, XRFaceTracker.FT_BROW_DOWN_LEFT, XRFaceTracker.FT_BROW_DOWN],
-	["BrowUp", 0.01, XRFaceTracker.FT_BROW_UP_RIGHT, XRFaceTracker.FT_BROW_UP_LEFT, XRFaceTracker.FT_BROW_UP],
+	["BrowUp", 0.2, XRFaceTracker.FT_BROW_UP_RIGHT, XRFaceTracker.FT_BROW_UP_LEFT, XRFaceTracker.FT_BROW_UP],
 	["LipPuck", 0.1, XRFaceTracker.FT_LIP_PUCKER_UPPER, XRFaceTracker.FT_LIP_PUCKER_LOWER, XRFaceTracker.FT_LIP_PUCKER],
 	["MouthOpen", 0.1, XRFaceTracker.FT_MOUTH_OPEN],
 	["MouthSmile", 0.1, XRFaceTracker.FT_MOUTH_SMILE_RIGHT, XRFaceTracker.FT_MOUTH_SMILE_LEFT, XRFaceTracker.FT_MOUTH_SMILE]

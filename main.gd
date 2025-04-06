@@ -121,13 +121,13 @@ func triggerfingerbutton(hand):
 	displayoption.selected = displayoption.selected + 1 if displayoption.selected < displayoption.item_count - 1 else 0
 	var triggermode = displayoption.get_item_text(displayoption.selected)
 	if triggermode == "XR":
-		get_node("XROrigin3D/"+handname+"TrackedHand").visible = true
-		get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = true
+		#get_node("XROrigin3D/"+handname+"TrackedHand").visible = true
+		#get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = true
 		get_node("XROrigin3D/XRController3D"+handname).visible = false
 		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(false)
 	elif triggermode == "AH":
-		get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = false
-		get_node("XROrigin3D/"+handname+"TrackedHand").visible = false
+		#get_node("XROrigin3D/"+handname+"TrackedHand").show_when_tracked = false
+		#get_node("XROrigin3D/"+handname+"TrackedHand").visible = false
 		get_node("XROrigin3D/XRController3D"+handname).visible = true
 		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(true)
 	get_node("XROrigin3D/XRController3D"+handname).trigger_haptic_pulse("haptic", 0, 1.0, 0.25, 0)
@@ -142,7 +142,7 @@ func triggerfingerbutton(hand):
 	
 @onready var viewport : Viewport = get_viewport()
 @onready var environment : Environment = $WorldEnvironment.environment
-func switch_to_ar() -> bool:
+func switch_to_ar() -> bool:  #passthrough
 	var xr_interface: XRInterface = XRServer.primary_interface
 	if xr_interface:
 		var modes = xr_interface.get_supported_environment_blend_modes()
