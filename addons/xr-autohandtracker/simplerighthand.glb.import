@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://coc7xo1jkpppe"
-path="res://.godot/imported/simplerighgthand.glb-755dbb75c1c86b370292eedf98854bde.scn"
+uid="uid://dngec4nbh3ngj"
+path="res://.godot/imported/simplerighthand.glb-8d9af185af77d0a3b4238160367b4dd5.scn"
 
 [deps]
 
-source_file="res://addons/xr-autohandtracker/simplerighgthand.glb"
-dest_files=["res://.godot/imported/simplerighgthand.glb-755dbb75c1c86b370292eedf98854bde.scn"]
+source_file="res://addons/xr-autohandtracker/simplerighthand.glb"
+dest_files=["res://.godot/imported/simplerighthand.glb-8d9af185af77d0a3b4238160367b4dd5.scn"]
 
 [params]
 

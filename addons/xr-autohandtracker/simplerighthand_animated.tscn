@@ -1,0 +1,147 @@
+[gd_scene load_steps=14 format=3 uid="uid://b4af03fp12r73"]
+
+[ext_resource type="PackedScene" uid="uid://dngec4nbh3ngj" path="res://addons/xr-autohandtracker/simplerighthand.glb" id="1_ro5f1"]
+
+[sub_resource type="Animation" id="Animation_tjro0"]
+resource_name = "Default"
+
+[sub_resource type="Animation" id="Animation_ro5f1"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RightHandHumanoid/Skeleton3D:RightIndexProximal")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.655, 0.079, -0.088, 0.747)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RightHandHumanoid/Skeleton3D:RightLittleProximal")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.658, -0.055, 0.064, 0.749)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_l3mau"]
+_data = {
+&"Default": SubResource("Animation_tjro0"),
+&"RESET": SubResource("Animation_ro5f1")
+}
+
+[sub_resource type="Animation" id="Animation_jopun"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RightHandHumanoid/Skeleton3D:RightIndexProximal")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.654, 0.079, -0.089, 0.747)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RightHandHumanoid/Skeleton3D:RightMiddleProximal")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.708, -0.009, 0.009, 0.706)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("RightHandHumanoid/Skeleton3D:RightRingProximal")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.669, -0.031, 0.035, 0.742)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("RightHandHumanoid/Skeleton3D:RightLittleProximal")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0.562, -0.046, 0.071, 0.823)
+
+[sub_resource type="Animation" id="Animation_g20o3"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RightHandHumanoid/Skeleton3D:RightIndexProximal")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.0744182, -0.00207576, -0.111238, 0.991001)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RightHandHumanoid/Skeleton3D:RightMiddleProximal")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.0541047, -0.000444808, 0.0119774, 0.998463)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("RightHandHumanoid/Skeleton3D:RightRingProximal")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.00175953, 0.00424792, 0.0509199, 0.998692)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("RightHandHumanoid/Skeleton3D:RightLittleProximal")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0.0501767, 0.000729531, 0.0893392, 0.994736)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cdxoi"]
+_data = {
+&"RGrip": SubResource("Animation_jopun"),
+&"RRest": SubResource("Animation_g20o3")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ro5f1"]
+animation = &"RightHand/RRest"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jopun"]
+animation = &"RightHand/RGrip"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g20o3"]
+animation = &"RightHand/RGrip"
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_gd4f8"]
+filter_enabled = true
+filters = ["RightHandHumanoid/Skeleton3D:RightLittleProximal", "RightHandHumanoid/Skeleton3D:RightMiddleProximal", "RightHandHumanoid/Skeleton3D:RightRingProximal"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_tjro0"]
+filter_enabled = true
+filters = ["RightHandHumanoid/Skeleton3D:RightIndexProximal"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_gd4f8"]
+graph_offset = Vector2(17.7143, 0.571429)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_g20o3")
+nodes/Animation/position = Vector2(68.5714, 205.714)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_ro5f1")
+"nodes/Animation 2/position" = Vector2(68.5714, 45.7143)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_jopun")
+"nodes/Animation 3/position" = Vector2(240, 228.571)
+nodes/Grip/node = SubResource("AnimationNodeBlend2_gd4f8")
+nodes/Grip/position = Vector2(468.571, 125.714)
+nodes/Trigger/node = SubResource("AnimationNodeBlend2_tjro0")
+nodes/Trigger/position = Vector2(297.143, 45.7143)
+nodes/output/position = Vector2(674.286, 137.143)
+node_connections = [&"Grip", 0, &"Trigger", &"Grip", 1, &"Animation 3", &"Trigger", 0, &"Animation 2", &"Trigger", 1, &"Animation", &"output", 0, &"Grip"]
+
+[node name="simplerighthand" instance=ExtResource("1_ro5f1")]
+
+[node name="Skeleton3D" parent="RightHandHumanoid" index="0"]
+bones/11/rotation = Quaternion(0.0541047, -0.000444808, 0.0119774, 0.998463)
+bones/16/rotation = Quaternion(0.00175953, 0.00424792, 0.0509199, 0.998692)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1"]
+libraries = {
+&"": SubResource("AnimationLibrary_l3mau"),
+&"RightHand": SubResource("AnimationLibrary_cdxoi")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+tree_root = SubResource("AnimationNodeBlendTree_gd4f8")
+anim_player = NodePath("../AnimationPlayer")
+parameters/Grip/blend_amount = 0.0
+parameters/Trigger/blend_amount = 0.0
