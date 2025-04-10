@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=3 uid="uid://cfk6nw5naeba5"]
 
 [ext_resource type="PackedScene" uid="uid://8jsauvbqvkou" path="res://addons/xr-autohandtracker/simplelefthand.glb" id="1_qcpkv"]
-[ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="2_bpjcm"]
+[ext_resource type="Texture2D" uid="uid://bpc5fxiguhwbw" path="res://addons/xr-autohandtracker/3DLABuvchecker.jpg" id="2_bpjcm"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h77ed"]
 albedo_texture = ExtResource("2_bpjcm")

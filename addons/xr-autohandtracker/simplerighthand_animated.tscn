@@ -1,6 +1,10 @@
-[gd_scene load_steps=14 format=3 uid="uid://b4af03fp12r73"]
+[gd_scene load_steps=16 format=3 uid="uid://b4af03fp12r73"]
 
 [ext_resource type="PackedScene" uid="uid://dngec4nbh3ngj" path="res://addons/xr-autohandtracker/simplerighthand.glb" id="1_ro5f1"]
+[ext_resource type="Texture2D" uid="uid://bpc5fxiguhwbw" path="res://addons/xr-autohandtracker/3DLABuvchecker.jpg" id="2_jopun"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g20o3"]
+albedo_texture = ExtResource("2_jopun")
 
 [sub_resource type="Animation" id="Animation_tjro0"]
 resource_name = "Default"
@@ -133,6 +137,9 @@ node_connections = [&"Grip", 0, &"Trigger", &"Grip", 1, &"Animation 3", &"Trigge
 [node name="Skeleton3D" parent="RightHandHumanoid" index="0"]
 bones/11/rotation = Quaternion(0.0541047, -0.000444808, 0.0119774, 0.998463)
 bones/16/rotation = Quaternion(0.00175953, 0.00424792, 0.0509199, 0.998692)
+
+[node name="RightHandHumanoidMesh" parent="RightHandHumanoid/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_g20o3")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1"]
 libraries = {

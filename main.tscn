@@ -131,10 +131,10 @@ tracker = &"left_hand"
 [node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("4_vivmo")]
 
 [node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid" index="0"]
-bones/6/rotation = Quaternion(0.506915, -0.0629895, 0.0999833, 0.853857)
-bones/11/rotation = Quaternion(0.616931, 0.00799911, -0.00999889, 0.786913)
-bones/16/rotation = Quaternion(0.574241, 0.0260109, -0.0390163, 0.817342)
-bones/21/rotation = Quaternion(0.611026, 0.0510022, -0.0680029, 0.787033)
+bones/6/rotation = Quaternion(-0.0744182, 0.00207577, 0.111238, 0.991001)
+bones/11/rotation = Quaternion(0.133134, 0.00149939, -0.0119655, 0.991025)
+bones/16/rotation = Quaternion(0.0809525, -0.000156998, -0.0503869, 0.995444)
+bones/21/rotation = Quaternion(0.128825, 0.00640803, -0.0883368, 0.987704)
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 

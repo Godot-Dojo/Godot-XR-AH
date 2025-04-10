@@ -75,7 +75,6 @@ func _ready():
 				joints2D.add_child(rstickf)
 				rstickf.transform = sticktransformB(joints2D.get_node(LRd % j1).transform.origin, joints2D.get_node(LRd % j2).transform.origin)
 
-
 		# Make the toggle buttons that show the activated button signals
 		var vboxsignals = flat_display.get_node("VBoxTrackers%d" % hand)
 		var buttonsig = vboxsignals.get_child(0)
@@ -100,7 +99,7 @@ func _button_signal(name, hand, pressed):
 	if buttonsig:
 		buttonsig.button_pressed = pressed
 	else:
-		print("buttonsignal ", hand, " ", name, " ", pressed)
+		print("unknown buttonsignal ", hand, " ", name, " ", pressed)
 		
 func _input_float_changed(name, value, hand):
 	var ifsig = flat_display.get_node_or_null("VSlider%d%s" % [ hand, name ])
