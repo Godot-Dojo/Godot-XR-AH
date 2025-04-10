@@ -114,7 +114,7 @@ filter_enabled = true
 filters = ["RightHandHumanoid/Skeleton3D:RightIndexProximal"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_gd4f8"]
-graph_offset = Vector2(17.7143, 0.571429)
+graph_offset = Vector2(-82.0267, -0.505563)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_g20o3")
 nodes/Animation/position = Vector2(68.5714, 205.714)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_ro5f1")
@@ -141,6 +141,7 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+active = false
 tree_root = SubResource("AnimationNodeBlendTree_gd4f8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Grip/blend_amount = 0.0

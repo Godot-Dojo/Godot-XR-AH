@@ -1,0 +1,129 @@
+[gd_scene load_steps=13 format=3 uid="uid://cfk6nw5naeba5"]
+
+[ext_resource type="PackedScene" uid="uid://8jsauvbqvkou" path="res://addons/xr-autohandtracker/simplelefthand.glb" id="1_qcpkv"]
+[ext_resource type="Texture2D" uid="uid://vgrfqvqnyo3q" path="res://3DLABbg_UV_Map_Checker_04_512x512.jpg" id="2_bpjcm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h77ed"]
+albedo_texture = ExtResource("2_bpjcm")
+
+[sub_resource type="Animation" id="Animation_mj63t"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftIndexProximal")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.507, -0.063, 0.1, 0.854)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftMiddleProximal")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.617, 0.008, -0.01, 0.787)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftRingProximal")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.574, 0.026, -0.039, 0.817)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftLittleProximal")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0.611, 0.051, -0.068, 0.787)
+
+[sub_resource type="Animation" id="Animation_kuos7"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftIndexProximal")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.0744182, 0.00207577, 0.111238, 0.991001)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftMiddleProximal")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.0541047, 0.000444808, -0.0119774, 0.998463)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftRingProximal")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.00175953, -0.00424792, -0.0509199, 0.998692)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("LeftHandHumanoid/Skeleton3D:LeftLittleProximal")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0.0501767, -0.000729531, -0.0893392, 0.994736)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_dj26r"]
+_data = {
+&"LGrip": SubResource("Animation_mj63t"),
+&"LRest": SubResource("Animation_kuos7")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bpjcm"]
+animation = &"LeftHand/LGrip"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_h77ed"]
+animation = &"LeftHand/LGrip"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kuos7"]
+animation = &"LeftHand/LRest"
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_mj63t"]
+filter_enabled = true
+filters = ["LeftHandHumanoid/Skeleton3D:LeftLittleProximal", "LeftHandHumanoid/Skeleton3D:LeftMiddleProximal", "LeftHandHumanoid/Skeleton3D:LeftRingProximal", "Skeleton3D:LeftLittleProximal", "Skeleton3D:LeftMiddleProximal", "Skeleton3D:LeftRingProximal"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_dj26r"]
+filter_enabled = true
+filters = ["LeftHandHumanoid/Skeleton3D:LeftIndexProximal", "Skeleton3D:LeftIndexProximal"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_q2hao"]
+graph_offset = Vector2(-72.8501, -40.8241)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_kuos7")
+nodes/Animation/position = Vector2(68.5714, 57.1429)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_bpjcm")
+"nodes/Animation 2/position" = Vector2(80, 217.143)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_h77ed")
+"nodes/Animation 3/position" = Vector2(240, 297.143)
+nodes/Grip/node = SubResource("AnimationNodeBlend2_mj63t")
+nodes/Grip/position = Vector2(514.286, 80)
+nodes/Trigger/node = SubResource("AnimationNodeBlend2_dj26r")
+nodes/Trigger/position = Vector2(274.286, 45.7143)
+nodes/output/position = Vector2(765.714, 182.857)
+node_connections = [&"Grip", 0, &"Trigger", &"Grip", 1, &"Animation 3", &"Trigger", 0, &"Animation", &"Trigger", 1, &"Animation 2", &"output", 0, &"Grip"]
+
+[node name="simplelefthand" instance=ExtResource("1_qcpkv")]
+
+[node name="Skeleton3D" parent="LeftHandHumanoid" index="0"]
+bones/6/rotation = Quaternion(-0.0744182, 0.00207577, 0.111238, 0.991001)
+bones/11/rotation = Quaternion(0.133134, 0.00149939, -0.0119655, 0.991025)
+bones/16/rotation = Quaternion(0.0809525, -0.000156998, -0.0503869, 0.995444)
+bones/21/rotation = Quaternion(0.128825, 0.00640803, -0.0883368, 0.987704)
+
+[node name="LeftHandHumanoidMesh" parent="LeftHandHumanoid/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_h77ed")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1"]
+libraries = {
+&"LeftHand": SubResource("AnimationLibrary_dj26r")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+tree_root = SubResource("AnimationNodeBlendTree_q2hao")
+anim_player = NodePath("../AnimationPlayer")
+parameters/Grip/blend_amount = 0.13
+parameters/Trigger/blend_amount = 0.0

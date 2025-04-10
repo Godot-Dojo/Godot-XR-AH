@@ -35,7 +35,7 @@ var oxrkradii = [ ]
 
 var handnode = null
 var skel = null
-var handanimationtree = null
+var handanimationtree : AnimationTree = null
 
 # values calculated from the hand skeleton itself
 var handtoskeltransform
@@ -81,6 +81,13 @@ func extractrestfingerbones():
 				bYalignedAxes = false
 	print("bYalignedAxes ", bYalignedAxes)
 
+var trigger_value = 0.0
+var grip_value = 0.0
+func _xr_controller_node_float_changed(name: String, value: float):
+	if name == "trigger":
+		trigger_value = value
+	elif name == "grip":
+		grip_value = value
 
 func _xr_controller_node_tracking_changed(tracking):
 	var xr_pose = xr_controller_node.get_pose()
@@ -93,7 +100,6 @@ func xrserver_tracker_added(tracker_name: StringName, type: int):
 	elif tracker_name == controllertracker_name: 
 		assert (type == XRServer.TRACKER_CONTROLLER)
 		xr_controllertracker = XRServer.get_tracker(controllertracker_name)
-	
 
 func xrserver_tracker_removed(tracker_name: StringName, type: int):
 	if tracker_name == handtracker_name: 
@@ -118,6 +124,7 @@ func findxrnodesandtrackers():
 		return false
 	xr_origin = xr_controller_node.get_parent()
 	xr_controller_node.tracking_changed.connect(_xr_controller_node_tracking_changed)
+	xr_controller_node.input_float_changed.connect(_xr_controller_node_float_changed)
 
 	for cch in xr_origin.get_children():
 		if cch is XRCamera3D:
@@ -152,6 +159,7 @@ func findhandnodes():
 		return false
 	handanimationtree = handnode.get_node_or_null("AnimationTree")
 	extractrestfingerbones()
+
 
 
 func _ready():
@@ -252,6 +260,10 @@ func process_handtrackingsource():
 	if xr_handtracker == null:
 		handtrackingactive = false
 		handtrackingvalid = false
+		if handanimationtree:
+			handanimationtree.active = true
+			handanimationtree.set("parameters/Grip/blend_amount", grip_value)
+			handanimationtree.set("parameters/Trigger/blend_amount", trigger_value)
 		return
 			
 	var lhandtrackingsource = xr_handtracker.hand_tracking_source
