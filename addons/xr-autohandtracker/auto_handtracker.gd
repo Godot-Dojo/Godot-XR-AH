@@ -161,7 +161,6 @@ func findhandnodes():
 	extractrestfingerbones()
 
 
-
 func _ready():
 	XRServer.tracker_removed.connect(xrserver_tracker_removed)
 	XRServer.tracker_added.connect(xrserver_tracker_added)
@@ -215,11 +214,11 @@ func calchandnodetransform(oxrktrans):
 	else:
 		hnorigin = wristorigin - hnbasis*wristboneresthandtransform.origin
 	return Transform3D(hnbasis, hnorigin)
-	
-		
+
+
 const carpallist = [ OpenXRInterface.HAND_JOINT_THUMB_METACARPAL, 
-					OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, 
-					OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
+					  OpenXRInterface.HAND_JOINT_INDEX_METACARPAL, OpenXRInterface.HAND_JOINT_MIDDLE_METACARPAL, 
+					  OpenXRInterface.HAND_JOINT_RING_METACARPAL, OpenXRInterface.HAND_JOINT_LITTLE_METACARPAL ]
 const FINGERCOUNT = 5
 
 func calcboneposesDisplaceOrigins(oxrktrans, handnodetransform):
@@ -309,6 +308,10 @@ func _process(delta):
 	var xrt = xr_origin.global_transform*XRServer.get_reference_frame()
 	if $AutoTracker.autotrackeractive:
 		$AutoTracker.autotrackgestures(oxrktrans, xrt)
+		var controllerpose = xr_controllertracker.get_pose("default")
+		if controllerpose:
+			$AutoTracker.xr_autotracker.set_pose("default", controllerpose.transform, controllerpose.linear_velocity, controllerpose.angular_velocity, controllerpose.tracking_confidence)
+
 	var handnodetransform = calchandnodetransform(oxrktrans)
 
 	# much other function calls done here attempting to stretch in Y, which didn't work due to non-conformal bone problems that need to be reported

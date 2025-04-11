@@ -132,14 +132,6 @@ func triggerfingerbutton(hand):
 		get_node("XROrigin3D/XRController3D"+handname+"/AutoHandtracker").set_process(true)
 	get_node("XROrigin3D/XRController3D"+handname).trigger_haptic_pulse("haptic", 0, 1.0, 0.25, 0)
 
-#	if Dvr:
-#		switch_to_ar()
-#		Dvr = false
-#	else:
-#		switch_to_vr()
-#		Dvr = true
-
-	
 @onready var viewport : Viewport = get_viewport()
 @onready var environment : Environment = $WorldEnvironment.environment
 func switch_to_ar() -> bool:  #passthrough
