@@ -66,8 +66,11 @@ func _ready():
 		print("OpenXR not initialized, please check if your headset is connected")
 
 func getcontextmenutexts():
-	return [ "VR", "AR", "FBTrackerL", "AutoTrackerL", "camerapos" ]
-
+	if $BodyTracking.visible:
+		return $BodyTracking.getcontextmenutexts()
+	return [ "AR" if is_in_vr() else "VR", 
+			 "FBTrackerL", "AutoTrackerL", "camerapos", 
+			 "StartBody" if not $BodyTracking.visible else "StopBody" ]
 
 # this really hacky and is supposed to be called every frame
 @onready var uninitialized_hmd_transform:Transform3D = XRServer.get_hmd_transform()
@@ -166,7 +169,17 @@ func switch_to_vr() -> bool:
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_BG
 	return true
 
+func is_in_vr() -> bool:
+	var xr_interface: XRInterface = XRServer.primary_interface
+	if xr_interface:
+		return xr_interface.environment_blend_mode == XRInterface.XR_ENV_BLEND_MODE_OPAQUE
+	return false
+
 func _on_radial_menu_menuitemselected(menutext):
+	if $BodyTracking.visible:
+		$BodyTracking._on_radial_menu_menuitemselected(menutext)
+		return
+
 	if menutext == "VR":
 		switch_to_vr()
 	elif menutext == "AR":
@@ -180,3 +193,17 @@ func _on_radial_menu_menuitemselected(menutext):
 	elif menutext == "camerapos":
 		var headtransform = get_node("XROrigin3D/XRCamera3D").transform	
 		$XROrigin3D/HandJoints/FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))
+	elif menutext == "StartBody":
+		$BodyTracking.startbodytracking()
+	elif menutext == "StopBody":
+		$BodyTracking.stopbodytracking()
+
+
+var axbuttondown = false
+func _on_xr_controller_3d_right_button_pressed(name):
+	if name == "by_button":
+		$BodyTracking.startaxbuttondown()
+
+func _on_xr_controller_3d_right_button_released(name):
+	if name == "by_button":
+		$BodyTracking.stopaxbuttondown()

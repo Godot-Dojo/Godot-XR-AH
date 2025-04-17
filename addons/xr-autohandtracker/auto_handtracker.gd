@@ -18,6 +18,7 @@ signal hand_active_changed(hand: int, active: bool)
 var islefthand = true
 var xr_controller_node : XRController3D = null
 var controllertracker_name : String 
+var controllertracker_pose : String
 var xr_controllertracker : XRPositionalTracker = null  # should be XRControllerTracker but for the use by the XRSimulator
 var handtracker_name : String
 var xr_handtracker : XRHandTracker = null
@@ -117,6 +118,7 @@ func findxrnodesandtrackers():
 		return false
 	xr_controller_node = get_parent()
 	controllertracker_name = xr_controller_node.tracker
+	controllertracker_pose = xr_controller_node.pose
 	islefthand = (controllertracker_name == "left_hand")
 	assert (controllertracker_name == ("left_hand" if islefthand else "right_hand"))
 	if not (xr_controller_node.get_parent() is XROrigin3D):

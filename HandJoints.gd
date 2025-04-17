@@ -144,8 +144,8 @@ func set_xr_interface(lxr_interface : OpenXRInterface):
 	play_area_changed(xr_interface.xr_play_area_mode)
 		
 	# reset the position of the 2D information panel 3 times in the first 15 seconds
-	for t in range(3):
-		await get_tree().create_timer(5).timeout
+	for t in range(2):
+		await get_tree().create_timer(4).timeout
 		var headtransform = get_node("../XRCamera3D").transform	
 		$FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))
 

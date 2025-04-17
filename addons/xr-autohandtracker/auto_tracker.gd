@@ -46,7 +46,8 @@ func deactivateautotracker(xr_controller_node, xr_controllertracker):
 	setaxbybuttonstatus(0)
 	graspsqueezer.applysqueeze(graspsqueezer.touchbuttondistance + 1)	
 	pinchsqueezer.applysqueeze(pinchsqueezer.touchbuttondistance + 1)	
-	xr_controller_node.set_tracker(xr_controllertracker.name)
+	xr_controller_node.tracker = get_parent().controllertracker_name
+	xr_controller_node.pose = get_parent().controllertracker_pose
 	autotrackeractive = false
 
 func autotrackgestures(oxrktrans, xrt):
