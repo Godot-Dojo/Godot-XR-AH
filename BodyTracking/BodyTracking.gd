@@ -4,6 +4,15 @@ extends Node3D
 @onready var xrleft = get_node("/root/Main/XROrigin3D/XRController3DLeft")
 @onready var xrright = get_node("/root/Main/XROrigin3D/XRController3DRight")
 
+func _ready():
+	#Relative to the Grip Pose
+	$HeadClaw/PivotMarker.position = Vector3(0.0, -0.109, 0.09)
+	$LeftClaw/PivotMarker.position = Vector3(-0.041, 0.048, 0.028)
+	$RightClaw/PivotMarker.position = Vector3(0.038, 0.045, 0.033)
+	$LeftClaw/PivotMarkerElbow.position = Vector3(-0.162, 0.205, 0.172)
+	$RightClaw/PivotMarkerElbow.position = Vector3(0.146, 0.214, 0.177)
+	$LeftClaw/PivotMarkerShoulder.position = Vector3(-0.22, 0.589, 0.136)
+	$RightClaw/PivotMarkerShoulder.position = Vector3(0.17, 0.318, 0.155)
 
 func startbodytracking():
 	set_process(true)
@@ -20,44 +29,47 @@ func stopbodytracking():
 	set_process(false)
 
 func _process(delta):
-	if not $VRPlayerAvatar/PlayerAnimation.active:
-		$VRPlayerAvatar/HeadCam.transform = xrcamera.transform
-		$VRPlayerAvatar/simplelefthand.transform = xrleft.transform
-		$VRPlayerAvatar/simplerighthand.transform = xrright.transform
-		$VRPlayerAvatar/LeftClaw.transform = xrleft.transform
-		$VRPlayerAvatar/RightClaw.transform = xrright.transform
+	if not $MotionAnimation.active:
+		$HeadClaw.transform = xrcamera.transform
+		$LeftClaw.transform = xrleft.transform
+		$RightClaw.transform = xrright.transform
 		if animrec:
 			processanimrec(delta)
 		
 func getcontextmenutexts():
-	return [ "StopBody", "PlayAnim", "FixHeadCam", "FixLeftClaw", "FixRightClaw" ]
+	return [ "StopBody", "PlayAnim", 
+			 "FixHeadClaw", "FixLeftClaw", "FixRightClaw",
+			 "RotateBody" ]
 
 func _on_radial_menu_menuitemselected(menutext):
 	if menutext == "StopBody":
-		$VRPlayerAvatar/PlayerAnimation.stop()
-		$VRPlayerAvatar/PlayerAnimation.active = false
+		$MotionAnimation.stop()
+		$MotionAnimation.active = false
 		stopbodytracking()
 	if menutext == "PlayAnim":
-		$VRPlayerAvatar/PlayerAnimation.play("animreclibrary/animrec")
-		$VRPlayerAvatar/PlayerAnimation.active = true
+		$MotionAnimation.play("animreclibrary/animrec")
+		$MotionAnimation.active = true
+	if menutext == "RotateBody":
+		rotation_degrees.y += 30
 	if menutext.begins_with("Fix"):
-		var anim = $VRPlayerAvatar/PlayerAnimation.get_animation("animreclibrary/animrec")
+		var anim = $MotionAnimation.get_animation("animreclibrary/animrec")
 		if anim:
 			var i = animtrackers.find(menutext.substr(3))
 			var trs = [ ]
 			for k in range(anim.track_get_key_count(i*2)):
 				var tr = Transform3D(anim.track_get_key_value(i*2+1, k), anim.track_get_key_value(i*2, k))
 				trs.append(tr)
-			var pm = $VRPlayerAvatar.get_node(menutext.substr(3)).get_node("PivotMarker")
+			var pm = get_node(menutext.substr(3)).get_node("PivotMarker")
 			var vec = searchfixedpivotvec(trs, pm.position)
 			pm.position = vec
 
-const animtrackers = [ "HeadCam", "LeftClaw", "RightClaw" ]
+const animtrackers = [ "HeadClaw", "LeftClaw", "RightClaw" ]
 var animrec : Animation = null
 var animrecT = 0.0
 func startaxbuttondown():
-	if visible and not $VRPlayerAvatar/PlayerAnimation.active:
+	if visible and not $MotionAnimation.active:
 		print("Start anim recording ", animrecT)
+		$RecordingMarker.visible = true
 		animrec = Animation.new()
 		animrecT = 0.0
 		for i in range(len(animtrackers)):
@@ -68,7 +80,7 @@ func startaxbuttondown():
 
 func processanimrec(delta):
 	for i in range(len(animtrackers)):
-		var tr = get_node("VRPlayerAvatar/"+animtrackers[i]).transform
+		var tr = get_node(animtrackers[i]).transform
 		animrec.position_track_insert_key(i*2, animrecT, tr.origin)
 		animrec.rotation_track_insert_key(i*2+1, animrecT, Quaternion(tr.basis.orthonormalized()))
 	animrec.length = animrecT + 1.0
@@ -77,9 +89,10 @@ func processanimrec(delta):
 func stopaxbuttondown():
 	if animrec:
 		print("Finish anim recording ", animrecT)
+		$RecordingMarker.visible = false
 		animrec.length = animrecT
 		animrec.loop_mode = Animation.LOOP_LINEAR
-		var animlibrary : AnimationLibrary = $VRPlayerAvatar/PlayerAnimation.get_animation_library("animreclibrary")
+		var animlibrary : AnimationLibrary = $MotionAnimation.get_animation_library("animreclibrary")
 		animlibrary.remove_animation("animrec")
 		animlibrary.add_animation("animrec", animrec)
 		animrec = null

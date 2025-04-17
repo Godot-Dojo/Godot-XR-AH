@@ -194,6 +194,7 @@ func _on_radial_menu_menuitemselected(menutext):
 		var headtransform = get_node("XROrigin3D/XRCamera3D").transform	
 		$XROrigin3D/HandJoints/FrontOfPlayer.transform = Transform3D(headtransform.basis, headtransform.origin - headtransform.basis.z*0.5 + Vector3(0,-0.2,0))
 	elif menutext == "StartBody":
+		$XROrigin3D/HandJoints/FrontOfPlayer.position.y = max($XROrigin3D/HandJoints/FrontOfPlayer.position.y, 3)
 		$BodyTracking.startbodytracking()
 	elif menutext == "StopBody":
 		$BodyTracking.stopbodytracking()
