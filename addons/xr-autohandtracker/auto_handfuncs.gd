@@ -7,7 +7,7 @@ const FINGERCOUNT = 5
 
 static func basisfromA(a, v):
 	var vx = a.normalized()
-	var vy = vx.cross(v.normalized())
+	var vy = vx.cross(v).normalized()
 	var vz = vx.cross(vy)
 	return Basis(vx, vy, vz)
 

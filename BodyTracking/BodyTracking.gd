@@ -4,15 +4,28 @@ extends Node3D
 @onready var xrleft = get_node("/root/Main/XROrigin3D/XRController3DLeft")
 @onready var xrright = get_node("/root/Main/XROrigin3D/XRController3DRight")
 
+var wristshoulderlength = 0.6 - 0.1
+var thoracicheight = 0.19
+var thoracicshoulderwidth = 0.099792*2
+@onready var thoracicvecleng = Vector2(thoracicheight, thoracicshoulderwidth/2).length()
+
 func _ready():
 	#Relative to the Grip Pose
 	$HeadClaw/PivotMarker.position = Vector3(0.0, -0.109, 0.09)
+
 	$LeftClaw/PivotMarker.position = Vector3(-0.041, 0.048, 0.028)
 	$RightClaw/PivotMarker.position = Vector3(0.038, 0.045, 0.033)
-	$LeftClaw/PivotMarkerElbow.position = Vector3(-0.162, 0.205, 0.172)
+	$LeftClaw/PivotMarkerElbow.position = Vector3(-0.028, 0.328, 0.121)
 	$RightClaw/PivotMarkerElbow.position = Vector3(0.146, 0.214, 0.177)
 	$LeftClaw/PivotMarkerShoulder.position = Vector3(-0.22, 0.589, 0.136)
-	$RightClaw/PivotMarkerShoulder.position = Vector3(0.17, 0.318, 0.155)
+	$RightClaw/PivotMarkerShoulder.position = Vector3(0.045, 0.566, 0.35)
+
+	$LeftClaw/WristPivot.position = Vector3(-0.041, 0.048, 0.028)
+	$LeftClaw/WristPivot.rotation_degrees = Vector3(20, 0, 0) # from wrist to elbow vector direction in YZ
+
+	$HeadClaw/PivotMarker/LeftShoulder.position = Vector3(-thoracicheight, -0.0, thoracicshoulderwidth/2)
+	$HeadClaw/PivotMarker/RightShoulder.position = Vector3(thoracicheight, -0.0, thoracicshoulderwidth/2)
+
 
 func startbodytracking():
 	set_process(true)
@@ -28,18 +41,30 @@ func stopbodytracking():
 	visible = false
 	set_process(false)
 
+var Dtime = 0
 func _process(delta):
 	if not $MotionAnimation.active:
 		$HeadClaw.transform = xrcamera.transform
 		$LeftClaw.transform = xrleft.transform
 		$RightClaw.transform = xrright.transform
+		positionshoulderslocus()
+		repositionthorax()
 		if animrec:
 			processanimrec(delta)
+		Dtime += delta
+		if Dtime > 1:
+			var lw = $LeftClaw/PivotMarker.global_position
+			var ls = $HeadClaw/PivotMarker/LeftShoulder.global_position
+			var rw = $RightClaw/PivotMarker.global_position
+			var rs = $HeadClaw/PivotMarker/RightShoulder.global_position
+			prints("SHSHWR ", (lw - ls).length(), (rw - rs).length())
+			Dtime = 0
+		
 		
 func getcontextmenutexts():
 	return [ "StopBody", "PlayAnim", 
 			 "FixHeadClaw", "FixLeftClaw", "FixRightClaw",
-			 "RotateBody" ]
+			 "RotateBody", "SetShoulders" ]
 
 func _on_radial_menu_menuitemselected(menutext):
 	if menutext == "StopBody":
@@ -62,6 +87,42 @@ func _on_radial_menu_menuitemselected(menutext):
 			var pm = get_node(menutext.substr(3)).get_node("PivotMarker")
 			var vec = searchfixedpivotvec(trs, pm.position)
 			pm.position = vec
+
+	if menutext == "SetShoulders":
+		var rs = $RightClaw/PivotMarkerShoulder.global_position
+		var ls = $LeftClaw/PivotMarkerShoulder.global_position
+		var nk = $HeadClaw/PivotMarker.global_position
+		var svec = rs - ls
+		var lam = svec.dot(nk - ls)/svec.length_squared()
+		print("Mid point neck lam... ", lam)
+		$HeadClaw/PivotMarker.global_basis = AutoHandFuncs.basisfromA(svec, nk - ls)
+		$HeadClaw/PivotMarker/LeftShoulder.global_position = $LeftClaw/PivotMarkerShoulder.global_position
+		$HeadClaw/PivotMarker/RightShoulder.global_position = $RightClaw/PivotMarkerShoulder.global_position
+		prints("LR thorax shoulders", $HeadClaw/PivotMarker/LeftShoulder.position, $HeadClaw/PivotMarker/RightShoulder.position)
+
+
+func positionshoulderlocus(nk, w):
+	var vw = w - nk
+	var m = vw.length()
+	var h = thoracicvecleng
+	var l = wristshoulderlength
+	var b = (m*m - l*l + h*h)/(2*m)
+	var asq = h*h - b*b
+	var a = sqrt(max(0, asq))
+	var vy = vw/m
+	var vx = Vector3(0,1,0).cross(vy).normalized()
+	var vz = vx.cross(vy)
+	var c = nk + b*vy
+	return Transform3D(Basis(vx*a, vy*a, vz*a), c)
+	
+func positionshoulderslocus():
+	var nk = $HeadClaw/PivotMarker.global_position
+	$LeftShoulderLocus.global_transform = positionshoulderlocus(nk, $LeftClaw/PivotMarker.global_position)
+	$RightShoulderLocus.global_transform = positionshoulderlocus(nk, $RightClaw/PivotMarker.global_position)
+	#var thoracicheight = 0.19
+	#var thoracicshoulderwidth = 0.099792*2
+	#@onready var thoracicvecleng = Vector2(thoracicheight, thoracicshoulderwidth/2).length()
+	#wristshoulderlength
 
 const animtrackers = [ "HeadClaw", "LeftClaw", "RightClaw" ]
 var animrec : Animation = null
@@ -132,3 +193,40 @@ func variancescore(trs, vec):
 		var vs = (pt - apt).length_squared()
 		vsum += vs
 	return vsum/len(trs)
+
+func measurethoraxrot(thoraxquat):
+	var thoraxtrans = $HeadClaw.global_transform*Transform3D(thoraxquat, $HeadClaw/PivotMarker.position)
+	var tsleft = thoraxtrans*$HeadClaw/PivotMarker/LeftShoulder.position
+	var tsright = thoraxtrans*$HeadClaw/PivotMarker/RightShoulder.position
+	var lw = $LeftClaw/PivotMarker.global_position
+	var rw = $RightClaw/PivotMarker.global_position
+	var swl = (tsleft - lw).length() - wristshoulderlength
+	var swr = (tsright - rw).length() - wristshoulderlength
+	return swl*swl + swr*swr
+
+func repositionthorax():
+	var propthoraxquat = $HeadClaw/PivotMarker.basis.get_rotation_quaternion()
+	var Dpropthoraxquat = propthoraxquat
+	var eps = 0.001
+	var qeps = sqrt(1.0 - eps*eps)
+	for k in range(12):
+		var E0 = measurethoraxrot(propthoraxquat)
+		var gx = measurethoraxrot(propthoraxquat*Quaternion(eps, 0, 0, qeps))
+		var gy = measurethoraxrot(propthoraxquat*Quaternion(0, eps, 0, qeps))
+		var gz = measurethoraxrot(propthoraxquat*Quaternion(0, 0, eps, qeps))
+		var gradE = Vector3(gx-E0, gy-E0, gz-E0)/eps
+		var gradEsq = gradE.length_squared()
+		var c = 0.5
+		var tau = 0.5
+		var delta = 0.2
+		for i in range(10):
+			var v = -gradE*delta
+			var addpropthoraxquat = Quaternion(v.x, v.y, v.z, sqrt(1.0 - v.length_squared()))
+			var E1 = measurethoraxrot(propthoraxquat*addpropthoraxquat)
+			if E1 < E0 - delta*c*gradEsq:
+				propthoraxquat = propthoraxquat*addpropthoraxquat 
+				break
+			delta = delta*tau
+	#print(Dpropthoraxquat.inverse()*propthoraxquat)
+	$HeadClaw/PivotMarker.basis = Basis(propthoraxquat)
+	

@@ -49,6 +49,7 @@ func makeradialmenu(menuitemtexts):
 		setupnamepos(radialmenuitem, menuitemtexts[i], contextclocksequence[i], diskradius)
 		$MenuDisk.add_child(radialmenuitem)
 	await get_tree().process_frame # necessary to set the text dimensions
+	await get_tree().process_frame # necessary to set the text dimensions
 	for menuitem in $MenuDisk.get_children():
 		setbackgroundcollision(menuitem)
 	$MenuDisk.visible = true

@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=53 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -118,6 +118,22 @@ albedo_color = Color(1, 0.631373, 0.0313726, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_82xsv"]
 albedo_color = Color(1, 1, 0.0313726, 1)
 
+[sub_resource type="BoxMesh" id="BoxMesh_074og"]
+size = Vector3(0.01, 0.01, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1u8w0"]
+albedo_color = Color(0.117647, 0.705882, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cegan"]
+size = Vector3(0.04, 0.01, 0.01)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0odxb"]
+albedo_color = Color(1, 0.360784, 1, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_2cqfq"]
+inner_radius = 0.97
+outer_radius = 1.03
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1u8w0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ryguw"]
@@ -163,12 +179,18 @@ pose = &"grip"
 
 [node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("4_vivmo")]
 
+[node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid" index="0"]
+bones/6/rotation = Quaternion(-0.0744182, 0.00207577, 0.111238, 0.991001)
+bones/11/rotation = Quaternion(0.133134, 0.00149939, -0.0119655, 0.991025)
+bones/16/rotation = Quaternion(0.0809525, -0.000156998, -0.0503869, 0.995444)
+bones/21/rotation = Quaternion(0.128825, 0.00640803, -0.0883368, 0.987704)
+
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 
 [node name="LeftClaw" type="Node3D" parent="XROrigin3D/XRController3DLeft"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="XROrigin3D/XRController3DLeft/LeftClaw"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 size = Vector3(0.1, 0.1, 0.2)
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="XROrigin3D/XRController3DLeft/LeftClaw/CSGBox3D"]
@@ -189,6 +211,7 @@ visiblehandtrackskeletonRaw = true
 [node name="RightClaw" type="Node3D" parent="XROrigin3D/XRController3DRight"]
 
 [node name="CSGBox3D" type="CSGBox3D" parent="XROrigin3D/XRController3DRight/RightClaw"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 size = Vector3(0.1, 0.1, 0.2)
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="XROrigin3D/XRController3DRight/RightClaw/CSGBox3D"]
@@ -367,6 +390,15 @@ mesh = SubResource("SphereMesh_ryguw")
 material = SubResource("StandardMaterial3D_d13ii")
 
 [node name="PivotMarker" type="MeshInstance3D" parent="BodyTracking/HeadClaw"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.10967, 0.126184)
+mesh = SubResource("SphereMesh_yaehf")
+surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
+
+[node name="LeftShoulder" type="MeshInstance3D" parent="BodyTracking/HeadClaw/PivotMarker"]
+mesh = SubResource("SphereMesh_yaehf")
+surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
+
+[node name="RightShoulder" type="MeshInstance3D" parent="BodyTracking/HeadClaw/PivotMarker"]
 mesh = SubResource("SphereMesh_yaehf")
 surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
 
@@ -374,6 +406,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.177, 0.742504, -0.433731)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="BodyTracking/LeftClaw"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 size = Vector3(0.1, 0.1, 0.2)
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="BodyTracking/LeftClaw/CSGBox3D"]
@@ -393,10 +426,21 @@ surface_material_override/0 = SubResource("StandardMaterial3D_82xsv")
 mesh = SubResource("SphereMesh_yaehf")
 surface_material_override/0 = SubResource("StandardMaterial3D_82xsv")
 
+[node name="WristPivot" type="MeshInstance3D" parent="BodyTracking/LeftClaw"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, -0.041, 0.048, 0.028)
+mesh = SubResource("BoxMesh_074og")
+surface_material_override/0 = SubResource("StandardMaterial3D_1u8w0")
+
+[node name="ElbowPivot" type="MeshInstance3D" parent="BodyTracking/LeftClaw/WristPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("BoxMesh_cegan")
+surface_material_override/0 = SubResource("StandardMaterial3D_0odxb")
+
 [node name="RightClaw" type="Node3D" parent="BodyTracking"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.273287, 0.787562, -0.433731)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="BodyTracking/RightClaw"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 size = Vector3(0.1, 0.1, 0.2)
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="BodyTracking/RightClaw/CSGBox3D"]
@@ -415,6 +459,14 @@ surface_material_override/0 = SubResource("StandardMaterial3D_82xsv")
 [node name="PivotMarkerShoulder" type="MeshInstance3D" parent="BodyTracking/RightClaw"]
 mesh = SubResource("SphereMesh_yaehf")
 surface_material_override/0 = SubResource("StandardMaterial3D_82xsv")
+
+[node name="LeftShoulderLocus" type="MeshInstance3D" parent="BodyTracking"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0.261075, 0)
+mesh = SubResource("TorusMesh_2cqfq")
+
+[node name="RightShoulderLocus" type="MeshInstance3D" parent="BodyTracking"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0.261075, 0)
+mesh = SubResource("TorusMesh_2cqfq")
 
 [node name="MotionAnimation" type="AnimationPlayer" parent="BodyTracking"]
 active = false
