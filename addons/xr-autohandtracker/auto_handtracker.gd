@@ -1,4 +1,3 @@
-@tool
 extends Node3D
 
 # Settings that can be changed dynamically in the debugger to 

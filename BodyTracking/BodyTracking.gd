@@ -26,6 +26,11 @@ func _ready():
 	$HeadClaw/PivotMarker/LeftShoulder.position = Vector3(-thoracicheight, -0.0, thoracicshoulderwidth/2)
 	$HeadClaw/PivotMarker/RightShoulder.position = Vector3(thoracicheight, -0.0, thoracicshoulderwidth/2)
 
+	#if ResourceLoader.exists("res://data/animrec.anim"):
+	#	var anim = ResourceLoader.load("res://data/animrec.anim")
+	#	var animlibrary : AnimationLibrary = $MotionAnimation.get_animation_library("animreclibrary")
+	#	animlibrary.remove_animation("animrec")
+	#	animlibrary.add_animation("animrec", anim)
 
 func startbodytracking():
 	set_process(true)
@@ -59,12 +64,12 @@ func _process(delta):
 			var rs = $HeadClaw/PivotMarker/RightShoulder.global_position
 			prints("SHSHWR ", (lw - ls).length(), (rw - rs).length())
 			Dtime = 0
-		
-		
+
 func getcontextmenutexts():
 	return [ "StopBody", "PlayAnim", 
 			 "FixHeadClaw", "FixLeftClaw", "FixRightClaw",
-			 "RotateBody", "SetShoulders" ]
+			 "RotateBody", "SetShoulders", 
+			 "SaveAnim" ]
 
 func _on_radial_menu_menuitemselected(menutext):
 	if menutext == "StopBody":
@@ -74,6 +79,15 @@ func _on_radial_menu_menuitemselected(menutext):
 	if menutext == "PlayAnim":
 		$MotionAnimation.play("animreclibrary/animrec")
 		$MotionAnimation.active = true
+	if menutext == "SaveAnim":
+		$MotionAnimation.play("animreclibrary/animrec")
+		var anim = $MotionAnimation.get_animation("animreclibrary/animrec")
+		var save_path = "user://animrec.anim"
+		print("OS.get_data_dir ", OS.get_data_dir())
+		if OS.has_feature("android"):
+			save_path = "/storage/emulated/0/Android/data/com.example.godotxrah/files/animrec.anim"
+		var E = ResourceSaver.save(anim, save_path)
+		print("Resourcesaver Error=", E)
 	if menutext == "RotateBody":
 		rotation_degrees.y += 30
 	if menutext.begins_with("Fix"):
@@ -100,7 +114,12 @@ func _on_radial_menu_menuitemselected(menutext):
 		$HeadClaw/PivotMarker/RightShoulder.global_position = $RightClaw/PivotMarkerShoulder.global_position
 		prints("LR thorax shoulders", $HeadClaw/PivotMarker/LeftShoulder.position, $HeadClaw/PivotMarker/RightShoulder.position)
 
-
+func _input(event):
+	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_L:
+		var frontofplayer = get_node("/root/Main/XROrigin3D/HandJoints/FrontOfPlayer")
+		frontofplayer.position.y = max(frontofplayer.position.y, 3)
+		_on_radial_menu_menuitemselected("PlayAnim")
+		
 func positionshoulderlocus(nk, w):
 	var vw = w - nk
 	var m = vw.length()

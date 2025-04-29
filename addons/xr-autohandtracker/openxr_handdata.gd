@@ -78,7 +78,7 @@ func _process(delta):
 		autohandright.oxrktransRaw_updated = true
 
 func _input(event):
-	if event is InputEventKey and event.is_pressed and event.keycode == KEY_P:
+	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_P:
 		var file = FileAccess.open("res://data/handspinch.var", FileAccess.READ)
 		Dautohandspinchtrans = str_to_var(file.get_as_text())
 		xpulloffset = -0.2
