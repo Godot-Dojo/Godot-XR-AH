@@ -1,0 +1,27 @@
+[gd_scene load_steps=10 format=3 uid="uid://degjokngkak1a"]
+
+[ext_resource type="PackedScene" uid="uid://d4i6j25gy87i3" path="res://avatars/Davali_1.5_Avatar_PUBLIC_29-04-2022.glb" id="1_qm27a"]
+[ext_resource type="Texture2D" uid="uid://bmlmm21423gr3" path="res://avatars/Main_AlbedoTransparency4.jpg" id="2_ri2o2"]
+[ext_resource type="Texture2D" uid="uid://cyupw4i0jrbg4" path="res://avatars/Feathers_AlbedoTransparency4.jpg" id="3_flaq4"]
+[ext_resource type="Texture2D" uid="uid://bec61vn0yb12o" path="res://avatars/Feathers2_AlbedoTransparency4.jpg" id="4_uiogv"]
+[ext_resource type="Texture2D" uid="uid://m1w0foomvv7" path="res://avatars/Eyes_AlbedoTransparency4.jpg" id="5_kfsj1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_budmv"]
+albedo_texture = ExtResource("2_ri2o2")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4tj70"]
+albedo_texture = ExtResource("3_flaq4")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p7p11"]
+albedo_texture = ExtResource("4_uiogv")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gu651"]
+albedo_texture = ExtResource("5_kfsj1")
+
+[node name="davali" instance=ExtResource("1_qm27a")]
+
+[node name="Body" parent="Armature/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_budmv")
+surface_material_override/1 = SubResource("StandardMaterial3D_4tj70")
+surface_material_override/2 = SubResource("StandardMaterial3D_p7p11")
+surface_material_override/3 = SubResource("StandardMaterial3D_gu651")
