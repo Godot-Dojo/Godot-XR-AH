@@ -75,19 +75,27 @@ func _on_radial_menu_menuitemselected(menutext):
 	if menutext == "StopBody":
 		$MotionAnimation.stop()
 		$MotionAnimation.active = false
+		$BodyTrackingData/BodyMotionAnimation.stop()
+		$BodyTrackingData/BodyMotionAnimation.active = false
 		stopbodytracking()
 	if menutext == "PlayAnim":
 		$MotionAnimation.play("animreclibrary/animrec")
 		$MotionAnimation.active = true
+		$BodyTrackingData/BodyMotionAnimation.play("manimreclibrary/manimrec")
+		$BodyTrackingData/BodyMotionAnimation.active = true
 	if menutext == "SaveAnim":
-		$MotionAnimation.play("animreclibrary/animrec")
 		var anim = $MotionAnimation.get_animation("animreclibrary/animrec")
+		var manim = $BodyTrackingData/BodyMotionAnimation.get_animation("manimreclibrary/manimrec")
 		var save_path = "user://animrec.anim"
+		var msave_path = "user://manimrec.anim"
 		print("OS.get_data_dir ", OS.get_data_dir())
 		if OS.has_feature("android"):
-			save_path = "/storage/emulated/0/Android/data/com.example.godotxrah/files/animrec.anim"
+			save_path = "/storage/emulated/0/Android/datac/com.example.godotxrah/files/animrec.anim"
+			msave_path = "/storage/emulated/0/Android/data/com.example.godotxrah/files/manimrec.anim"
 		var E = ResourceSaver.save(anim, save_path)
 		print("Resourcesaver Error=", E)
+		var mE = ResourceSaver.save(manim, msave_path)
+		print("mResourcesaver Error=", mE)
 	if menutext == "RotateBody":
 		rotation_degrees.y += 30
 	if menutext.begins_with("Fix"):
@@ -118,6 +126,7 @@ func _input(event):
 	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_L:
 		var frontofplayer = get_node("/root/Main/XROrigin3D/HandJoints/FrontOfPlayer")
 		frontofplayer.position.y = max(frontofplayer.position.y, 3)
+		$BodyTrackingData.makenodesforanimation()
 		_on_radial_menu_menuitemselected("PlayAnim")
 		
 func positionshoulderlocus(nk, w):
@@ -154,9 +163,11 @@ func startaxbuttondown():
 		animrecT = 0.0
 		for i in range(len(animtrackers)):
 			animrec.add_track(Animation.TYPE_POSITION_3D)
+			print("aaaa ", [animtrackers[i]])
 			animrec.track_set_path(i*2, animtrackers[i])
 			animrec.add_track(Animation.TYPE_ROTATION_3D)
 			animrec.track_set_path(i*2+1, animtrackers[i])
+		$BodyTrackingData.createanimation()
 
 func processanimrec(delta):
 	for i in range(len(animtrackers)):
@@ -176,6 +187,7 @@ func stopaxbuttondown():
 		animlibrary.remove_animation("animrec")
 		animlibrary.add_animation("animrec", animrec)
 		animrec = null
+	$BodyTrackingData.finishanimation()
 	
 func searchfixedpivotvec(trs, vec):
 	var ddel = 0.0001

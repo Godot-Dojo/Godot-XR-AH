@@ -6,6 +6,16 @@ var bodyupperexists = false
 var bodylowerexists = false
 var bodyhandsexists = false
 
+var manimrec = null
+var manimrecT = 0.0
+func createanimation():
+	manimrec = Animation.new()
+	for i in range($MiniBody.get_child_count()):
+		manimrec.add_track(Animation.TYPE_POSITION_3D)
+		manimrec.track_set_path(i*2, String($MiniBody.get_child(i).name))
+		manimrec.add_track(Animation.TYPE_ROTATION_3D)
+		manimrec.track_set_path(i*2+1, String($MiniBody.get_child(i).name))
+
 func createjoints(prefix, joints):
 	for j in joints:
 		var nj = axes3dscene.instantiate()
@@ -13,6 +23,11 @@ func createjoints(prefix, joints):
 		nj.scale = Vector3(0.02, 0.02, 0.02)
 		nj.get_node("UntrackedMesh").visible = true
 		$MiniBody.add_child(nj)
+
+func makenodesforanimation():
+	if $MiniBody.get_child_count() == 0:
+		createjoints("U", jointsupper)
+		createjoints("H", jointshands)
 
 func _process(delta):
 	var xr_bodytracker = XRServer.get_tracker("/user/body_tracker")
@@ -40,8 +55,29 @@ func _process(delta):
 				var tr = xr_bodytracker.get_joint_transform(j)
 				if jf & XRBodyTracker.JOINT_FLAG_ORIENTATION_TRACKED:
 					nj.transform.basis = tr.basis.scaled(Vector3(0.04, 0.04, 0.04))
+					if manimrec:
+						var i = manimrec.find_track(String(nj.get_name()), Animation.TYPE_ROTATION_3D)
+						manimrec.rotation_track_insert_key(i, manimrecT, Quaternion(tr.basis.orthonormalized()))
+
 				if jf & XRBodyTracker.JOINT_FLAG_POSITION_TRACKED:
 					nj.transform.origin = tr.origin
+					if manimrec:
+						var i = manimrec.find_track(String(nj.get_name()), Animation.TYPE_POSITION_3D)
+						manimrec.position_track_insert_key(i, manimrecT, tr.origin)
+
+	if manimrec:
+		manimrec.length = manimrecT + 1.0
+		manimrecT += delta
+
+func finishanimation():
+	if manimrec:
+		print("Finish anim recording ", manimrecT)
+		manimrec.length = manimrecT
+		manimrec.loop_mode = Animation.LOOP_LINEAR
+		var animlibrary : AnimationLibrary = $BodyMotionAnimation.get_animation_library("manimreclibrary")
+		animlibrary.remove_animation("manimrec")
+		animlibrary.add_animation("manimrec", manimrec)
+		manimrec = null
 
 var jointsupper = [ XRBodyTracker.JOINT_ROOT,
 					XRBodyTracker.JOINT_HIPS, 
