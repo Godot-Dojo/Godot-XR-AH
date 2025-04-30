@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=59 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -18,6 +18,8 @@
 [ext_resource type="Script" uid="uid://cqhqlla1w2otw" path="res://BodyTracking/BodyTracking.gd" id="16_2cqfq"]
 [ext_resource type="Animation" uid="uid://dvxbr754dcs7j" path="res://data/animrec.anim" id="17_yaehf"]
 [ext_resource type="Animation" path="res://data/manimrec.anim" id="18_074og"]
+[ext_resource type="PackedScene" uid="uid://degjokngkak1a" path="res://avatars/davali.tscn" id="19_cegan"]
+[ext_resource type="Script" uid="uid://c027jq3p4qhmb" path="res://avatar_animator.gd" id="20_82xsv"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -152,6 +154,8 @@ albedo_color = Color(1, 1, 0.521569, 0.231373)
 _data = {
 &"manimrec": ExtResource("18_074og")
 }
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_getpj"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_cagca")
@@ -478,6 +482,7 @@ mesh = SubResource("CapsuleMesh_d13ii")
 [node name="SimpleHumanBody" type="Node3D" parent="BodyTracking"]
 
 [node name="BodyTrackingData" type="Node3D" parent="BodyTracking"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -0.4, 0)
 script = ExtResource("12_2cqfq")
 
 [node name="MiniBody" type="Node3D" parent="BodyTracking/BodyTrackingData"]
@@ -492,6 +497,16 @@ libraries = {
 &"manimreclibrary": SubResource("AnimationLibrary_yaehf")
 }
 
+[node name="davali" parent="." instance=ExtResource("19_cegan")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.52926, 0, -1.11651)
+script = ExtResource("20_82xsv")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="davali"]
+root_node = NodePath("../Armature/Skeleton3D")
+libraries = {
+&"dreclibrary": SubResource("AnimationLibrary_getpj")
+}
+
 [connection signal="button_pressed" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_pressed"]
 [connection signal="button_released" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_released"]
 [connection signal="menuitemselected" from="XROrigin3D/XRAimRight/RadialMenu" to="." method="_on_radial_menu_menuitemselected"]
@@ -500,3 +515,4 @@ libraries = {
 [editable path="XROrigin3D/XRController3DLeft/AutoHandtracker"]
 [editable path="XROrigin3D/XRController3DRight/simplerighthand"]
 [editable path="XROrigin3D/XRController3DRight/AutoHandtracker"]
+[editable path="davali"]
