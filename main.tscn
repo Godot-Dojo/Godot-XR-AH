@@ -1,4 +1,4 @@
-[gd_scene load_steps=59 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=60 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -20,6 +20,7 @@
 [ext_resource type="Animation" uid="uid://4d45rm11snv" path="res://data/manimrec.anim" id="18_074og"]
 [ext_resource type="PackedScene" uid="uid://degjokngkak1a" path="res://avatars/davali.tscn" id="19_cegan"]
 [ext_resource type="Script" uid="uid://c027jq3p4qhmb" path="res://avatar_animator.gd" id="20_82xsv"]
+[ext_resource type="Script" uid="uid://d34iosli8d12x" path="res://vrc_topbody.gd" id="22_d13ii"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -507,6 +508,11 @@ root_node = NodePath("../Armature/Skeleton3D")
 libraries = {
 &"dreclibrary": SubResource("AnimationLibrary_getpj")
 }
+speed_scale = 0.2
+
+[node name="davali2" parent="." instance=ExtResource("19_cegan")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.08138, 0, 0)
+script = ExtResource("22_d13ii")
 
 [connection signal="button_pressed" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_pressed"]
 [connection signal="button_released" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_released"]
@@ -517,3 +523,4 @@ libraries = {
 [editable path="XROrigin3D/XRController3DRight/simplerighthand"]
 [editable path="XROrigin3D/XRController3DRight/AutoHandtracker"]
 [editable path="davali"]
+[editable path="davali2"]

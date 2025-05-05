@@ -4,6 +4,8 @@ var ascale = 2.0
 @onready var manim : Animation = ResourceLoader.load("res://data/manimrec.anim")
 @onready var danim : Animation = Animation.new()
 
+
+
 func getjointtrans(t, j):
 	var tp = "U" if j < XRBodyTracker.JOINT_LEFT_HAND else "H"
 	var tn = "%s%d" % [tp, j] 
@@ -73,9 +75,11 @@ func _ready():
 		var trrightwrist = getjointtrans(t, XRBodyTracker.JOINT_RIGHT_WRIST)
 
 		var roty180 = Basis().rotated(Vector3(0,1,0), rad_to_deg(180))
+		var roty90 = Basis().rotated(Vector3(0,1,0), rad_to_deg(90))
+		var roty270 = Basis().rotated(Vector3(0,1,0), rad_to_deg(270))
 		trrightupperarm.basis = trrightupperarm.basis*roty180
 		trrightlowerarm.basis = trrightlowerarm.basis*roty180
-		trrightwrist.basis = trrightwrist.basis*roty180
+		trrightwrist.basis = trrightwrist.basis*roty90
 		trleftupperarm.basis = trleftupperarm.basis*roty180
 		trleftlowerarm.basis = trleftlowerarm.basis*roty180
 		trleftwrist.basis = trleftwrist.basis*roty180
@@ -99,12 +103,3 @@ func _ready():
 	animlibrary.add_animation("danim", danim)
 	$AnimationPlayer.active = true
 	$AnimationPlayer.play("dreclibrary/danim")
-
-#Hips Spine Chest Neck Head		
-#XRBodyTracker.JOINT_ROOT,
-#					XRBodyTracker.JOINT_HIPS, 
-#					XRBodyTracker.JOINT_SPINE,
-#					XRBodyTracker.JOINT_CHEST,
-#					XRBodyTracker.JOINT_UPPER_CHEST, 
-#					XRBodyTracker.JOINT_NECK,
-#					XRBodyTracker.JOINT_HEAD,
