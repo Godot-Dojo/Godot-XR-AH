@@ -17,7 +17,7 @@
 [ext_resource type="Script" uid="uid://binshs17pl7bm" path="res://scenemanager/open_xr_fb_spatial_anchor_manager.gd" id="15_vivmo"]
 [ext_resource type="Script" uid="uid://cqhqlla1w2otw" path="res://BodyTracking/BodyTracking.gd" id="16_2cqfq"]
 [ext_resource type="Animation" uid="uid://dvxbr754dcs7j" path="res://data/animrec.anim" id="17_yaehf"]
-[ext_resource type="Animation" path="res://data/manimrec.anim" id="18_074og"]
+[ext_resource type="Animation" uid="uid://4d45rm11snv" path="res://data/manimrec.anim" id="18_074og"]
 [ext_resource type="PackedScene" uid="uid://degjokngkak1a" path="res://avatars/davali.tscn" id="19_cegan"]
 [ext_resource type="Script" uid="uid://c027jq3p4qhmb" path="res://avatar_animator.gd" id="20_82xsv"]
 
@@ -156,6 +156,9 @@ _data = {
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_getpj"]
+_data = {
+&"manimrec": ExtResource("18_074og")
+}
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_cagca")
@@ -169,7 +172,7 @@ environment = SubResource("Environment_0xu52")
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79704, 0.0822801)
+transform = Transform3D(-0.999612, 0, -0.0278519, 0, 1, 0, 0.0278519, 0, -0.999612, 0, 1.65009, -0.198353)
 
 [node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D"]
 transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0705969, -0.0605885, -0.151146)
@@ -370,11 +373,10 @@ skeleton = NodePath("../XROrigin3D")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.98709, 0.825349, -0.519652)
 
 [node name="BodyTracking" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.467, 0, 0)
 script = ExtResource("16_2cqfq")
 
 [node name="HeadClaw" type="Node3D" parent="BodyTracking"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.818214, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.731759, 0.818214, 0)
 
 [node name="ScreenBox" type="CSGMesh3D" parent="BodyTracking/HeadClaw"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0224239)
@@ -401,7 +403,7 @@ mesh = SubResource("SphereMesh_yaehf")
 surface_material_override/0 = SubResource("StandardMaterial3D_cegan")
 
 [node name="LeftClaw" type="Node3D" parent="BodyTracking"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.177, 0.742504, -0.433731)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.751742, 0.742504, -0.433731)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="BodyTracking/LeftClaw"]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
@@ -435,7 +437,7 @@ mesh = SubResource("BoxMesh_cegan")
 surface_material_override/0 = SubResource("StandardMaterial3D_0odxb")
 
 [node name="RightClaw" type="Node3D" parent="BodyTracking"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.273287, 0.787562, -0.433731)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.791793, 0.787562, -0.433731)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="BodyTracking/RightClaw"]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
@@ -482,7 +484,6 @@ mesh = SubResource("CapsuleMesh_d13ii")
 [node name="SimpleHumanBody" type="Node3D" parent="BodyTracking"]
 
 [node name="BodyTrackingData" type="Node3D" parent="BodyTracking"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -0.4, 0)
 script = ExtResource("12_2cqfq")
 
 [node name="MiniBody" type="Node3D" parent="BodyTracking/BodyTrackingData"]
@@ -498,7 +499,7 @@ libraries = {
 }
 
 [node name="davali" parent="." instance=ExtResource("19_cegan")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.52926, 0, -1.11651)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.881771, 0.359857)
 script = ExtResource("20_82xsv")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="davali"]

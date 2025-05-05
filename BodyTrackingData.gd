@@ -16,18 +16,18 @@ func createanimation():
 		manimrec.add_track(Animation.TYPE_ROTATION_3D)
 		manimrec.track_set_path(i*2+1, String($MiniBody.get_child(i).name))
 
-func createjoints(prefix, joints):
+func createjoints(prefix, joints, untrackedmeshvisibility=true):
 	for j in joints:
 		var nj = axes3dscene.instantiate()
 		nj.name = "%s%d" % [ prefix, j ]
-		nj.scale = Vector3(0.02, 0.02, 0.02)
-		nj.get_node("UntrackedMesh").visible = true
+		nj.scale = Vector3(0.02, 0.02, 0.02)*4
+		nj.get_node("UntrackedMesh").visible = untrackedmeshvisibility
 		$MiniBody.add_child(nj)
 
 func makenodesforanimation():
 	if $MiniBody.get_child_count() == 0:
-		createjoints("U", jointsupper)
-		createjoints("H", jointshands)
+		createjoints("U", jointsupper, false)
+		createjoints("H", jointshands, false)
 
 func _process(delta):
 	var xr_bodytracker = XRServer.get_tracker("/user/body_tracker")

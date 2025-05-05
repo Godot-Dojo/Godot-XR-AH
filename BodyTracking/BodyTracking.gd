@@ -46,7 +46,6 @@ func stopbodytracking():
 	visible = false
 	set_process(false)
 
-var Dtime = 0
 func _process(delta):
 	if not $MotionAnimation.active:
 		$HeadClaw.transform = xrcamera.transform
@@ -56,14 +55,6 @@ func _process(delta):
 		repositionthorax()
 		if animrec:
 			processanimrec(delta)
-		Dtime += delta
-		if Dtime > 1:
-			var lw = $LeftClaw/PivotMarker.global_position
-			var ls = $HeadClaw/PivotMarker/LeftShoulder.global_position
-			var rw = $RightClaw/PivotMarker.global_position
-			var rs = $HeadClaw/PivotMarker/RightShoulder.global_position
-			prints("SHSHWR ", (lw - ls).length(), (rw - rs).length())
-			Dtime = 0
 
 func getcontextmenutexts():
 	return [ "StopBody", "PlayAnim", 
@@ -128,6 +119,14 @@ func _input(event):
 		frontofplayer.position.y = max(frontofplayer.position.y, 3)
 		$BodyTrackingData.makenodesforanimation()
 		_on_radial_menu_menuitemselected("PlayAnim")
+		#$MotionAnimation.play("animreclibrary/animrec")
+		$MotionAnimation.stop()
+		$BodyTrackingData/BodyMotionAnimation.speed_scale = 0.1
+		$BodyTrackingData/BodyMotionAnimation.play("manimreclibrary/manimrec", 0)
+		$BodyTrackingData/BodyMotionAnimation.active = true
+		get_node("../davali/AnimationPlayer").speed_scale = 0.1
+		get_node("../davali/AnimationPlayer").play("dreclibrary/danim", 0)
+
 		
 func positionshoulderlocus(nk, w):
 	var vw = w - nk
