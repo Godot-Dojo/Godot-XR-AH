@@ -4,7 +4,7 @@ var ascale = 2.0
 @onready var manim : Animation = ResourceLoader.load("res://data/manimrec.anim")
 @onready var danim : Animation = Animation.new()
 
-
+@export var drawaxessize = 0 
 
 func getjointtrans(t, j):
 	var tp = "U" if j < XRBodyTracker.JOINT_LEFT_HAND else "H"

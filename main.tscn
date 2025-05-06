@@ -180,7 +180,7 @@ environment = SubResource("Environment_0xu52")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 transform = Transform3D(-0.999612, 0, -0.0278519, 0, 1, 0, 0.0278519, 0, -0.999612, 0, 1.65009, -0.198353)
-near = 0.25
+near = 0.15
 
 [node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D"]
 transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0705969, -0.0605885, -0.151146)
@@ -528,6 +528,8 @@ script = ExtResource("22_d13ii")
 visible = false
 mesh = SubResource("BoxMesh_getpj")
 surface_material_override/0 = SubResource("StandardMaterial3D_lswn8")
+
+[node name="JointAxes" type="Node3D" parent="davali2"]
 
 [connection signal="button_pressed" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_pressed"]
 [connection signal="button_released" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_released"]

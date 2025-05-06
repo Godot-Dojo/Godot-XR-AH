@@ -4,6 +4,8 @@ var skelbonerest = { }
 var skeltrackertrans = { }
 @onready var skel = $Armature/Skeleton3D
 
+var axes3dscene = load("res://axes3d.tscn")
+
 # missing optional "Upper Chest"
 var vrclookup = { "Root":".", "Hips":"Hips", "Spine":"Spine", "Chest":"Chest", "Upper Chest":"", "Neck":"Neck",
 					"Left Shoulder":"Left shoulder", "Left Upper Arm":"Left arm",
@@ -42,6 +44,8 @@ func _ready():
 	for ib in range(skel.get_bone_count()):
 		skelbonerest[skel.get_bone_name(ib)] = skel.get_bone_rest(ib)
 		#prints(ib, skel.get_bone_name(ib))
+	if not OS.has_feature("Android") and get_name() == "davali_me":
+		queue_free()
 
 var topbodydatfile = null
 func _input(event):
@@ -97,6 +101,19 @@ func _process_bodytrack(trackdata):
 			if jointsinverted.has(j):
 				skeltrackertrans[j].basis = skeltrackertrans[j].basis*jointsinverted[j]
 			#skeltrackertrans[j].origin = skeltrackertrans[j].origin/ascale
+
+		if has_node("JointAxes"):
+			var nj = get_node_or_null("JointAxes/J%d" % j)
+			if not nj:
+				if trackdata.has(j) and j < XRBodyTracker.JOINT_LEFT_THUMB_METACARPAL:
+					nj = axes3dscene.instantiate()
+					nj.name = "J%d" % j
+					nj.scale = Vector3(0.02, 0.02, 0.02)
+					$JointAxes.add_child(nj)
+			if nj:
+				nj.transform.origin = skeltrackertrans[j].origin
+				nj.transform.basis = skeltrackertrans[j].basis.scaled(Vector3.ONE*0.09)
+				nj.get_node("UntrackedMesh").visible = not trackdata.has(j)
 
 	skel.scale = Vector3.ONE*ascale
 	$Armature.transform = skeltrackertrans.get(XRBodyTracker.JOINT_ROOT, Transform3D())
