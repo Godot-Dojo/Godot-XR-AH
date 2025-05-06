@@ -511,7 +511,7 @@ libraries = {
 speed_scale = 0.2
 
 [node name="davali2" parent="." instance=ExtResource("19_cegan")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.08138, 0, 0)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.08138, -0.377913, 0)
 script = ExtResource("22_d13ii")
 
 [connection signal="button_pressed" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_pressed"]

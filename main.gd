@@ -140,7 +140,7 @@ func triggerfingerbutton(hand):
 func switch_to_ar() -> bool:  #passthrough
 	var xr_interface: XRInterface = XRServer.primary_interface
 	if xr_interface:
-		var modes = xr_interface.get_supported_environment_blend_modes()
+		var modes = xr_interface.start_topbodyloggingget_supported_environment_blend_modes()
 		if XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND in modes:
 			xr_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND
 			viewport.transparent_bg = true
@@ -204,7 +204,9 @@ var axbuttondown = false
 func _on_xr_controller_3d_right_button_pressed(name):
 	if name == "by_button":
 		$BodyTracking.startaxbuttondown()
-
+		$davali2.start_topbodylogging()
+		
 func _on_xr_controller_3d_right_button_released(name):
 	if name == "by_button":
 		$BodyTracking.stopaxbuttondown()
+		$davali2.stop_topbodylogging()

@@ -77,7 +77,7 @@ func _ready():
 		var roty180 = Basis().rotated(Vector3(0,1,0), rad_to_deg(180))
 		var roty90 = Basis().rotated(Vector3(0,1,0), rad_to_deg(90))
 		var roty270 = Basis().rotated(Vector3(0,1,0), rad_to_deg(270))
-		trrightupperarm.basis = trrightupperarm.basis*roty180
+		trrightupperarm.basis = trrightupperarm.basis*roty90
 		trrightlowerarm.basis = trrightlowerarm.basis*roty180
 		trrightwrist.basis = trrightwrist.basis*roty90
 		trleftupperarm.basis = trleftupperarm.basis*roty180
