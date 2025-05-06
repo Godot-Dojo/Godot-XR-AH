@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=62 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -161,6 +161,12 @@ _data = {
 &"manimrec": ExtResource("18_074og")
 }
 
+[sub_resource type="BoxMesh" id="BoxMesh_getpj"]
+size = Vector3(0.05, 0.3, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lswn8"]
+albedo_color = Color(1, 1, 0.027451, 1)
+
 [node name="Main" type="Node3D"]
 script = ExtResource("1_cagca")
 
@@ -174,6 +180,7 @@ environment = SubResource("Environment_0xu52")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 transform = Transform3D(-0.999612, 0, -0.0278519, 0, 1, 0, 0.0278519, 0, -0.999612, 0, 1.65009, -0.198353)
+near = 0.25
 
 [node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D"]
 transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0705969, -0.0605885, -0.151146)
@@ -366,6 +373,9 @@ script = ExtResource("13_ycdy4")
 [node name="OpenXRFbSpatialAnchorManager" type="OpenXRFbSpatialAnchorManager" parent="XROrigin3D"]
 script = ExtResource("15_vivmo")
 
+[node name="davali_me" parent="XROrigin3D" instance=ExtResource("19_cegan")]
+script = ExtResource("22_d13ii")
+
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
@@ -511,8 +521,13 @@ libraries = {
 speed_scale = 0.2
 
 [node name="davali2" parent="." instance=ExtResource("19_cegan")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.08138, -0.377913, 0)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.90149, 0, 0)
 script = ExtResource("22_d13ii")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="davali2"]
+visible = false
+mesh = SubResource("BoxMesh_getpj")
+surface_material_override/0 = SubResource("StandardMaterial3D_lswn8")
 
 [connection signal="button_pressed" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_pressed"]
 [connection signal="button_released" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_released"]

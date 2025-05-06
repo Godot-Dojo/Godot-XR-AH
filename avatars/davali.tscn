@@ -10,6 +10,7 @@
 albedo_texture = ExtResource("2_ri2o2")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4tj70"]
+cull_mode = 2
 albedo_texture = ExtResource("3_flaq4")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p7p11"]
@@ -27,7 +28,7 @@ surface_material_override/2 = SubResource("StandardMaterial3D_p7p11")
 surface_material_override/3 = SubResource("StandardMaterial3D_gu651")
 
 [node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="Armature/Skeleton3D" index="1"]
-setting_count = 5
+setting_count = 7
 settings/0/root_bone_name = "UpperEars_L"
 settings/0/root_bone = 9
 settings/0/end_bone_name = "UpperEarsEnd_L"
@@ -123,3 +124,41 @@ settings/4/gravity/damping_curve = null
 settings/4/gravity/direction = Vector3(0, -1, 0)
 settings/4/enable_all_child_collisions = true
 settings/4/exclude_collision_count = 0
+settings/5/root_bone_name = "HairParent"
+settings/5/root_bone = 20
+settings/5/end_bone_name = "HeadFeathers1_Left"
+settings/5/end_bone = 25
+settings/5/extend_end_bone = false
+settings/5/center_from = 0
+settings/5/individual_config = false
+settings/5/rotation_axis = 3
+settings/5/radius/value = 0.02
+settings/5/radius/damping_curve = null
+settings/5/stiffness/value = 3.1
+settings/5/stiffness/damping_curve = null
+settings/5/drag/value = 0.4
+settings/5/drag/damping_curve = null
+settings/5/gravity/value = 0.0
+settings/5/gravity/damping_curve = null
+settings/5/gravity/direction = Vector3(0, -1, 0)
+settings/5/enable_all_child_collisions = true
+settings/5/exclude_collision_count = 0
+settings/6/root_bone_name = "HairParent"
+settings/6/root_bone = 20
+settings/6/end_bone_name = "HeadFeathers1_Right"
+settings/6/end_bone = 26
+settings/6/extend_end_bone = false
+settings/6/center_from = 0
+settings/6/individual_config = false
+settings/6/rotation_axis = 3
+settings/6/radius/value = 0.02
+settings/6/radius/damping_curve = null
+settings/6/stiffness/value = 1.0
+settings/6/stiffness/damping_curve = null
+settings/6/drag/value = 0.4
+settings/6/drag/damping_curve = null
+settings/6/gravity/value = 0.0
+settings/6/gravity/damping_curve = null
+settings/6/gravity/direction = Vector3(0, -1, 0)
+settings/6/enable_all_child_collisions = true
+settings/6/exclude_collision_count = 0
