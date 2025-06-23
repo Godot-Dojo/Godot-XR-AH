@@ -26,8 +26,22 @@ var jointvrc_davali = {
 				XRBodyTracker.JOINT_RIGHT_LOWER_ARM:"Right elbow", XRBodyTracker.JOINT_RIGHT_WRIST:"Right wrist"
 			}
 
+var jointvrc_freakhound = { 
+				XRBodyTracker.JOINT_HIPS:"hips", XRBodyTracker.JOINT_SPINE:"spine", XRBodyTracker.JOINT_CHEST:"chest", XRBodyTracker.JOINT_NECK:"neck",
+				XRBodyTracker.JOINT_LEFT_SHOULDER:"shoulder.l", XRBodyTracker.JOINT_LEFT_UPPER_ARM:"upperarm.l", 
+				XRBodyTracker.JOINT_LEFT_LOWER_ARM:"forearm.l", XRBodyTracker.JOINT_LEFT_WRIST:"hand.l",
+				XRBodyTracker.JOINT_RIGHT_SHOULDER:"shoulder.r", XRBodyTracker.JOINT_RIGHT_UPPER_ARM:"upperarm.r", 
+				XRBodyTracker.JOINT_RIGHT_LOWER_ARM:"forearm.r", XRBodyTracker.JOINT_RIGHT_WRIST:"hand.r"
+			}
+
+var blendshapesvrc_freakhound = { 
+				XRFaceTracker.FT_EYE_CLOSED:"Blink", 
+				XRFaceTracker.FT_BROW_UP:"AA"
+			 }
+
 var jointtoboneids = { }
 var boneidtojoints = { }
+var facetoblendid = { }
 
 var roty180 = Basis().rotated(Vector3(0,1,0), rad_to_deg(180))
 var roty90 = Basis().rotated(Vector3(0,1,0), rad_to_deg(90))
@@ -36,6 +50,13 @@ var jointsinverted =  { XRBodyTracker.JOINT_LEFT_UPPER_ARM:roty180, XRBodyTracke
 
 func _ready():
 	var jointvrc = jointvrc_davali
+	if get_name().begins_with("freakhound"):
+		jointvrc = jointvrc_freakhound
+		ascale = 1.0
+		var blendshapesvrc = blendshapesvrc_freakhound
+		for i in blendshapesvrc:
+			facetoblendid[i] = $Armature/Skeleton3D/Body.find_blend_shape_by_name(blendshapesvrc[i])
+		
 	for j in range(XRBodyTracker.JOINT_MAX):
 		if jointvrc.has(j):
 			var i = skel.find_bone(jointvrc[j])
@@ -67,31 +88,34 @@ func _process(delta):
 			topbodydatfile = null
 
 	var xr_bodytracker = XRServer.get_tracker("/user/body_tracker")
-	if xr_bodytracker == null:
-		return
-	var trackdata = { "delta":delta }
-	for j in range(XRBodyTracker.JOINT_MAX):
-		var jf = xr_bodytracker.get_joint_flags(j)
-		if (jf & XRBodyTracker.JOINT_FLAG_POSITION_TRACKED) and (jf & XRBodyTracker.JOINT_FLAG_ORIENTATION_TRACKED):
-			trackdata[j] = xr_bodytracker.get_joint_transform(j)
-	if len(trackdata) > 1:
-		_process_bodytrack(trackdata)
-		if datlog:
-			datlog.store_var(trackdata)
+	if xr_bodytracker != null:
+		var trackdata = { "delta":delta }
+		for j in range(XRBodyTracker.JOINT_MAX):
+			var jf = xr_bodytracker.get_joint_flags(j)
+			if (jf & XRBodyTracker.JOINT_FLAG_POSITION_TRACKED) and (jf & XRBodyTracker.JOINT_FLAG_ORIENTATION_TRACKED):
+				trackdata[j] = xr_bodytracker.get_joint_transform(j)
+		if len(trackdata) > 1:
+			_process_bodytrack(trackdata)
+			if datlog:
+				datlog.store_var(trackdata)
+
+	if facetoblendid:
+		var xr_facetracker = XRServer.get_tracker("/user/face_tracker")
+		if xr_facetracker != null:
+			var blendshapes = xr_facetracker.blend_shapes
+			for i in facetoblendid:
+				$Armature/Skeleton3D/Body.set_blend_shape_value(facetoblendid[i], blendshapes[i])
+		
 			
 # (A.basis, A.origin) * (B.basis, B.origin) = (A.basis*B.basis, A.origin + A.basis*B.origin)
 # (A.basis, A.origin) * x = A.origin + A.basis*x)
-
 # (A.basis, A.origin) * (B.basis, B.origin) = (1, 0)
 #  => (A.basis, A.origin) = (B.basis.inverse(), -B.basis.inverse()*B.origin)
-
 # A.inverse()*B = (A.basis.inverse(), -A.basis.inverse()*A.origin) * (B.basis, B.origin)
 #		= (A.basis.inverse()*B.basis, -A.basis.inverse()*A.origin + A.basis.inverse()*B.origin)
-
 # divide origins by ascale
 # A.inverse()*B = (A.basis.inverse(), -A.basis.inverse()*A.origin) * (B.basis, B.origin)
 #		= (A.basis.inverse()*B.basis, -A.basis.inverse()*A.origin/ascale + A.basis.inverse()*B.origin/ascale)
-
 
 var ascale = 2.0/1.27
 func _process_bodytrack(trackdata):
@@ -100,16 +124,16 @@ func _process_bodytrack(trackdata):
 			skeltrackertrans[j] = trackdata[j]
 			if jointsinverted.has(j):
 				skeltrackertrans[j].basis = skeltrackertrans[j].basis*jointsinverted[j]
-			#skeltrackertrans[j].origin = skeltrackertrans[j].origin/ascale
 
 		if has_node("JointAxes"):
 			var nj = get_node_or_null("JointAxes/J%d" % j)
 			if not nj:
-				if trackdata.has(j) and j < XRBodyTracker.JOINT_LEFT_THUMB_METACARPAL:
-					nj = axes3dscene.instantiate()
-					nj.name = "J%d" % j
-					nj.scale = Vector3(0.02, 0.02, 0.02)
-					$JointAxes.add_child(nj)
+				if trackdata.has(j):
+					if j < XRBodyTracker.JOINT_LEFT_THUMB_METACARPAL or (j >= XRBodyTracker.JOINT_RIGHT_HAND and j < XRBodyTracker.JOINT_RIGHT_THUMB_METACARPAL) or j == XRBodyTracker.JOINT_LEFT_INDEX_FINGER_TIP:
+						nj = axes3dscene.instantiate()
+						nj.name = "J%d" % j
+						nj.scale = Vector3(0.02, 0.02, 0.02)
+						$JointAxes.add_child(nj)
 			if nj:
 				nj.transform.origin = skeltrackertrans[j].origin
 				nj.transform.basis = skeltrackertrans[j].basis.scaled(Vector3.ONE*0.09)
@@ -127,8 +151,7 @@ func _process_bodytrack(trackdata):
 			var trans = skeltrackertrans[j]
 			var rtrans = parenttrans.inverse()*trans
 			#if j == XRBodyTracker.JOINT_LEFT_UPPER_ARM:
-			#	$MeshInstance3D.transform = skeltrackertrans[j]
-				#print(skel.get_bone_pose_position(i).length()/(rtrans.origin.length()/ascale))
+			#	print(skel.get_bone_pose_position(i).length()/(rtrans.origin.length()/ascale))
 			skel.set_bone_pose_position(i, rtrans.origin/ascale)
 			skel.set_bone_pose_rotation(i, Quaternion(rtrans.basis.orthonormalized()))
 

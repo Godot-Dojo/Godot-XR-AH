@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=61 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -21,6 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://degjokngkak1a" path="res://avatars/davali.tscn" id="19_cegan"]
 [ext_resource type="Script" uid="uid://c027jq3p4qhmb" path="res://avatar_animator.gd" id="20_82xsv"]
 [ext_resource type="Script" uid="uid://d34iosli8d12x" path="res://vrc_topbody.gd" id="22_d13ii"]
+[ext_resource type="PackedScene" uid="uid://dhmjklu4mp07j" path="res://avatars/freakhoundprivate/freakhound.tscn" id="22_ryguw"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -160,12 +161,6 @@ _data = {
 _data = {
 &"manimrec": ExtResource("18_074og")
 }
-
-[sub_resource type="BoxMesh" id="BoxMesh_getpj"]
-size = Vector3(0.05, 0.3, 0.1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lswn8"]
-albedo_color = Color(1, 1, 0.027451, 1)
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_cagca")
@@ -524,12 +519,13 @@ speed_scale = 0.2
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.90149, 0, 0)
 script = ExtResource("22_d13ii")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="davali2"]
-visible = false
-mesh = SubResource("BoxMesh_getpj")
-surface_material_override/0 = SubResource("StandardMaterial3D_lswn8")
-
 [node name="JointAxes" type="Node3D" parent="davali2"]
+
+[node name="freakhound2" parent="." instance=ExtResource("22_ryguw")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -2.09638, 0, 0)
+script = ExtResource("22_d13ii")
+
+[node name="JointAxes" type="Node3D" parent="freakhound2"]
 
 [connection signal="button_pressed" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_pressed"]
 [connection signal="button_released" from="XROrigin3D/XRController3DRight" to="." method="_on_xr_controller_3d_right_button_released"]
@@ -541,3 +537,4 @@ surface_material_override/0 = SubResource("StandardMaterial3D_lswn8")
 [editable path="XROrigin3D/XRController3DRight/AutoHandtracker"]
 [editable path="davali"]
 [editable path="davali2"]
+[editable path="freakhound2"]
