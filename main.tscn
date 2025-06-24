@@ -72,7 +72,7 @@ transparency = 1
 albedo_color = Color(1, 0.168627, 1, 0.6)
 
 [sub_resource type="PrismMesh" id="PrismMesh_dg77c"]
-size = Vector3(0.1, 8, 0.1)
+size = Vector3(0.02, 8, 0.02)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dg77c"]
 albedo_color = Color(0.852053, 0.00058989, 0.854236, 1)
@@ -273,7 +273,6 @@ hand_tracker = &"/user/hand_tracker/right"
 
 [node name="OriginStick" type="MeshInstance3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
-visible = false
 mesh = SubResource("PrismMesh_dg77c")
 surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
 
