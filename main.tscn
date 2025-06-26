@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene load_steps=35 format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -12,9 +12,7 @@
 [ext_resource type="Script" uid="uid://bys2i3bex48tg" path="res://BodyTrackingData.gd" id="12_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://ctltchlf2j2r4" path="res://addons/xr-simulator/XRSimulator.tscn" id="12_f86bf"]
 [ext_resource type="Script" uid="uid://caest0w4mjxt5" path="res://FaceAudioTracking.gd" id="12_ycdy4"]
-[ext_resource type="PackedScene" uid="uid://cmyouov3wf235" path="res://scenemanager/sceneanchor.tscn" id="13_w48qg"]
-[ext_resource type="Script" uid="uid://c1jp1xxsyiyhg" path="res://scenemanager/open_xr_fb_scene_manager.gd" id="13_ycdy4"]
-[ext_resource type="Script" uid="uid://binshs17pl7bm" path="res://scenemanager/open_xr_fb_spatial_anchor_manager.gd" id="15_vivmo"]
+[ext_resource type="PackedScene" uid="uid://enpct2blg4bp" path="res://addons/xr-spatialanchors/open_xr_fb_scene_manager.tscn" id="13_ycdy4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eyx45"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -129,12 +127,6 @@ transform = Transform3D(-0.0728079, 0.891955, -0.446223, -0.143636, -0.452123, -
 tracker = &"left_hand"
 
 [node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("4_vivmo")]
-
-[node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid" index="0"]
-bones/6/rotation = Quaternion(-0.0744182, 0.00207577, 0.111238, 0.991001)
-bones/11/rotation = Quaternion(0.133134, 0.00149939, -0.0119655, 0.991025)
-bones/16/rotation = Quaternion(0.0809525, -0.000156998, -0.0503869, 0.995444)
-bones/21/rotation = Quaternion(0.128825, 0.00640803, -0.0883368, 0.987704)
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 
@@ -282,12 +274,7 @@ mesh = SubResource("PrismMesh_dg77c")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
 
-[node name="OpenXRFbSceneManager" type="OpenXRFbSceneManager" parent="XROrigin3D"]
-default_scene = ExtResource("13_w48qg")
-script = ExtResource("13_ycdy4")
-
-[node name="OpenXRFbSpatialAnchorManager" type="OpenXRFbSpatialAnchorManager" parent="XROrigin3D"]
-script = ExtResource("15_vivmo")
+[node name="OpenXRFbSceneManager" parent="XROrigin3D" instance=ExtResource("13_ycdy4")]
 
 [node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5clia")

@@ -5,12 +5,12 @@ var xr_interface : OpenXRInterface
 var facetracker : XRFaceTracker = null
 func Dtracker_added(tracker_name: StringName, type: int):
 	if type == XRServer.TRACKER_ANCHOR:
-		var anchortracker : XRPositionalTracker= XRServer.get_tracker(tracker_name)
+		var anchortracker : XRPositionalTracker = XRServer.get_tracker(tracker_name)
 		var pp = anchortracker.get_pose("default")
 		prints("anchor_tracker_added", tracker_name, anchortracker)
-		var aa = load("res://scenemanager/xr_anchor_3d.tscn").instantiate()
-		aa.tracker = tracker_name
-		$XROrigin3D.add_child(aa)
+		#var aa = load("res://scenemanager/xr_anchor_3d.tscn").instantiate()
+		#aa.tracker = tracker_name
+		#$XROrigin3D.add_child(aa)
 		
 	elif type == XRServer.TRACKER_FACE:
 		facetracker = XRServer.get_tracker(tracker_name)
@@ -66,8 +66,14 @@ func _ready():
 		print("OpenXR not initialized, please check if your headset is connected")
 
 func getcontextmenutexts():
-	return [ "AR" if is_in_vr() else "VR", 
-			 "ReadEnvironment" ]
+	var cmen = [ "AR" if is_in_vr() else "VR" ]
+	prints("scenemanager", $XROrigin3D/OpenXRFbSceneManager.is_scene_capture_enabled(), $XROrigin3D/OpenXRFbSceneManager.are_scene_anchors_created())
+	if not $XROrigin3D/OpenXRFbSceneManager.is_scene_capture_enabled():
+		cmen.push_back("SceneCap")
+		cmen.push_back("SceneAnc")
+		cmen.push_back("DelSceneAnc")
+		cmen.push_back("PrintSpatial")
+	return cmen
 
 # this really hacky and is supposed to be called every frame
 @onready var uninitialized_hmd_transform:Transform3D = XRServer.get_hmd_transform()
@@ -173,10 +179,24 @@ func is_in_vr() -> bool:
 	return false
 
 func _on_radial_menu_menuitemselected(menutext):
+	prints("..........", menutext)
 	if menutext == "VR":
 		switch_to_vr()
 	elif menutext == "AR":
 		switch_to_ar()
+	elif menutext == "SceneCap":
+		# removes all the anchors at start of this
+		$XROrigin3D/OpenXRFbSceneManager.request_scene_capture()
+	elif menutext == "PrintSpatial":
+		print("  get_anchor_uuids ", $XROrigin3D/OpenXRFbSceneManager.get_anchor_uuids())
+		var spatialentity = $XROrigin3D/OpenXRFbSceneManager.spatialentityexample
+		print(" roomlayout ", spatialentity.get_room_layout())
+		print(" get_semantic_labels ", spatialentity.get_semantic_labels())
+		print(" get_supported_components ", spatialentity.get_supported_components())
+	elif menutext == "DelSceneAnc":
+		$XROrigin3D/OpenXRFbSceneManager.remove_scene_anchors()
+	elif menutext == "SceneAnc":
+		$XROrigin3D/OpenXRFbSceneManager.create_scene_anchors()
 	elif menutext == "FBTrackerL":
 		$XROrigin3D/XRController3DLeft/AutoHandtracker.visible = false
 		$XROrigin3D/LeftHandFbTracker.visible = true

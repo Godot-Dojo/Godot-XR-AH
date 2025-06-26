@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://enpct2blg4bp"]
+
+[ext_resource type="Script" uid="uid://cvyklrtti4sqm" path="res://addons/xr-spatialanchors/open_xr_fb_scene_manager.gd" id="1_jt4d5"]
+[ext_resource type="PackedScene" uid="uid://igdhix3w74t5" path="res://addons/xr-spatialanchors/spatialanchor.tscn" id="1_ktr6k"]
+
+[node name="OpenXRFbSceneManager" type="OpenXRFbSceneManager"]
+default_scene = ExtResource("1_ktr6k")
+auto_create = false
+script = ExtResource("1_jt4d5")
