@@ -20,7 +20,7 @@ func _ready():
 		print("****")
 		print(var_to_str([autohandleft.oxrktrans, autohandright.oxrktrans]))
 		print("****")	
-	if true:
+	if false:
 		await get_tree().create_timer(5).timeout
 		print("**RADS**")
 		print(var_to_str([autohandleft.oxrkradii, autohandright.oxrkradii]))
@@ -29,6 +29,7 @@ func _ready():
 # This pre-animated thing should correspond to a special kind of get_hand_tracking_source()
 var Dautohandspinchtrans = null
 var xpulloffset = -0.2  # actually the movement in y
+
 func process_pinchpull_animation(delta):
 	if xpulloffset < 0.1:
 		xpulloffset += delta*0.06

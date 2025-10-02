@@ -19,6 +19,7 @@ func _ready():
 		var rj = jointnode.duplicate()
 		rj.name = "J%d" % j
 		rj.scale = Vector3(0.01, 0.01, 0.01)
+		rj.visible = true
 		add_child(rj)
 
 	for hjstick in hjsticks:
@@ -29,6 +30,7 @@ func _ready():
 			rstick.name = "S%d_%d" % [j1, j2]
 			rstick.scale = Vector3(0.01, 0.01, 0.01)
 			add_child(rstick)
+			rstick.visible = true
 			#get_node("J%d" % hjstick[i+1]).get_node("Sphere").visible = (i > 0)
 
 

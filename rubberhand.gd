@@ -1,5 +1,9 @@
 extends Node
 
+# This executes after the OpenXRHandData object its parent
+# it makes the oxrktrans values from the raw values and sets oxrktrans_updated
+# so that it is not over-copied
+
 const hjtips = [ OpenXRInterface.HAND_JOINT_THUMB_TIP, 
 				 OpenXRInterface.HAND_JOINT_INDEX_TIP, 
 				 OpenXRInterface.HAND_JOINT_MIDDLE_TIP, 
@@ -38,7 +42,7 @@ class FingerPinchHold:
 		elif bpinched and pinchveclen > fingerpinchdistanceoff:
 			bpinched = false
 
-	func applypinchingdrag(oxrktrans, oppositeoxrktrans, oxrktransRaw, oppositeoxrktransRaw):
+	func applypinchingdrag(oppositeoxrktrans, oxrktransRaw, oppositeoxrktransRaw):
 		if bpinched and oppositepinchedjoint != -1:
 			oppositeoxrktrans[oppositepinchedjoint-oppositepinchedbackfromtip] = oxrktransRaw[OpenXRInterface.HAND_JOINT_THUMB_TIP]*thumbtransformtojoint
 			for jback in range(oppositepinchedbackfromtip-1, -1, -1):
@@ -53,8 +57,8 @@ func processfingergrabstate(leftoxrktrans, rightoxrktrans, leftoxrktransRaw, rig
 	for i in range(OpenXRInterface.HAND_JOINT_MAX):
 		rightoxrktrans[i] = rightoxrktransRaw[i]
 		leftoxrktrans[i] = leftoxrktransRaw[i]
-	leftpinchhold.applypinchingdrag(leftoxrktrans, rightoxrktrans, leftoxrktransRaw, rightoxrktransRaw)
-	rightpinchhold.applypinchingdrag(rightoxrktrans, leftoxrktrans, rightoxrktransRaw, leftoxrktransRaw)
+	leftpinchhold.applypinchingdrag(rightoxrktrans, leftoxrktransRaw, rightoxrktransRaw)
+	rightpinchhold.applypinchingdrag(leftoxrktrans, rightoxrktransRaw, leftoxrktransRaw)
 
 
 func _process(delta):

@@ -78,8 +78,8 @@ albedo_color = Color(0.852053, 0.00058989, 0.854236, 1)
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_rm4v2"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bkxwk"]
-seamless = true
 noise = SubResource("FastNoiseLite_rm4v2")
+seamless = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3vxx6"]
 albedo_color = Color(0.466667, 0.247059, 0.196078, 1)
@@ -127,6 +127,12 @@ transform = Transform3D(-0.0728079, 0.891955, -0.446223, -0.143636, -0.452123, -
 tracker = &"left_hand"
 
 [node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("4_vivmo")]
+
+[node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid" index="0"]
+bones/6/rotation = Quaternion(-0.074418224, 0.002075771, 0.11123804, 0.99100137)
+bones/11/rotation = Quaternion(0.13313393, 0.0014993935, -0.011965518, 0.9910247)
+bones/16/rotation = Quaternion(0.080952495, -0.00015699807, -0.05038688, 0.9954435)
+bones/21/rotation = Quaternion(0.12882519, 0.0064080325, -0.08833678, 0.9877043)
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
 
@@ -200,10 +206,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.394503, 1.38851, -0.522603
 script = ExtResource("12_ycdy4")
 
 [node name="FaceTrackSticks" type="Node3D" parent="XROrigin3D/FaceAudioTracking"]
-transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.343816, 0.1015, 0.030935)
+transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.3438156, 0.101500034, 0.03093499)
 
 [node name="BodyTrackingData" type="Node3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25206, -0.491668)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2520561, -0.491668)
 script = ExtResource("12_2cqfq")
 
 [node name="MiniBody" type="Node3D" parent="XROrigin3D/BodyTrackingData"]
@@ -265,6 +271,7 @@ hand_tracker = &"/user/hand_tracker/right"
 
 [node name="OriginStick" type="MeshInstance3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+visible = false
 mesh = SubResource("PrismMesh_dg77c")
 surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
 

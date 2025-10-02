@@ -29,6 +29,7 @@ var handtrackingactive = false
 var handtrackingvalid = false
 var oxrktransRaw = [ ]
 var oxrktrans = [ ]
+
 var oxrktransRaw_updated = false
 var oxrktrans_updated = false
 var oxrkradii = [ ]
@@ -162,6 +163,10 @@ func findhandnodes():
 
 
 func _ready():
+	if Engine.is_editor_hint():
+		set_process(false)
+		return
+	
 	XRServer.tracker_removed.connect(xrserver_tracker_removed)
 	XRServer.tracker_added.connect(xrserver_tracker_added)
 	
@@ -254,7 +259,8 @@ func copyouttransformstoskel(fingerbonetransformsOut):
 			
 			# there will be a rant about not working!  skel.set_bone_pose(ix, t)
 			# see https://github.com/godotengine/godot-proposals/issues/8869#issuecomment-2577587098
-			
+
+# this allows us to update it outside of this node at an earlier joint node
 func process_handtrackingsource():
 	if xr_handtracker == null:
 		handtrackingactive = false

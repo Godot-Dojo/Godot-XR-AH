@@ -141,7 +141,6 @@ func triggerfingerbutton(hand):
 @onready var viewport : Viewport = get_viewport()
 @onready var environment : Environment = $WorldEnvironment.environment
 func switch_to_ar() -> bool:  #passthrough
-	var xr_interface: XRInterface = XRServer.primary_interface
 	if xr_interface:
 		var modes = xr_interface.get_supported_environment_blend_modes()
 		if XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND in modes:
@@ -159,7 +158,6 @@ func switch_to_ar() -> bool:  #passthrough
 	return true
 
 func switch_to_vr() -> bool:
-	var xr_interface: XRInterface = XRServer.primary_interface
 	if xr_interface:
 		var modes = xr_interface.get_supported_environment_blend_modes()
 		if XRInterface.XR_ENV_BLEND_MODE_OPAQUE in modes:
@@ -173,7 +171,6 @@ func switch_to_vr() -> bool:
 	return true
 
 func is_in_vr() -> bool:
-	var xr_interface: XRInterface = XRServer.primary_interface
 	if xr_interface:
 		return xr_interface.environment_blend_mode == XRInterface.XR_ENV_BLEND_MODE_OPAQUE
 	return false
