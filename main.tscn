@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://cippl3qeqq73l"]
+[gd_scene format=3 uid="uid://cippl3qeqq73l"]
 
 [ext_resource type="Script" uid="uid://bt6icsw3luyre" path="res://main.gd" id="1_cagca"]
 [ext_resource type="PackedScene" uid="uid://d20xy80xd171g" path="res://addons/xr-autohandtracker/OpenXRHandData.tscn" id="2_hw7j7"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dd35twe7yvkqf" path="res://FlatDisplay.tscn" id="3_o8mx1"]
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="PackedScene" uid="uid://cfk6nw5naeba5" path="res://addons/xr-autohandtracker/simplelefthand_animated.tscn" id="4_vivmo"]
+[ext_resource type="PackedScene" uid="uid://bx1xdisoqo1f6" path="res://xr-tools-hands/scenes/lowpoly/left_tac_glove_low.tscn" id="4_w48qg"]
 [ext_resource type="PackedScene" uid="uid://b4af03fp12r73" path="res://addons/xr-autohandtracker/simplerighthand_animated.tscn" id="7_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://c7d3acll3wppi" path="res://addons/xr-radialmenu/RadialMenu.tscn" id="7_dg77c"]
 [ext_resource type="Script" uid="uid://bys2i3bex48tg" path="res://BodyTrackingData.gd" id="12_2cqfq"]
@@ -78,8 +79,8 @@ albedo_color = Color(0.852053, 0.00058989, 0.854236, 1)
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_rm4v2"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bkxwk"]
-seamless = true
 noise = SubResource("FastNoiseLite_rm4v2")
+seamless = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3vxx6"]
 albedo_color = Color(0.466667, 0.247059, 0.196078, 1)
@@ -90,145 +91,187 @@ uv1_scale = Vector3(4, 4, 4)
 material = SubResource("StandardMaterial3D_3vxx6")
 size = Vector3(10, 0.01, 10)
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=1215915171]
 script = ExtResource("1_cagca")
 
-[node name="MeshInstance3DFLA" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3DFLA" type="MeshInstance3D" parent="." unique_id=977637102]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79506, -0.430125)
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1620135812]
 transform = Transform3D(0.972307, 0.231448, -0.0324245, -0.168036, 0.788752, 0.591299, 0.16243, -0.569476, 0.8058, 0, 4.78147, -0.575441)
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1403036532]
 environment = SubResource("Environment_0xu52")
 
-[node name="XROrigin3D" type="XROrigin3D" parent="."]
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=775067754]
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=818814929]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.79704, 0.0822801)
 
-[node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D"]
+[node name="SignalLog" type="Label3D" parent="XROrigin3D/XRCamera3D" unique_id=1950974601]
 transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0705969, -0.0605885, -0.151146)
 visible = false
 text = "Ding"
 
-[node name="SignalLog2" type="Label3D" parent="XROrigin3D/XRCamera3D"]
+[node name="SignalLog2" type="Label3D" parent="XROrigin3D/XRCamera3D" unique_id=505811687]
 transform = Transform3D(0.1, 0, 0, 0, 0.096785, 0.0251529, 0, -0.0251529, 0.096785, -0.0577948, -0.08284, -0.151146)
 visible = false
 text = "Dong"
 
-[node name="OpenXRHandData" parent="XROrigin3D" instance=ExtResource("2_hw7j7")]
+[node name="OpenXRHandData" parent="XROrigin3D" unique_id=1092444124 instance=ExtResource("2_hw7j7")]
 
-[node name="RubberHand" type="Node" parent="XROrigin3D/OpenXRHandData"]
+[node name="RubberHand" type="Node" parent="XROrigin3D/OpenXRHandData" unique_id=692995408]
 script = ExtResource("3_86svk")
 
-[node name="XRController3DLeft" type="XRController3D" parent="XROrigin3D"]
+[node name="XRController3DLeft" type="XRController3D" parent="XROrigin3D" unique_id=660175797]
 transform = Transform3D(-0.0728079, 0.891955, -0.446223, -0.143636, -0.452123, -0.880314, -0.986949, 0, 0.161035, -0.169555, 1.69177, -0.268697)
 tracker = &"left_hand"
 
-[node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("4_vivmo")]
+[node name="simplelefthand" parent="XROrigin3D/XRController3DLeft" unique_id=932197161 instance=ExtResource("4_vivmo")]
+transform = Transform3D(1, 0, -1.4901161e-08, -1.6530066e-09, 1, 9.405646e-09, -1.4901161e-08, 0, 1.0000001, 0, 0, 0)
 
-[node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" instance=ExtResource("3_7v2m6")]
+[node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/simplelefthand/LeftHandHumanoid" index="0"]
+bones/6/rotation = Quaternion(-0.074418224, 0.002075771, 0.11123804, 0.99100137)
+bones/11/rotation = Quaternion(0.13313393, 0.0014993935, -0.011965518, 0.9910247)
+bones/16/rotation = Quaternion(0.080952495, -0.00015699807, -0.05038688, 0.9954435)
+bones/21/rotation = Quaternion(0.12882519, 0.0064080325, -0.08833678, 0.9877043)
 
-[node name="XRController3DRight" type="XRController3D" parent="XROrigin3D"]
+[node name="LeftHand" parent="XROrigin3D/XRController3DLeft" unique_id=1154391387 instance=ExtResource("4_w48qg")]
+script = null
+
+[node name="Skeleton3D" parent="XROrigin3D/XRController3DLeft/LeftHand/Hand_Glove_low_L/Armature" index="0" unique_id=1368779080]
+bones/1/rotation = Quaternion(0.323537, -2.5658142e-05, -0.027220426, 0.9458239)
+bones/2/rotation = Quaternion(-0.09044407, -0.04151748, -0.16629349, 0.98104167)
+bones/3/rotation = Quaternion(-0.04661986, 0.02097099, 0.010327632, 0.9986392)
+bones/5/rotation = Quaternion(-0.0012845465, -0.011608094, -0.016825877, 0.99979025)
+bones/6/rotation = Quaternion(0.10292491, -0.009932083, -0.007944166, 0.9946078)
+bones/7/rotation = Quaternion(-0.012859, -0.023610815, -0.32325828, 0.9459289)
+bones/8/rotation = Quaternion(0.012057539, -0.009291937, -0.24747224, 0.96877545)
+bones/10/rotation = Quaternion(-0.035753887, -0.0004000325, 0.0063676415, 0.9993403)
+bones/11/rotation = Quaternion(-0.0026496367, -0.0011447113, -0.12599176, 0.9920271)
+bones/12/rotation = Quaternion(0.039422527, 0.0019339261, -0.22807404, 0.97284347)
+bones/13/rotation = Quaternion(-0.012339468, -0.008812943, -0.28066906, 0.9596848)
+bones/15/rotation = Quaternion(-0.070265576, 0.010190836, -0.024330735, 0.9971795)
+bones/16/rotation = Quaternion(-0.032063447, -0.002236244, -0.06863657, 0.99712384)
+bones/17/rotation = Quaternion(0.025345208, 0.008124622, -0.2490055, 0.9681363)
+bones/18/rotation = Quaternion(0.0025223217, 0.007880732, -0.2432038, 0.9699399)
+bones/20/rotation = Quaternion(-0.09173688, 0.020302717, -0.010182976, 0.9955242)
+bones/21/rotation = Quaternion(-0.06251818, -0.00022572002, -0.115392834, 0.99135065)
+bones/22/rotation = Quaternion(0.058578636, 0.021648303, -0.26990518, 0.9608596)
+bones/23/rotation = Quaternion(0.006871769, -0.0035727466, -0.21195254, 0.97724926)
+
+[node name="AnimationTree" parent="XROrigin3D/XRController3DLeft/LeftHand" index="1"]
+root_node = NodePath("../Hand_Glove_low_L")
+parameters/Grip/blend_amount = 0.0
+
+[node name="AutoHandtracker" parent="XROrigin3D/XRController3DLeft" unique_id=1663721349 instance=ExtResource("3_7v2m6")]
+
+[node name="ExampleJoint" parent="XROrigin3D/XRController3DLeft/AutoHandtracker/VisibleHandTrackSkeleton" parent_id_path=PackedInt32Array(1663721349, 621360424) index="1" unique_id=849896023]
+visible = true
+
+[node name="XRController3DRight" type="XRController3D" parent="XROrigin3D" unique_id=1149699793]
 transform = Transform3D(0.399725, 0, 0.916635, 0, 1, 0, -0.916635, 0, 0.399725, 0.169251, 1.69625, -0.288043)
 tracker = &"right_hand"
 
-[node name="simplerighthand" parent="XROrigin3D/XRController3DRight" instance=ExtResource("7_2cqfq")]
+[node name="simplerighthand" parent="XROrigin3D/XRController3DRight" unique_id=427903935 instance=ExtResource("7_2cqfq")]
 
-[node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" instance=ExtResource("3_7v2m6")]
+[node name="Skeleton3D" parent="XROrigin3D/XRController3DRight/simplerighthand/RightHandHumanoid" index="0"]
+bones/6/rotation = Quaternion(0, 0, 0, 1)
+bones/21/rotation = Quaternion(0, 0, 0, 1)
+
+[node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" unique_id=766919122 instance=ExtResource("3_7v2m6")]
 visiblehandtrackskeletonRaw = true
 
-[node name="XRAimRight" type="XRNode3D" parent="XROrigin3D"]
+[node name="XRAimRight" type="XRNode3D" parent="XROrigin3D" unique_id=1495907754]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.462758, 1.39293, -0.234335)
 tracker = &"right_hand"
 pose = &"aim"
 show_when_tracked = true
 
-[node name="RadialMenu" parent="XROrigin3D/XRAimRight" instance=ExtResource("7_dg77c")]
+[node name="RadialMenu" parent="XROrigin3D/XRAimRight" unique_id=1678299263 instance=ExtResource("7_dg77c")]
 
-[node name="XRNode3D" type="XRNode3D" parent="XROrigin3D"]
+[node name="XRNode3D" type="XRNode3D" parent="XROrigin3D" unique_id=333016519]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.60491, 2.07751, -6.98268)
 tracker = &"/user/eyes_ext"
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/XRNode3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/XRNode3D" unique_id=141177153]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.73947)
 mesh = SubResource("BoxMesh_vivmo")
 surface_material_override/0 = SubResource("StandardMaterial3D_2cqfq")
 
-[node name="HandJoints" type="Node3D" parent="XROrigin3D"]
+[node name="HandJoints" type="Node3D" parent="XROrigin3D" unique_id=399789539]
 script = ExtResource("4_eaqi8")
 
-[node name="FrontOfPlayer" type="Node3D" parent="XROrigin3D/HandJoints"]
+[node name="FrontOfPlayer" type="Node3D" parent="XROrigin3D/HandJoints" unique_id=2021393083]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65802, -0.491668)
 
-[node name="FlatDisplayMesh" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
+[node name="FlatDisplayMesh" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer" unique_id=1219756470]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0258811, 0.169554, -0.0442287)
 mesh = SubResource("QuadMesh_eslsg")
 skeleton = NodePath("../../../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_6gabm")
 
-[node name="SubViewport" type="SubViewport" parent="XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh"]
+[node name="SubViewport" type="SubViewport" parent="XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh" unique_id=1025215845]
 size = Vector2i(800, 500)
 
-[node name="FlatDisplay" parent="XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh/SubViewport" instance=ExtResource("3_o8mx1")]
+[node name="FlatDisplay" parent="XROrigin3D/HandJoints/FrontOfPlayer/FlatDisplayMesh/SubViewport" unique_id=1485160494 instance=ExtResource("3_o8mx1")]
 
-[node name="Joints2D" type="Node3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
+[node name="Joints2D" type="Node3D" parent="XROrigin3D/HandJoints/FrontOfPlayer" unique_id=376883140]
 
-[node name="FingerButton" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
+[node name="FingerButton" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer" unique_id=1179831744]
 mesh = SubResource("SphereMesh_65vmt")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_brx0b")
 
-[node name="Touched" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer/FingerButton"]
+[node name="Touched" type="MeshInstance3D" parent="XROrigin3D/HandJoints/FrontOfPlayer/FingerButton" unique_id=635724051]
 visible = false
 mesh = SubResource("BoxMesh_yct16")
 surface_material_override/0 = SubResource("StandardMaterial3D_g60ck")
 
-[node name="RemoteTransform3D" type="RemoteTransform3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="XROrigin3D/HandJoints/FrontOfPlayer" unique_id=655153114]
 transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, -0.0506874, -0.16801, 0)
 remote_path = NodePath("../../../FaceAudioTracking/FaceTrackSticks")
 update_scale = false
 
-[node name="RemoteTransform3D2" type="RemoteTransform3D" parent="XROrigin3D/HandJoints/FrontOfPlayer"]
+[node name="RemoteTransform3D2" type="RemoteTransform3D" parent="XROrigin3D/HandJoints/FrontOfPlayer" unique_id=1206791827]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.594036, 0)
 remote_path = NodePath("../../../BodyTrackingData")
 update_scale = false
 
-[node name="FaceAudioTracking" type="Node3D" parent="XROrigin3D"]
+[node name="FaceAudioTracking" type="Node3D" parent="XROrigin3D" unique_id=129679853]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.394503, 1.38851, -0.522603)
 script = ExtResource("12_ycdy4")
 
-[node name="FaceTrackSticks" type="Node3D" parent="XROrigin3D/FaceAudioTracking"]
-transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.343816, 0.1015, 0.030935)
+[node name="FaceTrackSticks" type="Node3D" parent="XROrigin3D/FaceAudioTracking" unique_id=1364186718]
+transform = Transform3D(1, 0, 0, 0, 0.975465, 0.220153, 0, -0.220153, 0.975465, 0.3438156, 0.101500034, 0.03093499)
 
-[node name="BodyTrackingData" type="Node3D" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25206, -0.491668)
+[node name="BodyTrackingData" type="Node3D" parent="XROrigin3D" unique_id=1473776460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2520561, -0.491668)
 script = ExtResource("12_2cqfq")
 
-[node name="MiniBody" type="Node3D" parent="XROrigin3D/BodyTrackingData"]
+[node name="MiniBody" type="Node3D" parent="XROrigin3D/BodyTrackingData" unique_id=1187101040]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/BodyTrackingData"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/BodyTrackingData" unique_id=2119515269]
 mesh = SubResource("BoxMesh_2cqfq")
 surface_material_override/0 = SubResource("StandardMaterial3D_yaehf")
 
-[node name="LeftHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
+[node name="LeftHandFbTracker" type="XRNode3D" parent="XROrigin3D" unique_id=1109885582]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.313141, 1.24593, -0.590358)
 visible = false
 tracker = &"/user/hand_tracker/left"
 
-[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/LeftHandFbTracker"]
+[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/LeftHandFbTracker" unique_id=201933740]
 material = SubResource("StandardMaterial3D_074og")
 
-[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/LeftHandFbTracker/OpenXRFbHandTrackingMesh"]
+[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/LeftHandFbTracker/OpenXRFbHandTrackingMesh" unique_id=49105386]
 
-[node name="RightHandFbTracker" type="XRNode3D" parent="XROrigin3D"]
+[node name="RightHandFbTracker" type="XRNode3D" parent="XROrigin3D" unique_id=1853554415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.440078, 1.24593, -0.590358)
 visible = false
 tracker = &"/user/hand_tracker/right"
 
-[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/RightHandFbTracker"]
+[node name="OpenXRFbHandTrackingMesh" type="OpenXRFbHandTrackingMesh" parent="XROrigin3D/RightHandFbTracker" unique_id=1274978465]
 hand = 1
 material = SubResource("StandardMaterial3D_074og")
 bones/0/name = "RightPalm"
@@ -258,34 +301,37 @@ bones/23/name = "RightLittleIntermediate"
 bones/24/name = "RightLittleDistal"
 bones/25/name = "RightLittleTip"
 
-[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/RightHandFbTracker/OpenXRFbHandTrackingMesh"]
+[node name="XRHandModifier3D" type="XRHandModifier3D" parent="XROrigin3D/RightHandFbTracker/OpenXRFbHandTrackingMesh" unique_id=559623105]
 hand_tracker = &"/user/hand_tracker/right"
 
-[node name="XRSimulator" parent="XROrigin3D" instance=ExtResource("12_f86bf")]
+[node name="XRSimulator" parent="XROrigin3D" unique_id=1184891310 instance=ExtResource("12_f86bf")]
 
-[node name="OriginStick" type="MeshInstance3D" parent="XROrigin3D"]
+[node name="OriginStick" type="MeshInstance3D" parent="XROrigin3D" unique_id=1988754762]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+visible = false
 mesh = SubResource("PrismMesh_dg77c")
 surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
 
-[node name="OriginStick2" type="MeshInstance3D" parent="XROrigin3D/OriginStick"]
+[node name="OriginStick2" type="MeshInstance3D" parent="XROrigin3D/OriginStick" unique_id=1291704891]
 transform = Transform3D(1, 0, 0, 0, -2.18557e-08, 1, 0, -0.5, -4.37114e-08, 0, -0.613974, 1.8672)
 mesh = SubResource("PrismMesh_dg77c")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_dg77c")
 
-[node name="OpenXRFbSceneManager" parent="XROrigin3D" instance=ExtResource("13_ycdy4")]
+[node name="OpenXRFbSceneManager" parent="XROrigin3D" unique_id=415243678 instance=ExtResource("13_ycdy4")]
 
-[node name="MeshInstance3DFloor" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3DFloor" type="MeshInstance3D" parent="." unique_id=1336287765]
 mesh = SubResource("BoxMesh_5clia")
 skeleton = NodePath("../XROrigin3D")
 
-[node name="MiniScene" type="Node3D" parent="."]
+[node name="MiniScene" type="Node3D" parent="." unique_id=120768039]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.98709, 0.825349, -0.519652)
 
 [connection signal="menuitemselected" from="XROrigin3D/XRAimRight/RadialMenu" to="." method="_on_radial_menu_menuitemselected"]
 
 [editable path="XROrigin3D/XRController3DLeft/simplelefthand"]
+[editable path="XROrigin3D/XRController3DLeft/LeftHand"]
+[editable path="XROrigin3D/XRController3DLeft/LeftHand/Hand_Glove_low_L"]
 [editable path="XROrigin3D/XRController3DLeft/AutoHandtracker"]
 [editable path="XROrigin3D/XRController3DRight/simplerighthand"]
 [editable path="XROrigin3D/XRController3DRight/AutoHandtracker"]

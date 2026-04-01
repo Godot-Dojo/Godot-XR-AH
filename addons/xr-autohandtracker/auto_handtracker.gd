@@ -147,6 +147,8 @@ func findhandnodes():
 		var lskel = ch.find_child("Skeleton3D")
 		if lskel and ch.visible:
 			if lskel.get_bone_count() >= 25:
+				if handnode != null:
+					print("More than 1 hand node, so using ", ch.get_path())
 				handnode = ch
 			else:
 				print("unrecognized skeleton in controller ", lskel.get_bone_count())
