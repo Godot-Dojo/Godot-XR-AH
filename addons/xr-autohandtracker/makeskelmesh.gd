@@ -43,12 +43,13 @@ func makeboneboxmesh(skel, iboneparent, ibone):
 
 
 func _ready():
-	return
-	print($mesh_Hand_low_L.mesh.surface_get_primitive_type(0))
-	var handmesharrays = $mesh_Hand_low_L.mesh.surface_get_arrays(0)
+	#return
+	var nmesh = $mesh_Glove_low_L
+	print(nmesh.mesh.surface_get_primitive_type(0))
+	var handmesharrays = nmesh.mesh.surface_get_arrays(0)
 
-	$mesh_Hand_low_L.mesh = ArrayMesh.new()
-	var mesh : ArrayMesh = $mesh_Hand_low_L.mesh
+	nmesh.mesh = ArrayMesh.new()
+	var mesh : ArrayMesh = nmesh.mesh
 	#mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, boxmesharrays2)
 #	handmesharrays[Mesh.ARRAY_BONES] = null
 #	handmesharrays[Mesh.ARRAY_WEIGHTS] = null

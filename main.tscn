@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://bdq7831nlkq57" path="res://HandJoints.gd" id="4_eaqi8"]
 [ext_resource type="PackedScene" uid="uid://cfk6nw5naeba5" path="res://addons/xr-autohandtracker/simplelefthand_animated.tscn" id="4_vivmo"]
 [ext_resource type="PackedScene" uid="uid://bx1xdisoqo1f6" path="res://xr-tools-hands/scenes/lowpoly/left_tac_glove_low.tscn" id="4_w48qg"]
+[ext_resource type="Script" uid="uid://dcvq5ddpglr84" path="res://addons/xr-autohandtracker/makeskelmesh.gd" id="6_vivmo"]
 [ext_resource type="PackedScene" uid="uid://b4af03fp12r73" path="res://addons/xr-autohandtracker/simplerighthand_animated.tscn" id="7_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://c7d3acll3wppi" path="res://addons/xr-radialmenu/RadialMenu.tscn" id="7_dg77c"]
 [ext_resource type="Script" uid="uid://bys2i3bex48tg" path="res://BodyTrackingData.gd" id="12_2cqfq"]
@@ -159,6 +160,7 @@ bones/20/rotation = Quaternion(-0.09173688, 0.020302717, -0.010182976, 0.9955242
 bones/21/rotation = Quaternion(-0.06251818, -0.00022572002, -0.115392834, 0.99135065)
 bones/22/rotation = Quaternion(0.058578636, 0.021648303, -0.26990518, 0.9608596)
 bones/23/rotation = Quaternion(0.006871769, -0.0035727466, -0.21195254, 0.97724926)
+script = ExtResource("6_vivmo")
 
 [node name="AnimationTree" parent="XROrigin3D/XRController3DLeft/LeftHand" index="1"]
 root_node = NodePath("../Hand_Glove_low_L")
@@ -174,10 +176,6 @@ transform = Transform3D(0.399725, 0, 0.916635, 0, 1, 0, -0.916635, 0, 0.399725, 
 tracker = &"right_hand"
 
 [node name="simplerighthand" parent="XROrigin3D/XRController3DRight" unique_id=427903935 instance=ExtResource("7_2cqfq")]
-
-[node name="Skeleton3D" parent="XROrigin3D/XRController3DRight/simplerighthand/RightHandHumanoid" index="0"]
-bones/6/rotation = Quaternion(0, 0, 0, 1)
-bones/21/rotation = Quaternion(0, 0, 0, 1)
 
 [node name="AutoHandtracker" parent="XROrigin3D/XRController3DRight" unique_id=766919122 instance=ExtResource("3_7v2m6")]
 visiblehandtrackskeletonRaw = true

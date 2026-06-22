@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://b4af03fp12r73"]
+[gd_scene format=3 uid="uid://b4af03fp12r73"]
 
 [ext_resource type="PackedScene" uid="uid://dngec4nbh3ngj" path="res://addons/xr-autohandtracker/simplerighthand.glb" id="1_ro5f1"]
 [ext_resource type="Texture2D" uid="uid://bpc5fxiguhwbw" path="res://addons/xr-autohandtracker/3DLABuvchecker.jpg" id="2_jopun"]
@@ -119,6 +119,7 @@ filters = ["RightHandHumanoid/Skeleton3D:RightIndexProximal"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_gd4f8"]
 graph_offset = Vector2(-82.0267, -0.505563)
+nodes/output/position = Vector2(674.286, 137.143)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_g20o3")
 nodes/Animation/position = Vector2(68.5714, 205.714)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_ro5f1")
@@ -129,25 +130,24 @@ nodes/Grip/node = SubResource("AnimationNodeBlend2_gd4f8")
 nodes/Grip/position = Vector2(468.571, 125.714)
 nodes/Trigger/node = SubResource("AnimationNodeBlend2_tjro0")
 nodes/Trigger/position = Vector2(297.143, 45.7143)
-nodes/output/position = Vector2(674.286, 137.143)
-node_connections = [&"Grip", 0, &"Trigger", &"Grip", 1, &"Animation 3", &"Trigger", 0, &"Animation 2", &"Trigger", 1, &"Animation", &"output", 0, &"Grip"]
+node_connections = [&"output", 0, &"Grip", &"Grip", 0, &"Trigger", &"Grip", 1, &"Animation 3", &"Trigger", 0, &"Animation 2", &"Trigger", 1, &"Animation"]
 
-[node name="simplerighthand" instance=ExtResource("1_ro5f1")]
+[node name="simplerighthand" unique_id=527417418 instance=ExtResource("1_ro5f1")]
 
 [node name="Skeleton3D" parent="RightHandHumanoid" index="0"]
+bones/6/rotation = Quaternion(0, 0, 0, 1)
 bones/11/rotation = Quaternion(0.0541047, -0.000444808, 0.0119774, 0.998463)
 bones/16/rotation = Quaternion(0.00175953, 0.00424792, 0.0509199, 0.998692)
+bones/21/rotation = Quaternion(0, 0, 0, 1)
 
 [node name="RightHandHumanoidMesh" parent="RightHandHumanoid/Skeleton3D" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_g20o3")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1"]
-libraries = {
-&"": SubResource("AnimationLibrary_l3mau"),
-&"RightHand": SubResource("AnimationLibrary_cdxoi")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1" unique_id=176583609]
+libraries/ = SubResource("AnimationLibrary_l3mau")
+libraries/RightHand = SubResource("AnimationLibrary_cdxoi")
 
-[node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+[node name="AnimationTree" type="AnimationTree" parent="." index="2" unique_id=1152700220]
 active = false
 tree_root = SubResource("AnimationNodeBlendTree_gd4f8")
 anim_player = NodePath("../AnimationPlayer")
